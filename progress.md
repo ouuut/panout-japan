@@ -49,3 +49,9 @@
 验：本地 headed 亮点 6.99%；线上 `japan.ouuut.com` build `2d273e7982` 亮点 6.88%、8 瓦片全 200、零 404；crime `#crm-root` 在/面板 `rgba(255,255,255,.6)`+深字；cabinet 药丸 `display:none`。全部 headed 实机截图取证。
 
 遗留：quake 的 `.eq-left-dock` 默认 `is-open`（工具条默认展开）；地球仪 idle 自转把镜头带离日本（`userWantsAutoRotate=true`）——待拍板。
+
+## 2026-10-13 · dock 按钮挤压修复（`9ade1810`）
+
+用户贴图：顶左 dock「震级/震级筛/年份」互相压着。根因：vendor 的 dock 按钮全靠 `--eq-dock-w/h/gap/radius` 定宽高，而这四个 token 只存在于原站 `sites/quake/src/style.css` 的 `:root` 块里——**抽成 vendor 文件时 `:root` 没一起带，production css 里定义是 0 个，用了 29 处** → 宽高塌成 auto → 互相挤。同类全量审计（prod css 用到的每个 `var(--x)` 必须有定义：prod 自身/shell `:root`/运行时）再抓出 `--bg2`（famous-reopen 边框用它）也丢了。
+修：`--eq-dock-w:52px; --eq-dock-h:calc(w/2); --eq-dock-gap:8px; --eq-dock-radius:6px; --bg2:rgba(255,244,232,.14)` 落到 `#v-quake-viewport` 基座规则里（原站同值），审计脚本复跑 `ALL DEFINED ✔`。
+验：本地 headed 5 个 item 全 52×26、x 坐标 128/188/248/308/368 等距无叠；线上 build `2815aba8e6` 同样 52×26 + 震点在。
