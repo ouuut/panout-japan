@@ -16,8 +16,8 @@
 
 | | |
 |---|---|
-| **已完成** | 真融合上线：单仓 `ouuut/panout-japan`，门面 `/` + 三站子路径一次部署（`8b9331b` 双推）；`japan.ouuut.com/{quake,crime,cabinet}/` 全活；全仓 `saaaai.com/` 字面清零；token 全走密码库（ouuut_github_token/ouuut_cf_api_token） |
-| **唯一 next** | GSC/Bing 验证 + AI 爬虫政策统一 + ouuut.com Products 加条 + quake 瓦片 fetch 回填 + M2 新闻聚合 |
+| **已完成** | 单页三合一上线：`preview` 壳 + `app/` 三视图（mount/unmount+懒加载+单基址）→ `site/assemble.mjs` 直装 13 文件 → CF Pages `panout-site`（`f8b2f04b`），`japan.ouuut.com#/quake|crime|cabinet` 全活（桌面+手机+remount 全验，零 error）|
+| **唯一 next** | GSC/Bing 验证 + 看门狗探针 + ouuut.com Products 加条 + M2 新闻聚合 |
 git log --oneline -5
 git remote -v
 ```
