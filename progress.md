@@ -55,3 +55,11 @@
 用户贴图：顶左 dock「震级/震级筛/年份」互相压着。根因：vendor 的 dock 按钮全靠 `--eq-dock-w/h/gap/radius` 定宽高，而这四个 token 只存在于原站 `sites/quake/src/style.css` 的 `:root` 块里——**抽成 vendor 文件时 `:root` 没一起带，production css 里定义是 0 个，用了 29 处** → 宽高塌成 auto → 互相挤。同类全量审计（prod css 用到的每个 `var(--x)` 必须有定义：prod 自身/shell `:root`/运行时）再抓出 `--bg2`（famous-reopen 边框用它）也丢了。
 修：`--eq-dock-w:52px; --eq-dock-h:calc(w/2); --eq-dock-gap:8px; --eq-dock-radius:6px; --bg2:rgba(255,244,232,.14)` 落到 `#v-quake-viewport` 基座规则里（原站同值），审计脚本复跑 `ALL DEFINED ✔`。
 验：本地 headed 5 个 item 全 52×26、x 坐标 128/188/248/308/368 等距无叠；线上 build `2815aba8e6` 同样 52×26 + 震点在。
+
+## 2026-10-13 · 查bug轮（workflowz 五路 fanout + headed 实测，`683b34f`）
+
+- 用户报地震图"菜单挤叠+常驻Loading+UI全崩"。实测结论：线上 BUILD 2815aba8e6 本身正常——菜单52px/震点/veil全好，用户截图系旧缓存快照（本地复现：旧CSS 30846B vs 新30969B，http-server缓存头+`?v=`旧戳导致）。
+- 五路取证：IntroVeil（入场Ix序列完整在，veil 9条退出路径，P5 vendor失败盖报错/P7 remount复用旧veil/P8 tick无token/P9自转漂移致12s兜底）/ MenuCss（--eq-rotate-len无回退确认，legend-len排除，壳遮挡排除，`(width<=640px)`无空格疑似未测）/ TileData（调用链+降级矩阵全，断档：coverageEnd 2026-08-10后静态无新点、legacy下1970-1999空、日本区外天然无点）/ ShellTheme（vendor `I_()`写死tactical+`data-quake-theme`无人消费、壳boot无mono白名单）/ LiveVerify（线上三视图+390+三轮切换+零errors/零失败请求，用户三报障全排除，唯一确认轻微：title不随语言）。
+- 修（5）：① P5 vendor失败先摘veil再写.qk-fail；② `--eq-rotate-len/--eq-legend-len` 补168px默认值；③ 壳boot mono白名单（旧mono收敛sage）；④ view.js detectTheme回退sage+THEME_MAP mono→sage；⑤ TITLES三语+setLang刷新title。本地 headed 全验：mono收敛/title三语/轮切零错/cabinet EN正常。
+- 部署：未推线上（门规：commit当轮做，push留收口）。线上仍 2815aba8e6，本轮 `7d940fe282` 待发布。
+- 遗留未修（有意）：`(width<=640px)` 无空格待真机matchMedia取证；autoRotate镜头漂移待拍板（默认开）；vendor CJK不跟三语（设计现状）；`I_()`写死tactical（vendor冻结，不动）。
