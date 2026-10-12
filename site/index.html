@@ -46,7 +46,8 @@
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "url": "https://3d.saaaai.com/", "name": "地震マップ" },
         { "@type": "ListItem", "position": 2, "url": "https://crime.saaaai.com/", "name": "東京都犯罪率マップ" },
-        { "@type": "ListItem", "position": 3, "url": "https://japan.saaaai.com/", "name": "内閣支持率 2000→" }
+        { "@type": "ListItem", "position": 3, "url": "https://japan.saaaai.com/", "name": "内閣支持率 2000→" },
+        { "@type": "ListItem", "position": 4, "url": "https://japan.ouuut.com/#news", "name": "News Pan（開発中）" }
       ]
     }
   ]
@@ -191,7 +192,7 @@ a { color: inherit; }
 .visual-cap a { color: var(--accent); text-decoration: none; font-weight: 700; padding: 8px 4px; }
 /* 卡片 */
 .section { padding: 20px 0 8px; }
-.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .card {
   display: flex; flex-direction: column; gap: 8px;
   background: var(--bg-card); border: 1px solid var(--line-main);
@@ -209,13 +210,6 @@ a.card:hover { background: var(--bg-hover); border-color: var(--accent); }
 }
 .card .go { color: var(--accent); font-size: 13px; font-weight: 700; margin-top: auto; padding-top: 10px; }
 .card .go span { display: inline-block; min-height: 44px; line-height: 44px; }
-/* 新闻预告：静态占位零 JS */
-.news-card { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 14px; }
-.news-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.news-rows li {
-  background: var(--bg-card-sub); border: 1px dashed var(--line-main);
-  border-radius: 10px; padding: 12px 14px; color: var(--text-faint); font-size: 13px;
-}
 .badge {
   display: inline-block; align-self: flex-start;
   font-family: ui-monospace, "JetBrains Mono", SFMono-Regular, Menlo, monospace;
@@ -233,7 +227,7 @@ footer a:hover { color: var(--text-main); }
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; padding-top: 32px; }
   .hero-visual { min-height: 280px; }
-  .grid3 { grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
   .sites-nav a { padding: 10px 8px; font-size: 12px; }
   .topbar { flex-wrap: wrap; }
 }
@@ -286,40 +280,32 @@ footer a:hover { color: var(--text-main); }
   </section>
 
   <section class="section" aria-labelledby="gates-h">
-    <p class="eyebrow" id="gates-h"><b>03</b> · <span data-i18n="gates_eyebrow">THREE GATES — LIVE NOW</span></p>
-    <div class="grid3">
+    <p class="eyebrow" id="gates-h"><b>03</b> · <span data-i18n="gates_eyebrow">FOUR GATES — THREE LIVE, ONE SOON</span></p>
+    <div class="grid2">
       <a class="card" href="https://3d.saaaai.com/">
-        <span class="domain">3d.saaaai.com</span>
+        <span class="domain">quake.japan.ouuut.com</span>
         <h2 data-i18n="card_quake_t">地震マップ</h2>
         <p data-i18n="card_quake_d">列島の震源を3D地球儀で俯瞰する。</p>
         <span class="go"><span data-i18n="go">開く →</span></span>
       </a>
       <a class="card" href="https://crime.saaaai.com/">
-        <span class="domain">crime.saaaai.com</span>
+        <span class="domain">crime.japan.ouuut.com</span>
         <h2 data-i18n="card_crime_t">犯罪率マップ</h2>
         <p data-i18n="card_crime_d">東京都 5,234 町丁の刑法犯千人率を分級着色で読む。</p>
         <span class="go"><span data-i18n="go">開く →</span></span>
       </a>
       <a class="card" href="https://japan.saaaai.com/">
-        <span class="domain">japan.saaaai.com</span>
+        <span class="domain">cabinet.japan.ouuut.com</span>
         <h2 data-i18n="card_cabinet_t">内閣支持率 2000→</h2>
         <p data-i18n="card_cabinet_d">NHK 月次世論調査 632 点の推移を月平均で追う。</p>
         <span class="go"><span data-i18n="go">開く →</span></span>
       </a>
-    </div>
-  </section>
-
-  <section class="section" aria-labelledby="news-h">
-    <p class="eyebrow" id="news-h"><b>04</b> · <span data-i18n="news_eyebrow">NEWS PAN — COMING SOON</span></p>
-    <div class="card news-card">
-      <span class="badge" data-i18n="news_badge">COMING SOON</span>
-      <h3 data-i18n="news_t">News Pan 開発中</h3>
-      <p data-i18n="news_d">日本本土ニュースの日次聚合、ただいま準備中。首版は静的プレースホルダのみ（JS 取数なし）。</p>
-      <ul class="news-rows" aria-hidden="true">
-        <li>— · — · —</li>
-        <li>— · — · —</li>
-        <li>— · — · —</li>
-      </ul>
+      <div class="card" id="news" aria-label="News Pan coming soon">
+        <span class="domain">news.japan.ouuut.com</span>
+        <span class="badge" data-i18n="news_badge">COMING SOON</span>
+        <h2 data-i18n="card_news_t">News Pan 開発中</h2>
+        <p data-i18n="card_news_d">日本本土ニュースの日次聚合、ただいま準備中。</p>
+      </div>
     </div>
   </section>
 </main>
@@ -341,13 +327,13 @@ var I18N = {
     pan_explain: "<strong>pan out</strong> —— カメラを引いて日本全体を見渡すこと。そして、うまくいくこと。",
     cta_quake: "地震マップを開く →", cta_crime: "犯罪率を見る", cta_cabinet: "支持率を見る",
     visual_cap: "STATIC PREVIEW · LIVE → 3D.SAAAAI.COM",
-    gates_eyebrow: "THREE GATES — LIVE NOW",
+    gates_eyebrow: "FOUR GATES — THREE LIVE, ONE SOON",
     card_quake_t: "地震マップ", card_quake_d: "列島の震源を3D地球儀で俯瞰する。",
     card_crime_t: "犯罪率マップ", card_crime_d: "東京都 5,234 町丁の刑法犯千人率を分級着色で読む。",
     card_cabinet_t: "内閣支持率 2000→", card_cabinet_d: "NHK 月次世論調査 632 点の推移を月平均で追う。",
     go: "開く →",
-    news_eyebrow: "NEWS PAN — COMING SOON", news_badge: "COMING SOON",
-    news_t: "News Pan 開発中", news_d: "日本本土ニュースの日次聚合、ただいま準備中。首版は静的プレースホルダのみ（JS 取数なし）。",
+    news_badge: "COMING SOON",
+    card_news_t: "News Pan 開発中", card_news_d: "日本本土ニュースの日次聚合、ただいま準備中。",
     sources: "データ出典：USGS · 警視庁 · NHK放送文化研究所 · CC BY 4.0"
   },
   zh: {
@@ -356,13 +342,13 @@ var I18N = {
     pan_explain: "<strong>pan out</strong>——把镜头拉远，看见日本全景；事情也终将如人意。",
     cta_quake: "打开地震地图 →", cta_crime: "查看犯罪率", cta_cabinet: "查看支持率",
     visual_cap: "静态预览 · 实时站 → 3D.SAAAAI.COM",
-    gates_eyebrow: "三座门 · 均已上线",
+    gates_eyebrow: "四座门 · 三已上线一将至",
     card_quake_t: "地震地图", card_quake_d: "在 3D 地球仪上俯瞰列岛震源。",
     card_crime_t: "犯罪率地图", card_crime_d: "东京都 5,234 町丁刑法犯千人率，分级设色。",
     card_cabinet_t: "内阁支持率 2000→", card_cabinet_d: "NHK 月度舆论调查 632 点，月平均追踪。",
     go: "打开 →",
-    news_eyebrow: "NEWS PAN · 即将上线", news_badge: "即将上线",
-    news_t: "News Pan 开发中", news_d: "日本本土新闻的日更聚合正在准备中。首版仅为静态占位（零 JS 取数）。",
+    news_badge: "即将上线",
+    card_news_t: "News Pan 开发中", card_news_d: "日本本土新闻的日更聚合正在准备中。",
     sources: "數據來源：USGS · 警视厅 · NHK放送文化研究所 · CC BY 4.0"
   },
   en: {
@@ -371,13 +357,13 @@ var I18N = {
     pan_explain: "<strong>pan out</strong> — to zoom out and see all of Japan; and for things to turn out well.",
     cta_quake: "Open quake map →", cta_crime: "See crime rates", cta_cabinet: "See approval",
     visual_cap: "STATIC PREVIEW · LIVE → 3D.SAAAAI.COM",
-    gates_eyebrow: "THREE GATES — LIVE NOW",
+    gates_eyebrow: "FOUR GATES — THREE LIVE, ONE SOON",
     card_quake_t: "Quake map", card_quake_d: "Hypocenters across the archipelago on a 3D globe.",
     card_crime_t: "Crime rates map", card_crime_d: "Per-1,000 rates for 5,234 Tokyo chome, classed colors.",
     card_cabinet_t: "Cabinet approval 2000→", card_cabinet_d: "632 monthly NHK poll points, monthly-averaged.",
     go: "Open →",
-    news_eyebrow: "NEWS PAN — COMING SOON", news_badge: "COMING SOON",
-    news_t: "News Pan in the works", news_d: "Daily aggregation of Japan-local news is being prepared. First edition is a static placeholder (zero JS fetching).",
+    news_badge: "COMING SOON",
+    card_news_t: "News Pan in the works", card_news_d: "Daily aggregation of Japan-local news is being prepared.",
     sources: "Sources: USGS · TMPD (Keishicho) · NHK BCRI · CC BY 4.0"
   }
 };
