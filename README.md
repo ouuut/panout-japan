@@ -16,8 +16,8 @@
 
 | | |
 |---|---|
-| **已完成** | M0 上线成功：`https://japan.ouuut.com/` 活（首页200+robots+sitemap/hreflang+ja/en 三语+三跳转全对，`d81f80b` 后未改门面）；仓 canonical `ouuut/panout-japan`；CF `panout-site`（ouuut 账号） |
-| **唯一 next** | GSC/Bing 验证 + AI 爬虫政策统一 + ouuut.com 官网 Products 加条（M3 可提前）+ M1 子域家族 |
+| **已完成** | 真融合上线：单仓 `ouuut/panout-japan`，门面 `/` + 三站子路径一次部署（`8b9331b` 双推）；`japan.ouuut.com/{quake,crime,cabinet}/` 全活；全仓 `saaaai.com/` 字面清零；token 全走密码库（ouuut_github_token/ouuut_cf_api_token） |
+| **唯一 next** | GSC/Bing 验证 + AI 爬虫政策统一 + ouuut.com Products 加条 + quake 瓦片 fetch 回填 + M2 新闻聚合 |
 git log --oneline -5
 git remote -v
 ```
