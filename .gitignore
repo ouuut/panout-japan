@@ -26,3 +26,6 @@ sites/quake/.work/
 .env
 .env.*
 !.env.example
+
+# wrangler 本地缓存（本机跑部署时落根目录的野目录，不入库）
+.wrangler/

@@ -16,8 +16,8 @@ import {
   viewConeRad,
 } from './viewCull.js'
 
-export const MANIFEST_URL = '/data/quakes/manifest.json'
-export const TILE_URL_PREFIX = '/data/quakes/tiles/'
+export const MANIFEST_URL = `${import.meta.env.BASE_URL}data/quakes/manifest.json`
+export const TILE_URL_PREFIX = `${import.meta.env.BASE_URL}data/quakes/tiles/`
 
 export const POINT_DOT_MIN = 0.22
 

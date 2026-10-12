@@ -6,13 +6,13 @@
 <title>东京都犯罪率地图 · Tokyo Crime Rates by Municipality</title>
 <meta name="description" content="基于警视厅官方统计的东京都 5,234 町丁犯罪率态势图。提供刑法犯认知件数、千人率分级设色、罪种细分与高发排行。東京都犯罪情勢マップ。">
 <meta name="theme-color" content="#141210">
-<link rel="canonical" href="https://crime.saaaai.com/">
+<link rel="canonical" href="https://japan.ouuut.com/crime/">
 
 <!-- 多语言声明（与 sitemap.xml 中的 xhtml:link 保持一致） -->
-<link rel="alternate" hreflang="ja" href="https://crime.saaaai.com/?lang=ja">
-<link rel="alternate" hreflang="zh-Hans" href="https://crime.saaaai.com/">
-<link rel="alternate" hreflang="en" href="https://crime.saaaai.com/?lang=en">
-<link rel="alternate" hreflang="x-default" href="https://crime.saaaai.com/">
+<link rel="alternate" hreflang="ja" href="https://japan.ouuut.com/crime/?lang=ja">
+<link rel="alternate" hreflang="zh-Hans" href="https://japan.ouuut.com/crime/">
+<link rel="alternate" hreflang="en" href="https://japan.ouuut.com/crime/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://japan.ouuut.com/crime/">
 
 <!-- GEO：机器可读的数据集与站点实体声明 -->
 <script type="application/ld+json">
@@ -21,8 +21,8 @@
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://crime.saaaai.com/#website",
-      "url": "https://crime.saaaai.com/",
+      "@id": "https://japan.ouuut.com/crime/#website",
+      "url": "https://japan.ouuut.com/crime/",
       "name": "东京都犯罪率地图",
       "alternateName": ["Tokyo Crime Rates Map", "東京都犯罪率マップ"],
       "description": "基于警视厅官方统计的东京都 5,234 町丁犯罪率分级设色交互地图，支持中/日/英三语。",
@@ -32,11 +32,11 @@
     },
     {
       "@type": "Dataset",
-      "@id": "https://crime.saaaai.com/#dataset",
+      "@id": "https://japan.ouuut.com/crime/#dataset",
       "name": "东京都町丁别犯罪认知件数与千人率数据集",
       "alternateName": "Tokyo crime counts by chome (Keishicho open data)",
       "description": "东京都 62 个区市町村 / 5,234 个町丁的刑法犯认知件数（6 类罪种）、常住人口与千人率，来源于警视厅公开统计与东京都住民基本台帐人口。千人率经小样本收缩 (K=2000) 后做分级设色。",
-      "url": "https://crime.saaaai.com/",
+      "url": "https://japan.ouuut.com/crime/",
       "inLanguage": ["zh-Hans", "ja", "en"],
       "isAccessibleForFree": true,
       "spatialCoverage": {
@@ -56,20 +56,20 @@
         {
           "@type": "DataDownload",
           "encodingFormat": "application/json",
-          "contentUrl": "https://crime.saaaai.com/data/muni.json",
+          "contentUrl": "https://japan.ouuut.com/crime/data/muni.json",
           "name": "区市町村别统计"
         },
         {
           "@type": "DataDownload",
           "encodingFormat": "application/json",
-          "contentUrl": "https://crime.saaaai.com/data/chome_poly.json",
+          "contentUrl": "https://japan.ouuut.com/crime/data/chome_poly.json",
           "name": "町丁别统计与多边形"
         }
       ]
     },
     {
       "@type": "FAQPage",
-      "@id": "https://crime.saaaai.com/#faq",
+      "@id": "https://japan.ouuut.com/crime/#faq",
       "mainEntity": [
         {
           "@type": "Question",
@@ -120,14 +120,14 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:locale:alternate" content="ja_JP">
 <meta property="og:locale:alternate" content="en_US">
-<meta property="og:url" content="https://crime.saaaai.com/">
+<meta property="og:url" content="https://japan.ouuut.com/crime/">
 <meta property="og:title" content="东京都犯罪率地图 · Tokyo Crime Rates by Municipality">
 <meta property="og:description" content="基于警视厅官方统计的东京都 5,234 町丁犯罪率态势图。提供刑法犯认知件数、千人率分级设色、罪种细分与高发排行。">
-<meta property="og:image" content="https://crime.saaaai.com/og-image.png">
+<meta property="og:image" content="https://japan.ouuut.com/crime/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="东京都犯罪率地图 · Tokyo Crime Rates by Municipality">
 <meta name="twitter:description" content="基于警视厅官方统计的东京都 5,234 町丁犯罪率态势图。提供刑法犯认知件数、千人率分级设色、罪种细分与高发排行。">
-<meta name="twitter:image" content="https://crime.saaaai.com/og-image.png">
+<meta name="twitter:image" content="https://japan.ouuut.com/crime/og-image.png">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -1012,7 +1012,7 @@ html[data-variant="editorial"] .leaflet-control-attribution a:hover {
 
 <div id="drop"></div>
 <div id="map"></div>
-<div id="site-domain" aria-hidden="true">crime.saaaai.com</div>
+<div id="site-domain" aria-hidden="true">crime.japan.ouuut.com</div>
 
 <!-- 地图左上角 HUD 状态胶囊 (对齐 GPT 专业情报站) -->
 <div id="hud-capsule" role="status">
@@ -1119,6 +1119,7 @@ const I18N = {
       { q: "可以用这些数据做租房或投资决策吗？", a: "认知件数不等于发案数，且受报案率影响；本图仅呈现官方统计的分布形态，不构成对任何地区安全性的评价或担保，请勿作为单一决策依据。" }
     ],
     siteBy: "数据来源：警视厅 · 東京都在住人口",
+    navQuake: "地震", navCabinet: "支持率",
     loadingTitle: "东京都犯罪率地图",
     loadingStatus: "● 正在装配东京都 5,234 町丁空间统计数据...",
     casesUnit: "件",
@@ -1186,6 +1187,7 @@ const I18N = {
       { q: "賃貸や投資の判断に使えますか？", a: "認知件数は発案件数とは異なり、届出率の影響も受けます。本図は公式統計の分布を示すのみで、いかなる地域の安全性の評価・保証も行いません。単独の判断材料としないでください。" }
     ],
     siteBy: "出典：警視庁 · 東京都常住人口",
+    navQuake: "地震", navCabinet: "支持率",
     loadingTitle: "東京都犯罪情勢マップ",
     loadingStatus: "● 都内 5,234 町丁の空間統計データを読み込み中...",
     casesUnit: "件",
@@ -1252,6 +1254,7 @@ const I18N = {
       { q: "How often is data updated and what are the sources?", a: "Sources are the Tokyo Metropolitan Police Department's published crime counts by district and crime type (FY2025 annual and FY2026 monthly cumulative) plus Tokyo's Basic Resident Register population, licensed CC BY, refreshed as the authorities publish." },
       { q: "Can I use this for renting or investment decisions?", a: "Reported counts differ from actual incidents and are affected by reporting rates. This map only visualises the distribution of official statistics; it is not an assessment or guarantee of any area's safety and must not be used as a sole basis for decisions." }
     ],
+    navQuake: "Quakes", navCabinet: "Approval",
     siteBy: "Source: Tokyo Metropolitan Police Dept. · Tokyo resident population",
     loadingTitle: "Tokyo Crime Rate Atlas",
     loadingStatus: "● Loading spatial statistics for 5,234 Tokyo districts...",
@@ -1521,8 +1524,8 @@ function setLanguage(lang) {
   {
     // 默认语言（中文）留在根路径，其余语言用 ?lang= 自指 canonical，避免重复内容
     const href = lang === "zh"
-      ? "https://crime.saaaai.com/"
-      : `https://crime.saaaai.com/?lang=${lang}`;
+      ? "https://japan.ouuut.com/crime/"
+      : `https://japan.ouuut.com/crime/?lang=${lang}`;
     setMeta('meta[property="og:url"]', href);
     const link = document.querySelector('link[rel="canonical"]');
     if (link) link.setAttribute("href", href);
@@ -2025,7 +2028,7 @@ function metaFooterCardHtml() {
         </div>
         ${faqHtml}
       </div>
-      <div class="faq-source">${t.siteBy}</div>
+      <div class="faq-source">${t.siteBy} · <a href="../" style="color:var(--accent)">Pan Out Japan</a> · <a href="../quake/" style="color:var(--accent)">${t.navQuake || "quake"}</a> · <a href="../cabinet/" style="color:var(--accent)">${t.navCabinet || "cabinet"}</a></div>
     </div>`;
 }
 

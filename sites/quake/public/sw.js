@@ -6,13 +6,13 @@ const SHELL = 'eq-shell-' + SW_VER
 const RUNTIME = 'eq-runtime-' + SW_VER
 
 const SHELL_URLS = [
-  '/',
-  '/index.html',
-  '/favicon.svg',
-  '/manifest.webmanifest',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/icon-512-maskable.png',
+  './',
+  './index.html',
+  './favicon.svg',
+  './manifest.webmanifest',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-512-maskable.png',
 ]
 
 self.addEventListener('install', (event) => {
@@ -95,14 +95,14 @@ self.addEventListener('fetch', (event) => {
       fetch(req)
         .then((res) => {
           const copy = res.clone()
-          caches.open(SHELL).then((c) => c.put('/index.html', copy)).catch(() => {})
+          caches.open(SHELL).then((c) => c.put('./index.html', copy)).catch(() => {})
           return res
         })
         .catch(async () => {
           const cache = await caches.open(SHELL)
           return (
-            (await cache.match('/index.html')) ||
-            (await cache.match('/')) ||
+            (await cache.match('./index.html')) ||
+            (await cache.match('./')) ||
             new Response('离线不可用', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
           )
         }),
@@ -114,22 +114,22 @@ self.addEventListener('fetch', (event) => {
 
   // 壳层静态
   if (
-    path === '/favicon.svg' ||
-    path === '/manifest.webmanifest' ||
-    path.startsWith('/icons/')
+    path.endsWith('/favicon.svg') ||
+    path.endsWith('/manifest.webmanifest') ||
+    path.includes('/icons/')
   ) {
     event.respondWith(cacheFirst(req, SHELL))
     return
   }
 
   // Vite 产物（带 hash）→ cache-first
-  if (path.startsWith('/assets/')) {
+  if (path.includes('/assets/')) {
     event.respondWith(cacheFirst(req, RUNTIME))
     return
   }
 
   // 地震瓦片 / 岸线 / 清单 → 按需缓存（不预拉）
-  if (path.startsWith('/data/')) {
+  if (path.includes('/data/')) {
     event.respondWith(onDemand(req))
     return
   }

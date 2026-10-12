@@ -214,10 +214,10 @@ topbar.innerHTML = `
     <span class="eq-topbar-eyebrow">Quake · Tactical</span>
   </div>
   <nav class="eq-topbar-nav" aria-label="全站导航">
-    <a href="#" aria-current="page">地震</a>
-    <a href="#" title="犯罪率站（主线收口时改真链）">犯罪率</a>
-    <a href="#" title="内阁支持率站（主线收口时改真链）">支持率</a>
-    <a href="#" title="门面（主线收口时改真链）">门面</a>
+    <a href="./" aria-current="page">地震</a>
+    <a href="../crime/" title="犯罪率站">犯罪率</a>
+    <a href="../cabinet/" title="内阁支持率站">支持率</a>
+    <a href="../" title="门面">门面</a>
   </nav>
   <div class="eq-topbar-lang" role="group" aria-label="语言切换（占位）">
     <button type="button" data-lang="ja">JA</button>
@@ -449,7 +449,7 @@ bottomBar.innerHTML = `
     </div>
   </div>
   <div class="eq-bottom-center">
-    <button type="button" class="eq-domain" id="eq-domain-reload" title="刷新网页重新开始">3d.saaaai.com</button>
+    <button type="button" class="eq-domain" id="eq-domain-reload" title="刷新网页重新开始">quake.japan.ouuut.com</button>
   </div>
   <div class="eq-bottom-right">
     <p class="eq-hint" id="eq-hint" aria-live="polite">左键平移 右键旋转</p>
@@ -799,7 +799,7 @@ function captureScreenshot() {
   if (!ctx) return
   ctx.drawImage(src, 0, 0)
 
-  const label = '3d.saaaai.com'
+  const label = 'quake.japan.ouuut.com'
   const fontPx = Math.max(14, Math.round(h * 0.018))
   ctx.font = `600 ${fontPx}px system-ui, -apple-system, "Segoe UI", "PingFang SC", sans-serif`
   ctx.textAlign = 'center'
@@ -817,7 +817,7 @@ function captureScreenshot() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `3d-saaaai-${stamp}.png`
+    a.download = `quake-japan-ouuut-${stamp}.png`
     a.rel = 'noopener'
     document.body.appendChild(a)
     a.click()
@@ -3485,7 +3485,7 @@ function wirePwaInstall() {
 
   if ('serviceWorker' in navigator) {
     const register = () => {
-      navigator.serviceWorker.register('/sw.js').then(
+      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).then(
         (reg) => console.info('[pwa] sw registered', reg.scope),
         (err) => console.warn('[pwa] sw register failed', err),
       )
@@ -3928,7 +3928,7 @@ async function init() {
   // 岸线数据 + 日本瓦片并行；飞镜中不显示岸线/点
   const outlineP = (async () => {
     try {
-      const outline = await loadJson('/data/japan-outline.json')
+      const outline = await loadJson(`${import.meta.env.BASE_URL}data/japan-outline.json`)
       outlineLayer = new OutlineLayer()
       outlineLayer.load(outline, {
         width: app.clientWidth,
@@ -3978,7 +3978,7 @@ async function init() {
     } catch (e) {
       console.error(e)
       try {
-        const quakes = await loadJson('/data/quakes.json')
+        const quakes = await loadJson(`${import.meta.env.BASE_URL}data/quakes.json`)
         console.warn('using legacy quakes.json fallback')
         return { ok: true, quakes, legacy: true }
       } catch {

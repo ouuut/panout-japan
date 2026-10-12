@@ -10,4 +10,7 @@
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+  <url><loc>https://japan.ouuut.com/quake/</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://japan.ouuut.com/crime/</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://japan.ouuut.com/cabinet/</loc><changefreq>weekly</changefreq></url>
 </urlset>
