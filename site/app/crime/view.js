@@ -1163,6 +1163,8 @@ function initMap() {
     L.marker(pos, { icon, interactive: false }).addTo(labelLayer);
   }
   labelLayer.addTo(map);
+  const gateLabels = () => { try { const z = map.getZoom(); if (z < 10) { if (map.hasLayer(labelLayer)) map.removeLayer(labelLayer); } else if (!map.hasLayer(labelLayer)) labelLayer.addTo(map); } catch (e) {} };
+  map.on("zoomend", gateLabels); gateLabels();
 
   applyMode();
   fitTokyo23(); // 首次聚焦东京 23 区全局正中
@@ -1316,13 +1318,16 @@ function ensureCrmCss() {
   }
 }
 async function loadLeaflet() {
+  const ensureLeafletCss = () => {
+    if (!document.getElementById('crm-leaflet-css')) {
+      const lk = document.createElement('link'); lk.id = 'crm-leaflet-css'; lk.rel = 'stylesheet';
+      lk.href = CRM_LEAFLET_CSS[0];
+      lk.onerror = () => { lk.href = CRM_LEAFLET_CSS[1]; };
+      document.head.appendChild(lk);
+    }
+  };
+  ensureLeafletCss();
   if (globalThis.L && globalThis.L.map) return globalThis.L;
-  if (!document.getElementById('crm-leaflet-css')) {
-    const lk = document.createElement('link'); lk.id = 'crm-leaflet-css'; lk.rel = 'stylesheet';
-    lk.href = CRM_LEAFLET_CSS[0];
-    lk.onerror = () => { lk.href = CRM_LEAFLET_CSS[1]; };
-    document.head.appendChild(lk);
-  }
   let lastErr = null;
   for (const u of CRM_LEAFLET_JS) { try { await import(u); if (globalThis.L && globalThis.L.map) return globalThis.L; } catch (e) { lastErr = e; } }
   throw lastErr || new Error('leaflet load failed');
@@ -1425,6 +1430,8 @@ export async function mountCrime(el, opts) {
     if (my !== bootSeq) { try { map.remove(); } catch (e) {} map = null; return false; }
     initZoomSlider();
     map.on('move zoom', refreshCallout);
+    try { requestAnimationFrame(() => setTimeout(() => { try { if (map) { map.invalidateSize(); fitTokyo23(); } } catch (e) {} }, 60)); } catch (e) {}
+    try { setTimeout(() => { try { if (map) { map.invalidateSize(); fitTokyo23(); } } catch (e) {} }, 1500); } catch (e) {}
     $el('crm-card').addEventListener('click', onCardClick);
     try { if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) { /* mobile: 卡片默认收起，点选才展开 */ } else selectChomeByName('新宿区歌舞伎町2丁目', false, true); } catch (e) { selectChomeByName('新宿区歌舞伎町2丁目', false, true); }
     applyThemeVariant(currentVariant);

@@ -3,11 +3,11 @@
 > japan.ouuut.com：地震・犯罪率・内閣支持率への静的聚合門面。
 > Pan out ＝ カメラを引いて日本全体を見渡すこと。そして、うまくいくこと。
 
-## Gates（外链跳转，老站现行 URL）
+## Gates（本站 hash 路由，单页三视图）
 
-- [地震マップ](https://3d.saaaai.com/)：列島の震源を3D地球儀で俯瞰する。数据源：USGS。
-- [犯罪率マップ](https://crime.saaaai.com/)：東京都 5,234 町丁の刑法犯千人率を分級着色。数据源：警視庁（CC BY）。
-- [内閣支持率 2000→](https://japan.saaaai.com/)：NHK 月次世論調査 632 点の推移を月平均で追う。数据源：NHK放送文化研究所。
+- [地震マップ](https://japan.ouuut.com/#/quake)：列島の震源を3D地球儀で俯瞰する。数据源：USGS。
+- [犯罪率マップ](https://japan.ouuut.com/#/crime)：東京都 5,234 町丁の刑法犯千人率を分級着色。数据源：警視庁（CC BY）。
+- [内閣支持率 2000→](https://japan.ouuut.com/#/cabinet)：NHK 月次世論調査 632 点の推移を月平均で追う。数据源：NHK放送文化研究所。
 
 ## News
 
