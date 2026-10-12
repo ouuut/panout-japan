@@ -36,3 +36,16 @@
 6. **quake 震点"消失"** —— 加加载遮罩（`.qk-veil`），采样画布亮点占比 >3.5% 且 ≥2.6s 才撤（12s 兜底）。另实测 **live 16s 亮点 5.44% → 50s 2.21%**：地球仪 idle 自转（`userWantsAutoRotate=true`，30s/圈）+ 镜头漂移把日本震点带出视野 —— 待拍板是否关默认自转。
 
 验证：`site/assemble.mjs --check` OK；本地 Chromium 实渲染 4 项全过（quake 亮点 6.30%、无重叠、小地球 y=96；crime `#crm-root` 在且可读；cabinet 白字）；线上 `index.html`/`app/crime/view.js`/`app/quake/view.js` 回读确认新版字节已上。
+
+## 2026-10-13 · 震点根因修复（瓦片数据缺失，`a5dadbff`）
+
+用户复测仍无震点。逐层定位：
+- 原站 `3d.saaaai.com` 请求日志：`/data/quakes/manifest.json` + `/data/quakes/tiles/r_15_5.json` …（20° 瓦片，共 154 片）。
+- panout 装配件只有 `app/quake/data/quakes.json`（legacy 平面文件），`quakes/manifest.json` **404**、无 tiles。
+- vendor 源码 `main.js:3980` 的 legacy 回退只 `loadJson` 数据；而显示路径 `quakeTiles.sync()` 无 manifest 直接 `return false`（`quakeTiles.js:267`）→ **getDisplayQuakes 恒空 → 0 点**。
+- 对照实验：同机 headed 浏览器下原站亮点 7.62%，panout 2.12%（只剩海岸线）；本地 headless 因 SwiftShader 偶然画出点，掩盖了问题（headed/真 GPU 才是用户实际）。
+
+修：从原站拉日本区 9 片瓦片（recent+archive 共 18 文件 / 13.4MB）+ 裁剪版 manifest，落 `app/quake/data/quakes/`；`site/assemble.mjs` 新增 `quakes/**` 整目录递归同步 + 缺失即 fail。脚本留档 `sites/quake/scripts/fetch-tiles-from-live.py`。
+验：本地 headed 亮点 6.99%；线上 `japan.ouuut.com` build `2d273e7982` 亮点 6.88%、8 瓦片全 200、零 404；crime `#crm-root` 在/面板 `rgba(255,255,255,.6)`+深字；cabinet 药丸 `display:none`。全部 headed 实机截图取证。
+
+遗留：quake 的 `.eq-left-dock` 默认 `is-open`（工具条默认展开）；地球仪 idle 自转把镜头带离日本（`userWantsAutoRotate=true`）——待拍板。

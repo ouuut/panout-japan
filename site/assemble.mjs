@@ -19,8 +19,21 @@ const syncFile = (src, dst) => {
   fs.copyFileSync(src, dst);
   return "wrote";
 };
-// 1) 壳：preview/index.html → site/index.html（去 preview 文案）
+// 0) app 文件清单 + 版本戳（视图 JS / quake CSS 的 ?v= 用它；内容一变缓存即失效）
+const APP_FILES = [
+  "quake/view.js", "quake/vendor/quake-core.js", "quake/vendor/quake-core.css",
+  "quake/data/japan-outline.json", "quake/data/quakes.json",
+  "crime/view.js", "crime/data/points.json", "crime/data/muni_poly.json",
+  "crime/data/chome_poly.json", "crime/data/muni.json", "crime/data/meta.json",
+  "cabinet/view.js", "cabinet/data.json",
+];
+const crypto = await import("crypto");
+const _hh = crypto.createHash("sha1");
+for (const f of APP_FILES) _hh.update(fs.readFileSync(path.join(ROOT, "app", f)));
+const BUILD = _hh.digest("hex").slice(0, 10);
+// 1) 壳：preview/index.html → site/index.html（去 preview 文案 + 注入版本戳）
 let shell = fs.readFileSync(path.join(ROOT, "preview/index.html"), "utf8");
+shell = shell.replace(/__PP_BUILD_HASH__/g, BUILD);
 shell = shell.replace(/<title>Pan Out Japan — preview<\/title>/, "<title>Pan Out Japan — 日本本土情報の門面 | 地震・犯罪率・内閣支持率</title>");
 shell = shell.replace(/<span>preview — 框架占位 · 无真实数据<\/span>/, "<span>© 2026 Pan Out Japan · ouuut</span>");
 const shellDst = path.join(SITE, "index.html");
@@ -31,16 +44,29 @@ if (checkOnly) {
   fs.writeFileSync(shellDst, shell);
 }
 // 2) 三视图：app/<view>/{view.js,vendor/,data/,data.json} → site/app/…（显式列文件，不整目录梭）
-const APP_FILES = [
-  "quake/view.js", "quake/vendor/quake-core.js", "quake/vendor/quake-core.css",
-  "quake/data/japan-outline.json", "quake/data/quakes.json",
-  "crime/view.js", "crime/data/points.json", "crime/data/muni_poly.json",
-  "crime/data/chome_poly.json", "crime/data/muni.json", "crime/data/meta.json",
-  "cabinet/view.js", "cabinet/data.json",
-];
 for (const f of APP_FILES) {
   const r = syncFile(path.join(ROOT, "app", f), path.join(SITE, "app", f));
   if (!checkOnly) console.log(`[assemble] app/${f}: ${r}`);
+}
+// 2b) 震源瓦片数据：app/quake/data/quakes/**（manifest + tiles）整目录同步
+const walkDir = (dir, base) => {
+  const out = [];
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) out.push(...walkDir(p, base));
+    else out.push(path.relative(base, p).split(path.sep).join("/"));
+  }
+  return out;
+};
+const QK_DIR = path.join(ROOT, "app/quake/data/quakes");
+if (fs.existsSync(QK_DIR)) {
+  for (const rel of walkDir(QK_DIR, QK_DIR)) {
+    const r = syncFile(path.join(QK_DIR, rel), path.join(SITE, "app/quake/data/quakes", rel));
+    if (!checkOnly) console.log(`[assemble] app/quake/data/quakes/${rel}: ${r}`);
+  }
+} else {
+  console.error("[assemble] FAIL: 缺 app/quake/data/quakes/（震源瓦片数据）");
+  process.exit(1);
 }
 // 3) 旧三子路径清场（单页后 /quake/ /crime/ /cabinet/ 不再存在）
 for (const d of ["quake", "crime", "cabinet"]) {

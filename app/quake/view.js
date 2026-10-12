@@ -88,7 +88,8 @@ function injectCss() {
       const l = document.createElement('link');
       l.id = 'qk-style';
       l.rel = 'stylesheet';
-      l.href = u;
+      const ver = (typeof window !== 'undefined' && window.__PP_BUILD__) ? String(window.__PP_BUILD__) : '';
+      l.href = ver ? (u + (u.indexOf('?') >= 0 ? '&' : '?') + 'v=' + ver) : u;
       l.onload = () => resolve();
       l.onerror = () => {
         try { l.remove(); } catch (e) {}

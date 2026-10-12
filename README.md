@@ -16,8 +16,8 @@
 
 | | |
 |---|---|
-| **已完成** | 单页三合一上线（`f8b2f04b`）+ **上线缺陷修复轮**（`6a5fe864`，2026-10-13）：shell 占位 chrome 不再与真视图重叠（quake 移除 `.hud-top/.controls/.spec`）、`.stage` 占位样式不再泄漏（`.stage > span`）、crime 补 `#crm-root` 挂载盒（整套皮肤 token 恢复：卡片 `--bg-card`/`--text-main` 生效）、cabinet `.cab-latest` 恢复白字压橙底、主题删 mono 只留 sage/dark（默认 sage）、quake 加加载遮罩（画布画出震点才撤） |
-| **唯一 next** | 地球仪 idle 自转/镜头漂移使日本震点离开视野（实测 live 16s 亮点 5.44% → 50s 2.21%；待拍板是否关默认自转）+ GSC/Bing 验证 + 看门狗探针 + ouuut.com Products 加条 + M2 新闻聚合 |
+| **已完成** | 单页三合一上线（`f8b2f04b`）+ **上线缺陷修复轮**（`6a5fe864`，2026-10-13）：shell 占位 chrome 不再与真视图重叠（quake 移除 `.hud-top/.controls/.spec`）、`.stage` 占位样式不再泄漏（`.stage > span`）、crime 补 `#crm-root` 挂载盒（整套皮肤 token 恢复：卡片 `--bg-card`/`--text-main` 生效）、cabinet `.cab-latest` 恢复白字压橙底、主题删 mono 只留 sage/dark（默认 sage）、quake 加加载遮罩（画布画出震点才撤）+ **震点根因修复**（`a5dadbff`：装配只搬了 legacy `quakes.json`，缺 vendor 真正用的 `quakes/manifest.json`+`tiles/*` → 0 点；补搬日本区 18 片/13.4MB + assemble 递归同步 + 视图资源加 `?v=<build>` 版本戳） |
+| **唯一 next** | GSC/Bing 验证 + 看门狗探针 + ouuut.com Products 加条 + M2 新闻聚合；残差：quake `.eq-left-dock` 默认展开、地球仪 idle 自转把镜头带离日本（`userWantsAutoRotate=true`）待拍板 |
 git log --oneline -5
 git remote -v
 ```
