@@ -16,8 +16,8 @@
 
 | | |
 |---|---|
-| **已完成** | 合仓：三站源码迁入 `sites/`（quake/crime/cabinet，瘦身 369M→66M）；四页 tactical 深色统一（token 冻 `docs/THEME-TOKENS.md`）；cabinet 补三语；门面 `site/` 新建（三语+SEO 件）；`f896044` 双推同 SHA |
-| **唯一 next** | M0 上线：`japan.ouuut.com` 建 CF Pages 项目 + 綁域 + GSC/Bing 验证 + 冒烟（A1–A7）；老站保持在线 |
+| **已完成** | M0 上线进行中：仓 canonical 切 `ouuut/panout-japan`；门面 `site/` 已推 CF Pages `panout-site`（`panout-site.pages.dev` 活，三语+三跳转已验）；`japan.ouuut.com` 自定义域已綁（API，initializing 待 DNS 生效） |
+| **唯一 next** | 等 `japan.ouuut.com` DNS 生效后冒烟（A1–A7）+ GSC/Bing 验证；个人仓残留删除（网页）；ouuut.com 官网 Products 加条（M3 可提前） |
 git log --oneline -5
 git remote -v
 ```

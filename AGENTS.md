@@ -17,10 +17,11 @@
 
 ## 双账号纪律（ouuut 系，2026-10-12 夜审 P1-4 待固化）
 
-- ouuut 系列站用 ouuut 账号推（两个 CF、两个 GH，别推错号）。
-- CF Pages 项目名：`panout-japan`（规划，建时确认）。
+- 身份：GH + CF 全走 ouuut（nkmtsai@gmail.com）。GH 用 ouuut token（`GH_TOKEN=<custom.ouuut_github_token> gh ...`，凭据库 `git:https://github.com` username=ouuut）；CF token 取 `custom.ouuut_cf_api_token`（`read_full` + parse .value），account `cf9d7aabc983abab99b5e3fdd080ec4d`。
+- CF Pages 项目：`panout-site`（`*-site` 惯例）。门面发布：`CLOUDFLARE_API_TOKEN=<tok> CLOUDFLARE_ACCOUNT_ID=cf9d7a... npx wrangler pages deploy site --project-name=panout-site --branch=main`（wrangler 4.149+ 仅建项目加 `--force`，部署不加；无 domain 子命令，自定义域走 API `POST /accounts/<acct>/pages/projects/panout-site/domains`）。
+- 仓：`ouuut/panout-japan`（canonical，origin 已切）；个人 `nakamotosai/panout-japan` 残留待删；Gitea `sai/panout-japan` 镜像。
 
 ## 发布（网站类，MASTER-CHECKLIST.md 为验收载体）
 
 - 发布前逐项打勾，**A1–A7 任一不过即阻断**。
-- 发布命令与回滚命令落这里（建站后补）。
+- 回滚：DNS 下线即回（M0 门面无状态）；老站三域独立不受影响。
