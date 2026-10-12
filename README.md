@@ -16,8 +16,8 @@
 
 | | |
 |---|---|
-| **已完成** | M0 上线进行中：仓 canonical 切 `ouuut/panout-japan`；门面 `site/` 已推 CF Pages `panout-site`（`panout-site.pages.dev` 活，三语+三跳转已验）；`japan.ouuut.com` 自定义域已綁（API，initializing 待 DNS 生效） |
-| **唯一 next** | 等 `japan.ouuut.com` DNS 生效后冒烟（A1–A7）+ GSC/Bing 验证；个人仓残留删除（网页）；ouuut.com 官网 Products 加条（M3 可提前） |
+| **已完成** | M0 上线成功：`https://japan.ouuut.com/` 活（首页200+robots+sitemap/hreflang+ja/en 三语+三跳转全对，`d81f80b` 后未改门面）；仓 canonical `ouuut/panout-japan`；CF `panout-site`（ouuut 账号） |
+| **唯一 next** | GSC/Bing 验证 + AI 爬虫政策统一 + ouuut.com 官网 Products 加条（M3 可提前）+ M1 子域家族 |
 git log --oneline -5
 git remote -v
 ```
