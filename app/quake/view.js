@@ -28,7 +28,7 @@ const CSS_CANDIDATES = [
   './app/quake/vendor/quake-core.css',
   '../app/quake/vendor/quake-core.css',
 ];
-const THEME_MAP = { mono: 'mono', sage: 'sage', dark: 'dark', tactical: 'dark' };
+const THEME_MAP = { sage: 'sage', dark: 'dark', mono: 'sage', tactical: 'dark' };
 
 let mounted = false;
 let bootToken = 0;
@@ -41,7 +41,7 @@ let ro = null;
 let mo = null;
 let rafKickTimer = 0;
 let currentLang = 'ja';
-let currentTheme = 'mono';
+let currentTheme = 'sage';
 let summary = null;
 
 function detectLang() {
@@ -71,11 +71,11 @@ function detectLang() {
 function detectTheme() {
   try {
     const t = localStorage.getItem('pp-theme');
-    if (t && THEME_MAP[t]) return t;
+    if (t === 'sage' || t === 'dark') return t;
   } catch (e) {}
   const de = document.documentElement.getAttribute('data-theme');
-  if (de && THEME_MAP[de]) return de;
-  return 'mono';
+  if (de === 'sage' || de === 'dark') return de;
+  return 'sage';
 }
 
 function injectCss() {
@@ -148,6 +148,7 @@ async function boot(token) {
   } catch (e) {
     console.error('[quake] vendor load failed', e);
     if (viewportEl && token === bootToken) {
+      try { const v = hostEl && hostEl.querySelector('.qk-veil'); if (v && v.parentNode) v.parentNode.removeChild(v); } catch (e2) {}
       viewportEl.innerHTML =
         '<div class="qk-fail">3D 地球仪加载失败 / failed to load globe vendor. ' +
         String((e && e.message) || e) + '</div>';
