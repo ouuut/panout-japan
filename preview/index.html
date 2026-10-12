@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja" data-variant="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pan Out Japan — preview</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html[data-variant="light"]{color-scheme:light;--bg:#faf8f5;--soft:#f0ebe2;--ink:#1c1a17;--muted:#6f675b;--faint:#ab9f8e;--line:rgba(28,26,23,.14);--accent:#96600a;--stage:#efe9dd}
+html[data-variant="dark"]{color-scheme:dark;--bg:#141210;--soft:#1e1c19;--ink:#f5f0e8;--muted:#a89d8d;--faint:#6f675b;--line:rgba(245,240,232,.14);--accent:#d0801a;--stage:#1b1917}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top-in{max-width:960px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;gap:20px}
+.brand{font-weight:700;font-size:15px;letter-spacing:.02em;white-space:nowrap}
+.brand small{display:block;font-size:10px;font-weight:400;color:var(--muted);letter-spacing:.18em}
+.tabs{display:flex;gap:4px;margin:0 auto}
+.tabs a{text-decoration:none;color:var(--muted);font-size:14px;padding:6px 12px;border-bottom:2px solid transparent}
+.tabs a[aria-current="page"]{color:var(--ink);font-weight:700;border-bottom-color:var(--accent)}
+.tools{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.tools button{background:none;border:0;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 2px}
+.tools button.on{color:var(--ink);font-weight:700}
+.tools .sep{width:1px;height:14px;background:var(--line)}
+main{max-width:960px;margin:0 auto;padding:36px 20px 60px}
+.view{display:none}
+.view.active{display:block}
+.eyebrow{font-size:11px;letter-spacing:.22em;color:var(--muted);margin-bottom:10px}
+h1{font-size:28px;font-weight:700;letter-spacing:.02em;margin-bottom:8px}
+.desc{color:var(--muted);font-size:14px;max-width:60ch;margin-bottom:6px}
+.meta{font-size:12px;color:var(--faint);margin-bottom:22px}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:12px;aspect-ratio:16/7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin-bottom:16px}
+.stage b{font-size:15px;font-weight:600}
+.stage span{font-size:12px;color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:22px}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--muted);font-size:12px;padding:6px 14px;cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--bg);font-weight:700}
+.dots{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.dots i{width:10px;height:10px;border-radius:50%;display:inline-block}
+ @media(max-width:640px){.top-in{gap:10px;padding:0 14px}.brand{font-size:13px}.brand small{display:none}.tabs{flex:1;justify-content:center}.tabs a{padding:6px 6px;font-size:13px;white-space:nowrap}main{padding:24px 14px 48px}h1{font-size:22px}.stage{aspect-ratio:16/10}}
+.scalebar{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.scalebar .bar{width:120px;height:6px;border-radius:3px;background:linear-gradient(90deg,#83a598,#d79921,#fe8019,#9d0006)}
+.chips{display:flex;gap:6px}
+.chips span{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.spec{border-top:1px solid var(--line);padding-top:14px;font-size:12px;color:var(--muted)}
+.spec b{color:var(--ink);font-weight:600}
+.spec li{margin:4px 0 4px 18px}
+footer{border-top:1px solid var(--line)}
+.foot-in{max-width:960px;margin:0 auto;padding:18px 20px;font-size:12px;color:var(--faint);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand">Pan Out Japan<small data-i18n="brand_sub">日本本土情報</small></div>
+  <nav class="tabs">
+    <a href="#/quake" data-view="quake" data-i18n="tab_quake">地震</a>
+    <a href="#/crime" data-view="crime" data-i18n="tab_crime">犯罪率</a>
+    <a href="#/cabinet" data-view="cabinet" data-i18n="tab_cabinet">支持率</a>
+  </nav>
+  <div class="tools">
+    <button data-lang="ja">JA</button><button data-lang="zh">中</button><button data-lang="en">EN</button>
+    <span class="sep"></span>
+    <button id="themeBtn">●</button>
+  </div>
+</div></header>
+<main>
+  <section class="view" id="v-quake">
+    <div class="eyebrow">QUAKE · USGS</div>
+    <h1 data-i18n="q_t">地震マップ</h1>
+    <p class="desc" data-i18n="q_d">列島の震源を3D地球儀で俯瞰する。</p>
+    <p class="meta" data-i18n="q_m">M4+ · 1970→NOW · 深度7段</p>
+    <div class="stage"><b data-i18n="q_s">3D 地球儀ステージ（プレースホルダ）</b><span>three.js canvas mounts here</span></div>
+    <div class="controls">
+      <div class="seg"><button>24H</button><button class="on">30D</button><button>ALL</button></div>
+      <div class="dots"><i style="background:#076678"></i><i style="background:#458588"></i><i style="background:#83a598"></i><i style="background:#d79921"></i><i style="background:#fe8019"></i><i style="background:#fb4934"></i><i style="background:#9d0006"></i><span>0–400km</span></div>
+    </div>
+    <div class="spec"><b data-i18n="spec_t">本番で搬入する核：</b><ul><li data-i18n="q_li1">depthColor.js（深度7色・凍結）</li><li data-i18n="q_li2">quakeTiles.js（視錐・遅延読込）</li><li data-i18n="q_li3">fetch-data.mjs（USGS 瓦片管線）</li></ul></div>
+  </section>
+  <section class="view" id="v-crime">
+    <div class="eyebrow">CRIME · TMPD</div>
+    <h1 data-i18n="c_t">犯罪率マップ</h1>
+    <p class="desc" data-i18n="c_d">東京都 5,234 町丁の刑法犯千人率を分級着色で読む。</p>
+    <p class="meta" data-i18n="c_m">R7年計 · 全部刑法犯 · 中位数 4.8/千人</p>
+    <div class="stage"><b data-i18n="c_s">2D 地図ステージ（プレースホルダ）</b><span>Leaflet map mounts here</span></div>
+    <div class="controls">
+      <input class="search" data-i18n-ph="c_ph" placeholder="搜索区市或町丁…" readonly>
+      <div class="scalebar"><span>0</span><span class="bar"></span><span>≥72</span></div>
+    </div>
+    <div class="spec"><b data-i18n="spec_t2">本番で搬入する核：</b><ul><li data-i18n="c_li1">分級着色管線（rateOf / buildScales / 図例直方図）</li><li data-i18n="c_li2">検索ドロップダウン（points.json）</li><li data-i18n="c_li3">双 variant token（本スキームの正本）</li></ul></div>
+  </section>
+  <section class="view" id="v-cabinet">
+    <div class="eyebrow">CABINET · NHK</div>
+    <h1 data-i18n="b_t">内閣支持率 2000→</h1>
+    <p class="desc" data-i18n="b_d">NHK 月次世論調査 632 点の推移を月平均で追う。</p>
+    <p class="meta" data-i18n="b_m">2000-01 → 2026-09 · 月平均 · 縦線=首相交代</p>
+    <div class="stage"><b data-i18n="b_s">折線グラフステージ（プレースホルダ）</b><span>ECharts mounts here</span></div>
+    <div class="controls">
+      <div class="seg"><button>3M</button><button>1Y</button><button class="on">ALL</button></div>
+      <div class="chips"><span>自民</span><span>立憲</span><span>支持率</span></div>
+    </div>
+    <div class="spec"><b data-i18n="spec_t3">本番で搬入する核：</b><ul><li data-i18n="b_li1">ECharts 配置（series / dataZoom / markLine）</li><li data-i18n="b_li2">zoom 段 + legend フォーカス</li><li data-i18n="b_li3">三語・主題切替器（全站 chrome 化）</li></ul></div>
+  </section>
+</main>
+<footer><div class="foot-in"><span data-i18n="foot">出典：USGS · 警視庁 · NHK放送文化研究所 · CC BY 4.0</span><span>preview — 框架占位 · 无真实数据</span></div></footer>
+<script>
+"use strict";
+var I18N={
+ja:{brand_sub:"日本本土情報",tab_quake:"地震",tab_crime:"犯罪率",tab_cabinet:"支持率",q_t:"地震マップ",q_d:"列島の震源を3D地球儀で俯瞰する。",q_m:"M4+ · 1970→NOW · 深度7段",q_s:"3D 地球儀ステージ（プレースホルダ）",c_t:"犯罪率マップ",c_d:"東京都 5,234 町丁の刑法犯千人率を分級着色で読む。",c_m:"R7年計 · 全部刑法犯 · 中央値 4.8/千人",c_s:"2D 地図ステージ（プレースホルダ）",b_t:"内閣支持率 2000→",b_d:"NHK 月次世論調査 632 点の推移を月平均で追う。",b_m:"2000-01 → 2026-09 · 月平均 · 縦線=首相交代",b_s:"折線グラフステージ（プレースホルダ）",q_li1:"depthColor.js（深度7色・凍結）",q_li2:"quakeTiles.js（視錐・遅延読込）",q_li3:"fetch-data.mjs（USGS 瓦片管線）",c_li1:"分級着色管線（rateOf / buildScales / 図例直方図）",c_li2:"検索ドロップダウン（points.json）",c_li3:"双 variant token（本スキームの正本）",b_li1:"ECharts 配置（series / dataZoom / markLine）",b_li2:"zoom 段 + legend フォーカス",b_li3:"三語・主題切替器（全站 chrome 化）",foot:"出典：USGS · 警視庁 · NHK放送文化研究所 · CC BY 4.0"},
+zh:{brand_sub:"日本本土情报",tab_quake:"地震",tab_crime:"犯罪率",tab_cabinet:"支持率",q_t:"地震地图",q_d:"在 3D 地球仪上俯瞰列岛震源。",q_m:"M4+ · 1970→现在 · 深度7档",q_s:"3D 地球仪舞台（占位）",c_t:"犯罪率地图",c_d:"东京都 5,234 町丁刑法犯千人率，分级设色。",c_m:"R7年计 · 全部刑法犯 · 中位数 4.8/千人",c_s:"2D 地图舞台（占位）",b_t:"内阁支持率 2000→",b_d:"NHK 月度舆论调查 632 点，月平均追踪。",b_m:"2000-01 → 2026-09 · 月平均 · 竖线=首相更替",b_s:"折线图舞台（占位）",spec_t:"本番搬入核心：",spec_t2:"本番搬入核心：",spec_t3:"本番搬入核心：",q_li1:"depthColor.js（深度7色·冻结）",q_li2:"quakeTiles.js（视锥·延迟加载）",q_li3:"fetch-data.mjs（USGS 瓦片管线）",c_li1:"分级设色管线（rateOf / buildScales / 图例直方图）",c_li2:"搜索下拉（points.json）",c_li3:"双 variant token（本方案正本）",b_li1:"ECharts 配置（series / dataZoom / markLine）",b_li2:"zoom 段 + legend 聚焦",b_li3:"三语·主题切换器（全站 chrome 化）",foot:"数据来源：USGS · 警视厅 · NHK放送文化研究所 · CC BY 4.0"},
+en:{brand_sub:"JAPAN LOCAL INTEL",tab_quake:"Quakes",tab_crime:"Crime",tab_cabinet:"Approval",q_t:"Quake map",q_d:"Hypocenters across the archipelago on a 3D globe.",q_m:"M4+ · 1970→NOW · 7 depth bands",q_s:"3D globe stage (placeholder)",c_t:"Crime rates map",c_d:"Per-1,000 rates for 5,234 Tokyo chome, classed colors.",c_m:"R7 total · all penal-code offenses · median 4.8/1k",c_s:"2D map stage (placeholder)",b_t:"Cabinet approval 2000→",b_d:"632 monthly NHK poll points, monthly-averaged.",b_m:"2000-01 → 2026-09 · monthly avg · line = PM change",b_s:"Line chart stage (placeholder)",spec_t:"Core to stage:",spec_t2:"Core to stage:",spec_t3:"Core to stage:",q_li1:"depthColor.js (7 depth bands, frozen)",q_li2:"quakeTiles.js (frustum + lazy tiles)",q_li3:"fetch-data.mjs (USGS tile pipeline)",c_li1:"classed-color pipeline (rateOf / buildScales / legend histogram)",c_li2:"search dropdown (points.json)",c_li3:"dual-variant tokens (canonical for this scheme)",b_li1:"ECharts config (series / dataZoom / markLine)",b_li2:"zoom steps + legend focus",b_li3:"trilingual + theme switcher (site-wide chrome)",foot:"Sources: USGS · TMPD · NHK BCRI · CC BY 4.0"}};
+var TITLES={quake:"地震マップ",crime:"犯罪率マップ",cabinet:"内閣支持率 2000→"};
+function lang(){try{var q=new URLSearchParams(location.search).get("lang");if(q&&I18N[q])return q;var s=localStorage.getItem("pp-lang");if(s&&I18N[s])return s}catch(e){}return"ja"}
+function setLang(L){var D=I18N[L]||I18N.ja;document.documentElement.lang=L==="zh"?"zh-CN":L;document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n");if(D[k])el.textContent=D[k]});document.querySelectorAll(".tools [data-lang]").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-lang")===L)});try{localStorage.setItem("pp-lang",L)}catch(e){}}
+function route(){var h=(location.hash||"#/quake").replace("#/","");if(!{quake:1,crime:1,cabinet:1}[h])h="quake";document.querySelectorAll(".view").forEach(function(s){s.classList.toggle("active",s.id==="v-"+h)});document.querySelectorAll(".tabs a").forEach(function(a){if(a.getAttribute("data-view")===h)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});document.title="Pan Out Japan — "+TITLES[h]}
+document.querySelectorAll(".tools [data-lang]").forEach(function(b){b.addEventListener("click",function(){setLang(b.getAttribute("data-lang"))})});
+var tb=document.getElementById("themeBtn");
+function setTheme(v){document.documentElement.setAttribute("data-variant",v);tb.textContent=v==="light"?"●":"○";try{localStorage.setItem("pp-theme",v)}catch(e){}}
+tb.addEventListener("click",function(){setTheme(document.documentElement.getAttribute("data-variant")==="light"?"dark":"light")});
+window.addEventListener("hashchange",route);
+(function(){var t="light";try{var s=localStorage.getItem("pp-theme");if(s)t=s}catch(e){}setTheme(t);setLang(lang());route()})();
+</script>
+</body>
+</html>
