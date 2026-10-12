@@ -23,3 +23,16 @@
 - 部署：CF Pages `panout-site`（`f8b2f04b`，ouuut token），`japan.ouuut.com`（已绑）+ 部署域三视图全验（quake 3D/crime 58 tiles+62 label/cabinet chart，零 error；手机 390 全过）。
 -  A1–A7：A1 robots+sitemap ✅ A2 单 canonical ✅ A3 canonical ✅ A4 hreflang 闭环 ✅ A5 三语 title ✅ A6 单 active h1 ✅ A7 无 noindex ✅。
 - 唯一 next：GSC/Bing 验证 + 看门狗探针 + ouuut.com Products 加条 + M2 新闻聚合。
+
+## 2026-10-13 · 上线缺陷修复轮（`6a5fe864`）
+
+用户报线上 4 类 bug，逐条取证 + 修：
+
+1. **quake 左下/右下重叠** —— 根因：shell 的**占位** `.controls`(72,677→405,722) 与 quake 自己的 `.eq-bottom-left`(68,612→322,728) 在左下叠着。修：`mountView` 里 quake 挂载前移除 `.hud-top/.controls/.spec`；shell `#shell-foot` 在 quake 视图隐藏（quake 自带版权行）。
+2. **quake 小地球位置歪** —— 根因：HUD `top:60px` 是为原站 54px 头留的，嵌进 shell 后无头可让，浮在中间。修：`quake-core.css` HUD 顶行 60→12（drawer 120→72；手机 56→12）；`#v-quake-viewport` 底色 `var(--stage)`→`var(--bg0)`（消除浅色闪）。
+3. **crime 右侧面板全透明、字看不见** —— 根因：crime 的整套 CSS 挂在 `#crm-root` 下（28 处 token/variant 选择器），但挂载元素 id 是 `#v-crime` → **皮肤规则一条都没生效**；卡片 bg 回退透明、文字继承 shell `--ink`（dark 主题下 `#EDEBE4`）→ 浅色地图上全看不见。修：`mountCrime` 建 `<div id="crm-root">` 挂载盒并把 variant/accent 属性挂它上面；unmount 连盒移除。实测 dark 下 `--bg-card: rgba(27,25,23,.62)` / `--text-main:#f5f0e8` 恢复。
+4. **cabinet 橙药丸灰字** —— 根因：shell 占位规则 `.stage span{color:var(--muted)}`（(0,1,1)）压过 `.cab-latest{color:#fff}`（(0,1,0)）。修：占位样式改子选择器 `.stage > b` / `.stage > span`。实测 `#cab-latest` col=`rgb(255,255,255)` / bg=`rgb(255,106,61)`。
+5. **主题第三项 mono** —— 删 mono（CSS 块 + 圆点 + 按钮 + 映射 + 默认）；默认 `sage`，白名单 `{sage,dark}`。
+6. **quake 震点"消失"** —— 加加载遮罩（`.qk-veil`），采样画布亮点占比 >3.5% 且 ≥2.6s 才撤（12s 兜底）。另实测 **live 16s 亮点 5.44% → 50s 2.21%**：地球仪 idle 自转（`userWantsAutoRotate=true`，30s/圈）+ 镜头漂移把日本震点带出视野 —— 待拍板是否关默认自转。
+
+验证：`site/assemble.mjs --check` OK；本地 Chromium 实渲染 4 项全过（quake 亮点 6.30%、无重叠、小地球 y=96；crime `#crm-root` 在且可读；cabinet 白字）；线上 `index.html`/`app/crime/view.js`/`app/quake/view.js` 回读确认新版字节已上。

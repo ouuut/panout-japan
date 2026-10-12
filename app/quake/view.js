@@ -158,8 +158,36 @@ async function boot(token) {
   summary = readSummaryFromDom();
   if (!summary || !summary.canvas) {
     console.error('[quake] vendor ran but #eq-canvas missing');
+    try { const v = hostEl && hostEl.querySelector('.qk-veil'); if (v && v.parentNode) v.parentNode.removeChild(v); } catch (e) {}
     return null;
   }
+  // 遮罩撤除：等画布真正画出震点（亮点占比超阈值）且至少 2.6s，最长 12s 由 mount 兜底
+  try {
+    const v = hostEl && hostEl.querySelector('.qk-veil');
+    if (v) {
+      const t0 = Number(v.dataset.t0 || Date.now());
+      const cv = viewportEl && viewportEl.querySelector('#eq-canvas');
+      let tries = 0;
+      const done = () => { try { if (v.parentNode) v.parentNode.removeChild(v); } catch (e) {} };
+      const tick = () => {
+        tries++;
+        let dotsOk = false;
+        try {
+          if (cv && cv.width) {
+            const c2 = document.createElement('canvas');
+            c2.width = 320; c2.height = Math.max(1, Math.round(320 * cv.height / cv.width));
+            const cx = c2.getContext('2d'); cx.drawImage(cv, 0, 0, c2.width, c2.height);
+            const d = cx.getImageData(0, 0, c2.width, c2.height).data;
+            let n = 0; for (let i = 0; i < d.length; i += 4) { if (d[i] > 60 || d[i+1] > 60 || d[i+2] > 60) n++; }
+            dotsOk = n / (c2.width * c2.height) > 0.035;
+          }
+        } catch (e) {}
+        if ((dotsOk && Date.now() - t0 >= 2600) || tries > 40) return done();
+        setTimeout(tick, 500);
+      };
+      setTimeout(tick, 400);
+    }
+  } catch (e) {}
   // Nudge resize so renderer picks up the real box (shell .stage may settle late).
   try {
     window.dispatchEvent(new Event('resize'));
@@ -196,6 +224,18 @@ function mountQuake(root, opts) {
   }
   if (!viewport.querySelector('#eq-canvas')) viewport.innerHTML = '';
   viewportEl = viewport;
+  // 加载遮罩：vendor 画布出现前挡住空舞台（防慢网/冷缓存下"地图全空"）
+  try {
+    if (!host.querySelector('.qk-veil')) {
+      const veil = document.createElement('div');
+      veil.className = 'qk-veil';
+      veil.textContent = '読み込み中 · Loading…';
+      veil.style.cssText = 'position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:#12100d;color:#8a8478;font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;pointer-events:none';
+      veil.dataset.t0 = String(Date.now());
+      host.appendChild(veil);
+      setTimeout(() => { try { if (veil.parentNode) veil.parentNode.removeChild(veil); } catch (e) {} }, 12000);
+    }
+  } catch (e) {}
 
   currentLang = opts.lang || detectLang();
   currentTheme = (opts.theme && THEME_MAP[opts.theme]) ? opts.theme : detectTheme();

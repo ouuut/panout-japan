@@ -1407,12 +1407,15 @@ export async function mountCrime(el, opts) {
   if (opts.controls) controlsRoot = opts.controls;
   el.classList.add('crm-mounted');
   try { el.style.position = 'relative'; el.style.minHeight = '70vh'; el.style.overflow = 'hidden'; } catch (e) {}
-  el.innerHTML = CRM_SKELETON
+  el.innerHTML = '<div id="crm-root"></div>';
+  rootEl = el.querySelector('#crm-root');
+  try { rootEl.style.cssText = 'position:absolute;inset:0'; } catch (e) {}
+  rootEl.innerHTML = CRM_SKELETON
   currentVariant = opts.theme ? (CRM_THEME_MAP[opts.theme] || 'editorial') : detectInitialTheme();
   currentAccent = opts.accent || detectInitialAccent();
   if (opts.lang && I18N[opts.lang]) { currentLang = opts.lang; try { crmStore.setItem('tokyo-crime-lang', opts.lang); } catch (e) {} }
-  el.setAttribute('data-crm-variant', currentVariant);
-  el.setAttribute('data-crm-accent', currentAccent);
+  rootEl.setAttribute('data-crm-variant', currentVariant);
+  rootEl.setAttribute('data-crm-accent', currentAccent);
   ensureCrmCss();
   const t0 = I18N[currentLang] || I18N.zh;
   const lt = $el('crm-loader-title'); if (lt) lt.textContent = t0.loadingTitle;
@@ -1460,7 +1463,7 @@ export function unmountCrime() {
   const deadRoot = rootEl, deadCtl = controlsRoot;
   rootEl = null; controlsRoot = null; searchInputEl = null;
   const mySweep = ++bootSeq;
-  const sweepDom = () => { if (mySweep !== bootSeq) return; try { if (deadCtl) deadCtl.innerHTML = ''; } catch (e) {} try { if (deadRoot) { deadRoot.innerHTML = ''; deadRoot.removeAttribute('data-crm-variant'); deadRoot.removeAttribute('data-crm-accent'); deadRoot.classList.remove('crm-mounted'); } } catch (e) {} };
+  const sweepDom = () => { if (mySweep !== bootSeq) return; try { if (deadCtl) deadCtl.innerHTML = ''; } catch (e) {} try { if (deadRoot) { deadRoot.innerHTML = ''; deadRoot.removeAttribute('data-crm-variant'); deadRoot.removeAttribute('data-crm-accent'); deadRoot.classList.remove('crm-mounted'); if (deadRoot.parentNode) deadRoot.parentNode.removeChild(deadRoot); } } catch (e) {} };
   try { requestAnimationFrame(() => setTimeout(sweepDom, 0)); } catch (e) { setTimeout(sweepDom, 50); }
   zoomSliderRender = null; L = null; mounted = false;
 }

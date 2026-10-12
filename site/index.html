@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="mono">
+<html lang="ja" data-theme="sage">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,7 +29,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 /* ---- ouuut-v2 tokens.css 快照（字体用系统回退栈，预览单文件不自托管） ---- */
 :root{--font-serif:'Instrument Serif',Georgia,'Noto Serif SC','Noto Serif JP',serif;--font-sans:'Geist',-apple-system,'Hiragino Sans','Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;--font-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;--pad:clamp(20px,4vw,56px);--fs-eyebrow:11px;--line-width:0px}
-html[data-theme="mono"]{color-scheme:light;--bg:#F3F1EA;--ink:#12120F;--muted:#65635C;--accent:#E8431A;--accent-soft:rgba(232,67,26,.08);--accent-ink:#B23010;--surface:rgba(18,18,15,.03);--stage:#ECE9E0;--faint:#8a8780;--text-halo:0 1px 0 rgba(255,255,255,.7),0 1px 1px rgba(18,18,15,.16)}
 html[data-theme="sage"]{color-scheme:light;--bg:#E9EDE3;--ink:#17211A;--muted:#56635A;--accent:#2F6B4F;--accent-soft:rgba(47,107,79,.08);--accent-ink:#2F6B4F;--surface:rgba(23,33,26,.03);--stage:#DFE4D6;--faint:#7d8a80;--text-halo:0 1px 0 rgba(255,255,255,.65),0 1px 1px rgba(23,33,26,.16)}
 html[data-theme="dark"]{color-scheme:dark;--bg:#0E0E0C;--ink:#EDEBE4;--muted:#A09E96;--accent:#FF6A3D;--accent-soft:rgba(255,106,61,.12);--accent-ink:#F2653A;--surface:rgba(237,235,228,.04);--stage:#171715;--faint:#6f6e68;--text-halo:none}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased;text-shadow:var(--text-halo,none);transition:background-color .3s ease,color .3s ease}
@@ -47,7 +46,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-siz
 .theme-dots button{width:44px;height:44px;margin:-6px -12px;display:inline-flex;align-items:center;justify-content:center;background:none;border:0;cursor:pointer}
 .theme-dots i{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(128,128,128,.55)}
 .theme-dots i::after{content:"";width:6px;height:6px;border-radius:50%}
-.theme-dots button[data-set-theme="mono"] i{background:#F3F1EA}.theme-dots button[data-set-theme="mono"] i::after{background:#E8431A}
 .theme-dots button[data-set-theme="sage"] i{background:#E9EDE3}.theme-dots button[data-set-theme="sage"] i::after{background:#2F6B4F}
 .theme-dots button[data-set-theme="dark"] i{background:#0E0E0C}.theme-dots button[data-set-theme="dark"] i::after{background:#FF6A3D}
 .theme-dots button[aria-pressed="true"] i{outline:2px solid var(--ink);outline-offset:3px}
@@ -60,8 +58,8 @@ html:lang(ja) h1,html:lang(zh-CN) h1{font-family:'Noto Serif JP','Noto Serif SC'
 .desc{color:var(--muted);font-size:15px;max-width:60ch;margin-bottom:6px}
 .meta{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:22px}
 .stage{background:var(--stage);border:0;border-radius:4px;aspect-ratio:16/7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin-bottom:16px}
-.stage b{font-family:var(--font-serif);font-size:17px;font-weight:400}
-.stage span{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.stage > b{font-family:var(--font-serif);font-size:17px;font-weight:400}
+.stage > span{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
 .controls{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-bottom:22px}
 .seg{display:flex;gap:2px;background:var(--surface);border-radius:999px;padding:3px}
 .seg button{background:none;border:0;color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;padding:6px 14px;cursor:pointer;border-radius:999px}
@@ -111,7 +109,7 @@ footer{position:fixed;right:16px;bottom:14px;z-index:6}
   <div class="tools">
     <button data-lang="ja">JA</button><button data-lang="zh">中</button><button data-lang="en">EN</button>
     <span class="sep"></span>
-    <span class="theme-dots" role="group" aria-label="theme"><button data-set-theme="mono" aria-pressed="true" title="mono"><i></i></button><button data-set-theme="sage" aria-pressed="false" title="sage"><i></i></button><button data-set-theme="dark" aria-pressed="false" title="dark"><i></i></button></span>
+    <span class="theme-dots" role="group" aria-label="theme"><button data-set-theme="sage" aria-pressed="true" title="sage"><i></i></button><button data-set-theme="dark" aria-pressed="false" title="dark"><i></i></button></span>
   </div>
 </div></header>
 <main>
@@ -152,7 +150,7 @@ footer{position:fixed;right:16px;bottom:14px;z-index:6}
     <div class="spec"><b data-i18n="spec_t3">本番で搬入する核：</b><ul><li data-i18n="b_li1">ECharts 配置（series / dataZoom / markLine）</li><li data-i18n="b_li2">zoom 段 + legend フォーカス</li><li data-i18n="b_li3">三語・主題切替器（全站 chrome 化）</li></ul></div>
   </section>
 </main>
-<footer><div class="foot-in"><span data-i18n="foot">出典：USGS · 警視庁 · NHK放送文化研究所 · CC BY 4.0</span><span>© 2026 Pan Out Japan · ouuut</span></div></footer>
+<footer id="shell-foot"><div class="foot-in"><span data-i18n="foot">出典：USGS · 警視庁 · NHK放送文化研究所 · CC BY 4.0</span><span>© 2026 Pan Out Japan · ouuut</span></div></footer>
 <script>
 "use strict";
 var I18N={
@@ -165,16 +163,19 @@ function setLang(L){var D=I18N[L]||I18N.ja;document.documentElement.lang=L==="zh
 var VIEW_BASE=(location.pathname.indexOf("/preview/")>=0||document.baseURI.indexOf("/preview/")>=0)?"../":"./";
 var VIEW_MODS={quake:VIEW_BASE+"app/quake/view.js",crime:VIEW_BASE+"app/crime/view.js",cabinet:VIEW_BASE+"app/cabinet/view.js"};
 var VIEW_API={quake:["mountQuake","unmountQuake","setQuakeLang","setQuakeTheme"],crime:["mountCrime","unmountCrime","setCrimeLang","setCrimeTheme"],cabinet:["mountCabinet","unmountCabinet","setCabinetLang","setCabinetTheme"]};
-var viewCache={}, activeView=null, curLang="ja", curTheme="mono";
+var viewCache={}, activeView=null, curLang="ja", curTheme="sage";
 function viewRoot(h){return document.getElementById("v-"+h)}
 async function mountView(h){var apis=VIEW_API[h];var mod;
  try{ if(!viewCache[h]) viewCache[h]=await import(VIEW_MODS[h]); mod=viewCache[h]; }
  catch(e){ console.error("[shell] view load failed:",h,e); return; }
+ var sec=viewRoot(h);
+ if(sec){ sec.querySelectorAll(".spec").forEach(function(e){e.remove()}); if(h==="quake")sec.querySelectorAll(".hud-top,.controls").forEach(function(e){e.remove()}); }
  try{ await mod[apis[0]](viewRoot(h),{lang:curLang,theme:curTheme,base:VIEW_BASE}); activeView=h; }
  catch(e){ console.error("[shell] view mount failed:",h,e); } }
 function unmountView(h){if(activeView!==h||!viewCache[h])return;try{var r=viewCache[h][VIEW_API[h][1]]();if(r&&r.then)r.catch(function(e){console.error(e)})}catch(e){console.error(e)}if(activeView===h)activeView=null;}
 function route(){var h=(location.hash||"#/quake").replace("#/","");if(!{quake:1,crime:1,cabinet:1}[h])h="quake";
  document.querySelectorAll(".view").forEach(function(s){s.classList.toggle("active",s.id==="v-"+h)});
+ var ft=document.getElementById("shell-foot");if(ft)ft.style.display=(h==="quake")?"none":"";
  document.querySelectorAll(".tabs a").forEach(function(a){if(a.getAttribute("data-view")===h)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
  document.title="Pan Out Japan — "+TITLES[h];
  if(activeView&&activeView!==h)unmountView(activeView);
@@ -182,10 +183,10 @@ function route(){var h=(location.hash||"#/quake").replace("#/","");if(!{quake:1,
 function broadcastLang(L){curLang=L;["quake","crime","cabinet"].forEach(function(h){if(viewCache[h]&&viewCache[h][VIEW_API[h][2]])try{viewCache[h][VIEW_API[h][2]](L)}catch(e){}})}
 function broadcastTheme(T){curTheme=T;["quake","crime","cabinet"].forEach(function(h){if(viewCache[h]&&viewCache[h][VIEW_API[h][3]])try{viewCache[h][VIEW_API[h][3]](T)}catch(e){}})}
 document.querySelectorAll(".tools [data-lang]").forEach(function(b){b.addEventListener("click",function(){setLang(b.getAttribute("data-lang"))})});
-function setTheme(v){if(!{mono:1,sage:1,dark:1}[v])v="mono";document.documentElement.setAttribute("data-theme",v);document.querySelectorAll(".theme-dots button").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-set-theme")===v?"true":"false")});try{localStorage.setItem("pp-theme",v)}catch(e){}broadcastTheme(v);}
+function setTheme(v){if(!{sage:1,dark:1}[v])v="sage";document.documentElement.setAttribute("data-theme",v);document.querySelectorAll(".theme-dots button").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-set-theme")===v?"true":"false")});try{localStorage.setItem("pp-theme",v)}catch(e){}broadcastTheme(v);}
 document.querySelectorAll(".theme-dots button").forEach(function(b){b.addEventListener("click",function(){setTheme(b.getAttribute("data-set-theme"))})});
 window.addEventListener("hashchange",route);
-(function(){var t="mono";try{var s=localStorage.getItem("pp-theme");if(s)t=s}catch(e){}curTheme=t;document.documentElement.setAttribute("data-theme",t);document.querySelectorAll(".theme-dots button").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-set-theme")===t?"true":"false")});var L=lang();curLang=L;setLang(L);route()})();
+(function(){var t="sage";try{var s=localStorage.getItem("pp-theme");if(s)t=s}catch(e){}curTheme=t;document.documentElement.setAttribute("data-theme",t);document.querySelectorAll(".theme-dots button").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-set-theme")===t?"true":"false")});var L=lang();curLang=L;setLang(L);route()})();
 </script>
 </body>
 </html>
