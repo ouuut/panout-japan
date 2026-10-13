@@ -63,3 +63,10 @@
 - 修（5）：① P5 vendor失败先摘veil再写.qk-fail；② `--eq-rotate-len/--eq-legend-len` 补168px默认值；③ 壳boot mono白名单（旧mono收敛sage）；④ view.js detectTheme回退sage+THEME_MAP mono→sage；⑤ TITLES三语+setLang刷新title。本地 headed 全验：mono收敛/title三语/轮切零错/cabinet EN正常。
 - 部署：未推线上（门规：commit当轮做，push留收口）。线上仍 2815aba8e6，本轮 `7d940fe282` 待发布。
 - 遗留未修（有意）：`(width<=640px)` 无空格待真机matchMedia取证；autoRotate镜头漂移待拍板（默认开）；vendor CJK不跟三语（设计现状）；`I_()`写死tactical（vendor冻结，不动）。
+
+## 2026-10-13 · 进站即日本（`c1a35f7`，已上线 `2bde87d50a`）
+
+- 用户要：进站直接日本构图，取消3s飞行，改完直接推。
+- 改：`sites/quake/src/main.js` init 开场 `INTRO_SPACE_VIEW`→`homeViewForDevice()` 瞬切 + `flyP animate:false`（岸线径向3.4s+点场溶解1.85s保留，数据一到直接推）。
+- 管线：`vite build`（新 dist `index-CUFc_M9I.js`）+ 新建 `sites/quake/scripts/build-vendor.mjs`（14处 assert-guarded patches：mount1+missing1+topbar1+data4+var4+theme2+sw1；变量名漂移用内容锚/正则；theme处1整吞`,ad(X);`处2分号单换——首版`,`残留致 Unexpected token，已修+`node --check` 门）。
+- 验：本地硬刷 t=5s 2.1%→8s veil撤；线上 `2bde87d50a` 9s 9.2%+零错。截图：进站即日本列岛+震点，无太空帧。
