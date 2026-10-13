@@ -3922,7 +3922,8 @@ async function init() {
   introPlaying = true
   controls.autoRotate = false
   updateRotateButton()
-  await applyPoseCamera(INTRO_SPACE_VIEW, { animate: false })
+  // [panout] 进站即日本：直接落 HOME 构图，不经太空（INTRO_SPACE_VIEW 保留供回退）
+  await applyPoseCamera(homeViewForDevice(), { animate: false })
   fillFullEarthGrid(earthGlobe)
 
   // 岸线数据 + 日本瓦片并行；飞镜中不显示岸线/点
@@ -3987,13 +3988,12 @@ async function init() {
     }
   })()
 
-  // 先让太空满网帧画出来，再飞向日本（期间仍无岸线/点）
+  // [panout] 飞行取消：日本首帧即画，数据一到直接推送（岸线径向+点场溶解保留）
   await new Promise((r) =>
     requestAnimationFrame(() => requestAnimationFrame(r)),
   )
   const flyP = applyCameraFrame({
-    animate: true,
-    duration: CAM_INTRO_SEC,
+    animate: false,
   })
 
   const [, dataRes] = await Promise.all([outlineP, dataP, flyP])
