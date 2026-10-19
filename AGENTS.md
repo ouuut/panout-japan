@@ -21,6 +21,11 @@
 - CF Pages 项目：`panout-site`（`*-site` 惯例）。门面发布：`CLOUDFLARE_API_TOKEN=<tok> CLOUDFLARE_ACCOUNT_ID=cf9d7a... npx wrangler pages deploy site --project-name=panout-site --branch=main`（wrangler 4.149+ 仅建项目加 `--force`，部署不加；无 domain 子命令，自定义域走 API `POST /accounts/<acct>/pages/projects/panout-site/domains`）。
 - 仓：`ouuut/panout-japan`（canonical，origin 已切）；个人 `nakamotosai/panout-japan` 残留待删；Gitea `sai/panout-japan` 镜像。
 
+## 构建
+
+- `python src/build.py` 生成 `site/`，`site/` 是产物不入库、不手改。
+- 预览：`cd site && python -m http.server 8900`。
+
 ## 发布（网站类，MASTER-CHECKLIST.md 为验收载体）
 
 - 发布前逐项打勾，**A1–A7 任一不过即阻断**。

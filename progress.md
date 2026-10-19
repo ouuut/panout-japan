@@ -70,3 +70,15 @@
 - 改：`sites/quake/src/main.js` init 开场 `INTRO_SPACE_VIEW`→`homeViewForDevice()` 瞬切 + `flyP animate:false`（岸线径向3.4s+点场溶解1.85s保留，数据一到直接推）。
 - 管线：`vite build`（新 dist `index-CUFc_M9I.js`）+ 新建 `sites/quake/scripts/build-vendor.mjs`（14处 assert-guarded patches：mount1+missing1+topbar1+data4+var4+theme2+sw1；变量名漂移用内容锚/正则；theme处1整吞`,ad(X);`处2分号单换——首版`,`残留致 Unexpected token，已修+`node --check` 门）。
 - 验：本地硬刷 t=5s 2.1%→8s veil撤；线上 `2bde87d50a` 9s 9.2%+零错。截图：进站即日本列岛+震点，无太空帧。
+
+## 2026-10-19 · M3 静态预渲染重建（全站 109 页）
+
+- 架构切换：弃「单壳 + hash 路由 + 运行时数据渲染」，改为 `src/build.py` 静态预渲染 MPA；`site/` 整目录部署，零运行时拼页。
+- 页面：封面 + 27 年页 + 3 章 + 62 区 + 14 任内阁 + method + 404 = 109；每页 canonical/hreflang/OG/JSON-LD 齐全，三语（ja/zh/en）。
+- 图表全部构建期生成为内联 SVG（地震/犯罪海报、内阁长轴、年度条带），首屏不再等 JS。
+- 懒挂：章节页 `.stage` 点「起動する」才挂 WebGL/Leaflet/ECharts，闭合后恢复海报 DOM；三主题 mono/sage/dark。
+- 数据修正：NHK 2008/09 列错位（-8/+10 列）与日经同月双调查标注 → 644 polls / 331 月；犯罪章改用町丁级口径（中位 4.4‰、最高 1,332‰）；最大月变动统一口径 +20.5。
+- 体积：封面 raw 36KB / br 9KB；地震章 56/18KB；犯罪章 69/24KB；区页 33/9KB。海岸线 0.05° 简化 3.8MB→1.9MB，震点数值精度收敛 14MB→13MB。
+- 字体：Noto Sans/Serif JP VF 实例化 400 + 子集，8 文件 490KB，自托管。
+- 验收：109 页本地 200；三主题 × ja/zh/en 实渲染；375px 无横向溢出；404 直开正常；globe/Leaflet/ECharts 懒挂与闭合恢复通过。
+- 残留：`site/` 未提交（构建产物）；globe 首次加载本地 ~10s（线上 brotli 后更快）；zh 标题沿用 JP 字形（系统回退兜底）。

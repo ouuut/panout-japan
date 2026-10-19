@@ -29,3 +29,8 @@ sites/quake/.work/
 
 # wrangler 本地缓存（本机跑部署时落根目录的野目录，不入库）
 .wrangler/
+
+# 构建产物与本地缓存（python src/build.py 重建）
+site/
+.cache/
+mcp.json

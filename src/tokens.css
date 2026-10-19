@@ -1,0 +1,64 @@
+/* Pan Out Japan · tokens — single source of truth.
+   Family: ouuut Tokyo Expedition Magazine Editorial. Zero rules: no borders. */
+
+:root {
+  --bg: #F3F1EA;
+  --bg-2: #ECE9E0;
+  --ink: #12120F;
+  --muted: #65635C;
+  --faint: #8E8B82;
+  --accent: #E8431A;
+  --accent-ink: #C53916;
+  --surface: rgba(18, 18, 15, .045);
+  --surface-2: rgba(18, 18, 15, .075);
+  --stage: #E7E3D9;
+  --shadow: 0 1px 0 rgba(255, 255, 255, .55), 0 18px 40px -24px rgba(18, 18, 15, .35);
+
+  --serif: 'Instrument Serif', 'Noto Serif JP', Georgia, 'Times New Roman', serif;
+  --sans: 'Geist', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --pad: clamp(20px, 5vw, 72px);
+  --maxw: 1280px;
+  --gut: clamp(20px, 3vw, 40px);
+
+  --fs-display: clamp(46px, 8.2vw, 118px);
+  --fs-h1: clamp(32px, 4.8vw, 64px);
+  --fs-h2: clamp(21px, 2.3vw, 30px);
+  --fs-h3: clamp(17px, 1.5vw, 20px);
+  --fs-body: 16px;
+  --fs-small: 13px;
+  --fs-micro: 11px;
+  --lh: 1.78;
+
+  --ease: cubic-bezier(.22, .7, .28, 1);
+}
+
+html[data-theme="sage"] {
+  --bg: #E9EDE3;
+  --bg-2: #E1E6D9;
+  --ink: #17211A;
+  --muted: #56635A;
+  --faint: #7D8A80;
+  --accent: #2F6B4F;
+  --accent-ink: #265A42;
+  --surface: rgba(23, 33, 26, .045);
+  --surface-2: rgba(23, 33, 26, .08);
+  --stage: #DDE4D2;
+  --shadow: 0 1px 0 rgba(255, 255, 255, .5), 0 18px 40px -24px rgba(23, 33, 26, .32);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0E0E0C;
+  --bg-2: #151513;
+  --ink: #EDEBE4;
+  --muted: #A09E96;
+  --faint: #6F6E68;
+  --accent: #FF6A3D;
+  --accent-ink: #F2653A;
+  --surface: rgba(237, 235, 228, .05);
+  --surface-2: rgba(237, 235, 228, .09);
+  --stage: #171715;
+  --shadow: 0 18px 40px -24px rgba(0, 0, 0, .8);
+}
