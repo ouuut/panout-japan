@@ -1195,7 +1195,13 @@ def main():
     css_bytes = css.encode("utf-8")
     js_bytes = js.encode("utf-8")
     CSS_VER = hashlib.sha1(css_bytes).hexdigest()[:8]
-    JS_VER = hashlib.sha1(js_bytes).hexdigest()[:8]
+    # The shell stamps its own ?v= onto every lazy /app/ module URL, so it must
+    # change whenever any app code (view/vendor) changes, not just shell.js.
+    app_code = b""
+    for ap in sorted((ROOT / "app").rglob("*")):
+        if ap.is_file() and "/data/" not in ap.as_posix() and ap.suffix in (".js", ".css"):
+            app_code += ap.read_bytes()
+    JS_VER = hashlib.sha1(js_bytes + app_code).hexdigest()[:8]
 
     # fonts first (needs the charset), then CSS can reference the version
     charset = collect_chars(files, i18n_json)
@@ -1340,7 +1346,7 @@ def write_meta(font_meta):
         "  Cache-Control: public, max-age=31536000, immutable\n"
         "\n"
         "/app/*\n"
-        "  Cache-Control: public, max-age=31536000, immutable\n"
+        "  Cache-Control: public, max-age=86400\n"
         "\n"
         "/data/*\n"
         "  Cache-Control: public, max-age=86400\n", encoding="utf-8")

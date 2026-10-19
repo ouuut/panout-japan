@@ -41,6 +41,8 @@
       var v = dic[els[j].dataset.t];
       if (v && v[l]) els[j].innerHTML = v[l];
     }
+    var live = document.querySelector('.stage[data-live="1"]');
+    if (live && live._setVendorLang) live._setVendorLang(l);
   }
 
   function loadDic() {
@@ -93,7 +95,18 @@
       else if (ch === 'crime') mod.mountCrime(live, opts);
       else mod.mountCabinet(live, opts);
 
+      live._setVendorLang = function (l) {
+        try {
+          if (ch === 'quake' && mod.setQuakeLang) mod.setQuakeLang(l);
+          else if (ch === 'crime' && mod.setCrimeLang) mod.setCrimeLang(l);
+          else if (ch === 'cabinet' && mod.setCabinetLang) mod.setCabinetLang(l);
+        } catch (e) {}
+      };
+      live._setVendorLang(opts.lang);
+
       stage.dataset.live = '1';
+      document.body.classList.add('stage-open');
+      setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
       var close = document.createElement('button');
       close.className = 'stage-close';
       close.type = 'button';
@@ -106,11 +119,14 @@
           else mod.unmountCabinet();
         } catch (e) {}
         live.innerHTML = '';
+        live._setVendorLang = null;
         stage.dataset.live = '0';
         delete stage.dataset.busy;
+        document.body.classList.remove('stage-open');
         btn.disabled = false;
         label.textContent = prev;
         close.remove();
+        setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
       });
       stage.appendChild(close);
     }).catch(function (err) {

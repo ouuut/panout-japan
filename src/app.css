@@ -471,3 +471,13 @@ p, li, figcaption { line-break: strict; }
   margin-top: 12px; font-family: var(--mono); font-size: 11px; color: var(--muted);
 }
 .cab-range { display: none; }
+
+/* live stage: immersive fullscreen (poster stages only; .stage-flow stays inline) */
+.stage:not(.stage-flow)[data-live="1"] {
+  position: fixed; inset: 0; z-index: 70;
+  margin: 0; height: auto; border-radius: 0;
+  background: var(--bg0);
+}
+.stage:not(.stage-flow)[data-live="1"] .stage-live { position: absolute; inset: 0; }
+.stage:not(.stage-flow)[data-live="1"] .stage-close { position: fixed; top: 14px; right: 16px; }
+body.stage-open { overflow: hidden; }

@@ -158,6 +158,10 @@ async function boot(token) {
   if (token !== bootToken || !mounted) return null;
   // Vendor runs synchronously on import against #v-quake-viewport (already in DOM).
   summary = readSummaryFromDom();
+  localizeDock();
+  [600, 1800].forEach(function (ms) {
+    setTimeout(function () { if (token === bootToken && mounted) localizeDock(); }, ms);
+  });
   if (!summary || !summary.canvas) {
     console.error('[quake] vendor ran but #eq-canvas missing');
     try { const v = hostEl && hostEl.querySelector('.qk-veil'); if (v && v.parentNode) v.parentNode.removeChild(v); } catch (e) {}
@@ -235,7 +239,7 @@ function mountQuake(root, opts) {
       veil.style.cssText = 'position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:#12100d;color:#8a8478;font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;pointer-events:none';
       veil.dataset.t0 = String(Date.now());
       host.appendChild(veil);
-      setTimeout(() => { try { if (veil.parentNode) veil.parentNode.removeChild(veil); } catch (e) {} }, 12000);
+      setTimeout(() => { try { if (veil.parentNode) veil.parentNode.removeChild(veil); } catch (e) {} }, 30000);
     }
   } catch (e) {}
 
@@ -324,12 +328,40 @@ function unmountQuake() {
   teardownDom();
 }
 
+const DOCK_LABELS = {
+  'eq-menu': { ja: 'メニュー', zh: '菜单', en: 'Menu' },
+  'eq-size-mode': { ja: '規模', zh: '震级', en: 'Size' },
+  'eq-btn-mag': { ja: '最小M', zh: '震级筛', en: 'Min mag' },
+  'eq-btn-year': { ja: '年', zh: '年份', en: 'Year' },
+  'eq-btn-depth': { ja: '深さ', zh: '深度', en: 'Depth' },
+};
+const DOCK_TITLES = {
+  'eq-menu': { ja: 'ツールを開閉', zh: '展开/收起工具', en: 'Toggle tools' },
+  'eq-size-mode': { ja: '点の大きさ：規模', zh: '点大小：按震级', en: 'Point size: magnitude' },
+  'eq-btn-mag': { ja: '最小規模', zh: '最小震级', en: 'Minimum magnitude' },
+  'eq-btn-year': { ja: '年範囲', zh: '年份区间', en: 'Year range' },
+  'eq-btn-depth': { ja: '深さの強調', zh: '深度夸张', en: 'Depth exaggeration' },
+};
+function localizeDock() {
+  if (!viewportEl) return;
+  for (const id of Object.keys(DOCK_LABELS)) {
+    const el = viewportEl.querySelector('#' + id);
+    if (!el) continue;
+    const l = DOCK_LABELS[id][currentLang] || DOCK_LABELS[id].en;
+    const t = DOCK_TITLES[id][currentLang] || DOCK_TITLES[id].en;
+    if (el.textContent.trim() !== l) el.textContent = l;
+    if (el.title !== t) el.title = t;
+  }
+  const pwa = viewportEl.querySelector('#eq-pwa-install');
+  if (pwa) pwa.style.display = 'none';
+}
+
 function setQuakeLang(l) {
   if (l !== 'ja' && l !== 'zh' && l !== 'en') return false;
   currentLang = l;
   try { localStorage.setItem('eq-lang', l); } catch (e) {}
-  // Vendor lang buttons were stripped with the topbar; the shell owns i18n.
-  // Persist only; takes effect on next mount (documented, not silent).
+  // Vendor UI is zh-first and frozen; localize the visible dock labels here.
+  localizeDock();
   return true;
 }
 
