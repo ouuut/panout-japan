@@ -17,7 +17,7 @@
 
 ## 双账号纪律（ouuut 系，2026-10-12 夜审 P1-4 待固化）
 
-- 身份：GH + CF 全走 ouuut（nkmtsai@gmail.com）。GH 用 ouuut token（`GH_TOKEN=<custom.ouuut_github_token> gh ...`，凭据库 `git:https://github.com` username=ouuut）；CF token 取 `custom.ouuut_cf_api_token`（`read_full` + parse .value），account `cf9d7aabc983abab99b5e3fdd080ec4d`。
+- 身份：GH + CF 全走 ouuut（nkmtsai@gmail.com）。CF token：`python C:\Users\sai\.omp\agent\scripts\secrets_manager.py read custom ouuut_cf_api_token`，输出 JSON **取 `.value`**；account 用同命令读 `ouuut_cf_account_id`（cf9d7aabc983abab99b5e3fdd080ec4d）。GH 用 `custom.ouuut_github_token`（凭据库 `git:https://github.com` username=ouuut）。
 - CF Pages 项目：`panout-site`（`*-site` 惯例）。门面发布：`CLOUDFLARE_API_TOKEN=<tok> CLOUDFLARE_ACCOUNT_ID=cf9d7a... npx wrangler pages deploy site --project-name=panout-site --branch=main`（wrangler 4.149+ 仅建项目加 `--force`，部署不加；无 domain 子命令，自定义域走 API `POST /accounts/<acct>/pages/projects/panout-site/domains`）。
 - 仓：`ouuut/panout-japan`（canonical，origin 已切）；个人 `nakamotosai/panout-japan` 残留待删；Gitea `sai/panout-japan` 镜像。
 
