@@ -16,8 +16,8 @@
 
 | | |
 |---|---|
-| **已完成** | …（上轮略）+ **查bug轮**（`683b34f`，workflowz 五路 fanout：veil盖报错先摘/rotate-legend默认值/mono白名单/TITLES三语，用户截图系旧缓存）+ **进站即日本**（`c1a35f7`，已上线 BUILD `2bde87d50a`：开场直落HOME无飞行+`build-vendor.mjs`固化14补丁管线） |
-| **唯一 next** | GSC/Bing 验证 + 看门狗探针 + ouuut.com Products 加条 + M2 新闻聚合；残差：autoRotate 默认开待拍板（进站静止日本？）、`(width<=640px)` 无空格待真机取证、wiki:panout-japan-profile 长文待补写 |
+| **已完成** | …（上轮略）+ **查bug轮**（`683b34f`，workflowz 五路 fanout：veil盖报错先摘/rotate-legend默认值/mono白名单/TITLES三语，用户截图系旧缓存）+ **进站即日本**（`c1a35f7`，已上线 BUILD `2bde87d50a`：开场直落HOME无飞行+`build-vendor.mjs`固化14补丁管线）+ **支持率补录**（`d128fdb`，已上线 BUILD `ce322f23cb`/部署 13e39345：补 2026-09/10 七社数据→642 点，10 月月均 52.1%〔六社〕，三语文案同步） |
+| **唯一 next** | GSC/Bing 验证 + 看门狗探针 + ouuut.com Products 加条 + M2 新闻聚合；残差：autoRotate 默认开待拍板（进站静止日本？）、`(width<=640px)` 无空格待真机取证、wiki:panout-japan-profile 长文待补写；支持率残差：日経10月未発表（vdata 404）、共同9月一次出典未确认（详见 data `_meta.note`） |
 git log --oneline -5
 git remote -v
 ```
