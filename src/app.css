@@ -363,7 +363,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* ---------------- spine ---------------- */
 .spine { display: grid; gap: 12px; }
 .spine-row {
-  display: grid; grid-template-columns: 150px 1fr 64px;
+  display: grid; grid-template-columns: 150px minmax(0, 1fr) 64px;
   align-items: center; gap: 14px;
 }
 .spine-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--muted); }
@@ -374,7 +374,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .spine-val { font-family: var(--mono); font-size: 11px; text-align: right; color: var(--ink); }
 @media (max-width: 640px) {
-  .spine-row { grid-template-columns: 116px 1fr 44px; gap: 6px; }
+  .spine-row { grid-template-columns: 116px minmax(0, 1fr) 44px; gap: 6px; }
   .spine-lbl { font-size: 9px; white-space: nowrap; }
   .spine-bars { height: 24px; }
 }

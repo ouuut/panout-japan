@@ -82,3 +82,10 @@
 - 字体：Noto Sans/Serif JP VF 实例化 400 + 子集，8 文件 490KB，自托管。
 - 验收：109 页本地 200；三主题 × ja/zh/en 实渲染；375px 无横向溢出；404 直开正常；globe/Leaflet/ECharts 懒挂与闭合恢复通过。
 - 残留：`site/` 未提交（构建产物）；globe 首次加载本地 ~10s（线上 brotli 后更快）；zh 标题沿用 JP 字形（系统回退兜底）。
+
+## 2026-10-19 · 收尾验收（移动端 0 溢出、载荷实测）
+
+- 修封面 375px 横向溢出：`.spine-row` 的 `1fr` 被 min-content 撑开（手机 356 vs 320），改 `minmax(0,1fr)` 后 scrollWidth=clientWidth=360，7 条路由复测全部 0 溢出。
+- 载荷实测（gzip，brotli 更低）：封面 35.4KB→8.7KB、地震章 52.1/15.6、犯罪章 67.4/22.6、内阁章 16.9/5.1；CSS 22.1/5.4；shell.js 6.0/1.9；i18n 18.6/7.6；字体 8 文件 491KB（unicode-range 按需）。
+- a11y 底线：109 页 h1 唯一（0 违例）、`:focus-visible` 有；移动端按钮 40px 高、导航链 38px（>WCAG 24px）。
+- 残留：部署待 CF 凭据（`wrangler whoami` 未认证、本机无 token）。
