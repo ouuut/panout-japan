@@ -1,4 +1,4 @@
-/* japan.ouuut.com · shell.js — theme, language, header, reveal, lazy chapter launch.
+/* japan.ouuut.com · shell.js — theme, language, header, reveal, inline chapter mount.
    No framework, no build step. Everything degrades without JS. */
 (function () {
   'use strict';
@@ -22,10 +22,6 @@
     return 'ja';
   }
 
-  function langLabel(l) {
-    return l === 'ja' ? '日本語' : l === 'zh' ? '中文' : 'EN';
-  }
-
   function tr(key) {
     if (dic && dic[key] && dic[key][lang()]) return dic[key][lang()];
     return '';
@@ -47,8 +43,6 @@
     }
     var live = document.querySelector('.stage[data-live="1"] .stage-live');
     if (live && live._setVendorLang) live._setVendorLang(l);
-    var stageLang = document.querySelector('.stage-chrome [data-stage-lang]');
-    if (stageLang) stageLang.textContent = langLabel(l);
   }
 
   function loadDic() {
@@ -106,77 +100,11 @@
     loadDic().then(function () { setLang(lang()); });
   }
 
-  function createStageChrome(stage, closeFn) {
-    var bar = document.createElement('div');
-    bar.className = 'stage-chrome';
-
-    var brand = document.createElement('a');
-    brand.className = 'stage-brand';
-    brand.href = '/';
-    brand.textContent = 'japan.ouuut.com';
-
-    var spacer = document.createElement('span');
-    spacer.className = 'stage-spacer';
-
-    var theme = document.createElement('div');
-    theme.className = 'stage-theme';
-    theme.setAttribute('role', 'group');
-    theme.setAttribute('aria-label', 'Theme');
-    var current = doc.dataset.theme || 'sage';
-    [['sage', 'Sage', '#E9EDE3', '#2F6B4F'],
-     ['dark', 'Dark', '#0E0E0C', '#FF6A3D']].forEach(function (row) {
-      var b = document.createElement('button');
-      b.className = 'theme-dot';
-      b.type = 'button';
-      b.dataset.themeSet = row[0];
-      b.setAttribute('aria-pressed', String(current === row[0]));
-      b.setAttribute('aria-label', row[1]);
-      b.title = row[1];
-      b.style.setProperty('--td-bg', row[2]);
-      b.style.setProperty('--td-accent', row[3]);
-      b.innerHTML = '<span class="td-dot"><span class="td-core"></span></span>';
-      b.addEventListener('click', function () { setTheme(this.dataset.themeSet, true); });
-      theme.appendChild(b);
-    });
-
-    var langBtn = document.createElement('button');
-    langBtn.className = 'stage-lang';
-    langBtn.type = 'button';
-    langBtn.setAttribute('data-stage-lang', '');
-    langBtn.setAttribute('aria-label', 'Language');
-    langBtn.title = 'Language';
-    langBtn.textContent = langLabel(lang());
-    langBtn.addEventListener('click', function () {
-      var next = LANGS[(LANGS.indexOf(lang()) + 1) % LANGS.length];
-      loadDic().then(function () { setLang(next); });
-    });
-
-    var close = document.createElement('button');
-    close.className = 'stage-close';
-    close.type = 'button';
-    close.setAttribute('aria-label', tr('ui.close') || 'Close');
-    close.innerHTML = '&times;';
-    close.addEventListener('click', closeFn);
-
-    bar.appendChild(brand);
-    bar.appendChild(spacer);
-    bar.appendChild(theme);
-    bar.appendChild(langBtn);
-    bar.appendChild(close);
-    return { bar: bar, close: close };
-  }
-
-  function launch(btn) {
-    var stage = btn.closest('.stage');
-    if (!stage || stage.dataset.busy) return;
-    var ch = btn.dataset.launch;
+  function mountStage(stage, ch) {
+    if (!stage || stage.dataset.busy || stage.dataset.live === '1') return;
     var live = stage.querySelector('.stage-live');
     if (!live) return;
-    var label = btn.querySelector('span') || btn;
-    var prev = label.textContent;
     stage.dataset.busy = '1';
-    btn.disabled = true;
-    label.textContent = tr('ui.launching') || 'Loading…';
 
     var url = '/app/' + ch + '/view.js' + (VER ? '?v=' + VER : '');
     import(url).then(function (mod) {
@@ -203,115 +131,39 @@
       live._setVendorTheme(opts.theme);
 
       stage.dataset.live = '1';
-      stage.classList.remove('is-preparing');
-      document.body.classList.add('stage-open');
-      doc.classList.add('stage-open');
+      stage.classList.remove('stage-failed');
+      delete stage.dataset.busy;
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 350);
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 900);
-
-      var chrome = null;
-      var closeStage = function () {
-        try {
-          if (ch === 'quake') mod.unmountQuake();
-          else if (ch === 'crime') mod.unmountCrime();
-          else mod.unmountCabinet();
-        } catch (e) {}
-        live.innerHTML = '';
-        live._setVendorLang = null;
-        live._setVendorTheme = null;
-        stage.dataset.live = '0';
-        stage.classList.remove('is-preparing');
-        delete stage.dataset.busy;
-        document.body.classList.remove('stage-open');
-        doc.classList.remove('stage-open');
-        btn.disabled = false;
-        label.textContent = prev;
-        if (chrome) chrome.bar.remove();
-        document.removeEventListener('keydown', onKey);
-        setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
-        try { window.dispatchEvent(new CustomEvent('pj:stage-closed', { detail: { ch: ch } })); } catch (e) {}
-        try { btn.focus({ preventScroll: true }); } catch (e) {}
-      };
-      var onKey = function (e) { if (e.key === 'Escape') closeStage(); };
-      chrome = createStageChrome(stage, closeStage);
-      stage.appendChild(chrome.bar);
-      document.addEventListener('keydown', onKey);
-      try { chrome.close.focus({ preventScroll: true }); } catch (e) {}
+      try { window.dispatchEvent(new CustomEvent('pj:stage-mounted', { detail: { ch: ch } })); } catch (e) {}
     }).catch(function (err) {
       console.error(err);
-      stage.classList.remove('is-preparing');
       stage.dataset.live = '0';
-      document.body.classList.remove('stage-open');
-      doc.classList.remove('stage-open');
-      label.textContent = tr('ui.failed') || 'Failed to load';
-      btn.disabled = false;
       delete stage.dataset.busy;
+      stage.classList.add('stage-failed');
       try { window.dispatchEvent(new CustomEvent('pj:stage-error', { detail: { ch: ch } })); } catch (e) {}
-      setTimeout(function () {
-        label.textContent = prev;
-      }, 2000);
     });
   }
 
-  function startLabel(panel) {
-    return panel.querySelector('.hp-enter span, .prod-action span');
-  }
-
-  function resetStartPanel(panel) {
-    panel.classList.remove('is-launching');
-    panel.removeAttribute('aria-busy');
-    var label = startLabel(panel);
-    if (label && label.dataset.prevLabel !== undefined) {
-      label.textContent = label.dataset.prevLabel;
-      delete label.dataset.prevLabel;
+  function setupStages() {
+    var stages = document.querySelectorAll('.stage[data-stage-auto]');
+    if (!stages.length) return;
+    if (!('IntersectionObserver' in window)) {
+      for (var i = 0; i < stages.length; i++) {
+        mountStage(stages[i], stages[i].dataset.stageAuto);
+      }
+      return;
     }
-  }
-
-  function resetStartPanels() {
-    var panels = document.querySelectorAll('[data-start-app].is-launching');
-    for (var i = 0; i < panels.length; i++) {
-      resetStartPanel(panels[i]);
-      try { panels[i].focus({ preventScroll: true }); } catch (e) {}
-    }
-  }
-
-  function failStartPanels() {
-    var panels = document.querySelectorAll('[data-start-app].is-launching');
-    for (var i = 0; i < panels.length; i++) {
-      var panel = panels[i];
-      var label = startLabel(panel);
-      if (label) label.textContent = tr('ui.failed') || 'Failed to load';
-      panel.classList.remove('is-launching');
-      panel.removeAttribute('aria-busy');
-      (function (p) {
-        setTimeout(function () {
-          if (!p.classList.contains('is-launching')) resetStartPanel(p);
-        }, 1800);
-      })(panel);
-    }
-  }
-
-  function startHome(panel) {
-    var ch = panel.dataset.startApp;
-    var stage = document.querySelector('.home-stage[data-view="' + ch + '"]');
-    if (!stage) return false;
-    if (stage.dataset.busy || stage.dataset.live === '1') return true;
-    var btn = stage.querySelector('[data-launch]');
-    if (!btn) return false;
-    var label = startLabel(panel);
-    if (label) {
-      if (label.dataset.prevLabel === undefined) label.dataset.prevLabel = label.textContent;
-      label.textContent = tr('ui.launching') || 'Loading…';
-    }
-    panel.classList.add('is-launching');
-    panel.setAttribute('aria-busy', 'true');
-    stage.classList.add('is-preparing');
-    stage.dataset.live = '1';
-    document.body.classList.add('stage-open');
-    doc.classList.add('stage-open');
-    btn.click();
-    return true;
+    var io = new IntersectionObserver(function (entries) {
+      for (var j = 0; j < entries.length; j++) {
+        if (!entries[j].isIntersecting) continue;
+        var stage = entries[j].target;
+        io.unobserve(stage);
+        mountStage(stage, stage.dataset.stageAuto);
+      }
+    }, { rootMargin: '320px 0px' });
+    for (var k = 0; k < stages.length; k++) io.observe(stages[k]);
   }
 
   function legacyHash() {
@@ -394,6 +246,7 @@
     setupHeader();
     setupMenu();
     setupReveal();
+    setupStages();
 
     var langs = document.querySelectorAll('[data-lang]');
     for (var i = 0; i < langs.length; i++) {
@@ -410,20 +263,6 @@
       });
     }
 
-    var btns = document.querySelectorAll('[data-launch]');
-    for (var k = 0; k < btns.length; k++) {
-      btns[k].addEventListener('click', function () { launch(this); });
-    }
-
-    var starts = document.querySelectorAll('[data-start-app]');
-    for (var m = 0; m < starts.length; m++) {
-      starts[m].addEventListener('click', function (e) {
-        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-        if (startHome(this)) e.preventDefault();
-      });
-    }
-    window.addEventListener('pj:stage-closed', resetStartPanels);
-    window.addEventListener('pj:stage-error', failStartPanels);
   }
 
   if (document.readyState === 'loading') {

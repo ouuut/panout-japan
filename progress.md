@@ -142,3 +142,12 @@
 - 三章修正：全屏 stage 增加站点头（域名 / 主题 / 语言 / 关闭），主题和语言可直接在应用内切换；`syncVendorTheme` / `setLang` 选择器修正为 `.stage-live`，应用真正收到主题/语言；文档滚动条隐藏、内部滚动条主题化；内阁从 in-flow `stage-flow` 改为全屏，控件置顶、图表 flex 填满，dataZoom 改为主题色轨道，顶部内阁标签不再被裁切。
 - 验：`/` 为新总入口，`/preview/` → `/`，`/method/`、`/quake/2011/`、`/crime/chiyoda/`、`/cabinet/abe1/` 均 404；sitemap 4 条；4 个内容页 + 1 个跳转别名；1440/390 无横向溢出；1440 chrome 52px、390 chrome 48px；内阁 1440 图表 974px / 控件 81px，390 图表 847px / 控件 142px；主题切换后 quake `data-quake-theme=dark`、crime `data-crm-variant=tactical`、cabinet dataZoom 切 tactical；文档 `scrollbar-width:none`，内部滚动条为 muted/accent 主题色；无白色滚动条。
 - 唯一 next：用户验收四页收口与三章交互；线上未部署。
+
+## 2026-10-21 · M4.6 独立页面 + 应用内嵌（去弹层）
+
+- 用户指出三章右上角出现主题/语言/关闭按钮，质疑“页中页”。确认这是上一轮的全屏弹层 chrome：章节页本身是独立页面，但点击后在页内盖了一层 fixed 舞台，带关闭按钮，视觉上像 modal。
+- 模式改为独立页面内嵌：三章 `/quake/`、`/crime/`、`/cabinet/` 直接把自己的应用挂在页面图区，滚动到图区由 IntersectionObserver 自动挂载；没有弹层、没有关闭按钮、没有 `body overflow:hidden`。首页三块数据板恢复为普通 `<a>`，直接进入章节页，不再原地全屏启动。
+- 删除 `stage-chrome` / `stage-close` / `stage-launch` / home hidden stages 及相关 CSS/JS；保留站点 sticky header 的主题与语言控件；静态标题、数据表、beats 始终在 HTML 中，爬虫/AI 无需点击或执行 JS。
+- 修 quake 内嵌加载遮罩：暗色画布亮点阈值可能不达标，兜底从 `tries > 40`（约 20s）降到 `tries > 8`（约 4.4s），避免图区长时间被“読み込み中”盖住。
+- 验：`/` 无 `.stage`，三入口为普通链接；三章 `.stage[data-live=1]` 内嵌 canvas，`stage-chrome`/`stage-close`/`[data-launch]` 均为 0；1440 与移动端无横向溢出；页面可正常滚动，无 body 锁；header 主题/语言切换后 quake `data-quake-theme=dark`、crime `data-crm-variant=tactical`，中文 H1 生效；`/preview/` 仍跳 `/`，旧路由仍 404。
+- 唯一 next：用户验收独立页面模式；线上未部署。

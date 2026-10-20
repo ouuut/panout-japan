@@ -734,18 +734,6 @@ def foot():
 </body></html>"""
 
 
-def home_stages():
-    out = []
-    for ch in ("quake", "crime", "cabinet"):
-        live_id = ' id="v-quake-viewport"' if ch == "quake" else ''
-        out.append(f"""<div class="stage home-stage" data-live="0" data-view="{ch}">
-<div class="stage-live"{live_id}></div>
-<div class="home-stage-loading" role="status"><span data-t="ui.launching">{ja('ui.launching')}</span></div>
-<button class="launch" data-launch="{ch}" hidden><span>{ja('ui.launch')}</span></button>
-</div>""")
-    return "".join(out)
-
-
 def page(path, title, desc, body, active="", jsonld=None, register=True, head_extra=""):
     body = body.replace('<table class="data-table">', '<div class="table-scroll"><table class="data-table">')
     body = body.replace('</table>', '</table></div>')
@@ -790,7 +778,7 @@ def build_home_preview():
 
     entries = []
     for key, num, href, verb, topic, count, unit, claim, source, svg in rows:
-        entries.append(f"""<a class="hp-entry" href="{href}" data-start-app="{key}">
+        entries.append(f"""<a class="hp-entry" href="{href}">
 <div class="hp-entry-head"><span class="hp-num">{num}</span><span class="hp-verb" data-t="{verb}">{ja(verb)}</span><span class="hp-topic" data-t="{topic}">{ja(topic)}</span></div>
 <div class="hp-entry-visual" aria-hidden="true">{svg}</div>
 <div class="hp-entry-body">
@@ -815,8 +803,7 @@ def build_home_preview():
 <p class="hp-method-k">METHOD / SOURCES</p>
 <p class="hp-method-p" data-t="cover.section.sub">{ja('cover.section.sub')}</p>
 </section>
-</main>
-{home_stages()}"""
+</main>"""
 
     return page("/", f"{BRAND} — 日本を、三つの尺度で見る",
                 "40,079の震源、5,234の町丁、331か月の内閣支持率。三つの入口から直接起動する。",
@@ -852,10 +839,9 @@ def build_quake():
             ('q.stat.max', 'M' + f"{mx['mag']:.1f}", ''), ('q.stat.energy', pct(e2011) + '%', '')])}
 </section>
 <section class="wrap rv">
-<div class="stage" data-live="0" data-view="quake">
+<div class="stage" data-live="0" data-stage-auto="quake" data-view="quake">
 <div class="stage-poster">{quake_poster()}</div>
 <p class="stage-caption">M4+ · {n(len(Q))} hypocentres · 2000–2026.07 · USGS ComCat</p>
-<button class="launch" data-launch="quake"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2l10 6-10 6z" fill="currentColor"/></svg><span{tattr('ui.launch')}>{ja('ui.launch')}</span></button>
 <div class="stage-live" id="v-quake-viewport"></div>
 </div>
 </section>
@@ -893,10 +879,9 @@ def build_crime():
             ('c.stat.median', f1(CHOME_MEDIAN) + '‰', ''), ('c.stat.max', n(CHOME_MAX) + '‰', '')])}
 </section>
 <section class="wrap rv">
-<div class="stage stage-crime" data-live="0" data-view="crime">
+<div class="stage stage-crime" data-live="0" data-stage-auto="crime" data-view="crime">
 <div class="stage-poster">{crime_poster()}</div>
 <p class="stage-caption">1 dot = 1 町丁 · 本土 {n(len([p for p in POINTS if p.get("lng") and 138.9 <= p["lng"] <= 139.96 and 35.46 <= p["lat"] <= 35.92]))} chome（島嶼部は枠外）· 2025 · 警視庁</p>
-<button class="launch" data-launch="crime"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2l10 6-10 6z" fill="currentColor"/></svg><span{tattr('ui.launch')}>{ja('ui.launch')}</span></button>
 <div class="stage-live"></div>
 </div>
 </section>
@@ -968,14 +953,13 @@ def build_cabinet():
             ('b.stat.swing', ('+' if swing > 0 else '') + f1(swing), 'pt')])}
 </section>
 <section class="wrap rv">
-<div class="stage stage-flow" data-live="0" data-view="cabinet">
+<div class="stage stage-cabinet" data-live="0" data-stage-auto="cabinet" data-view="cabinet">
 <div class="stage-poster">
 <figure class="figure" style="margin:0">
 {line_svg(series)}
 <figcaption>1998–2026 · monthly mean · {n(len(POLLS))} polls</figcaption>
 </figure>
 </div>
-<button class="launch" data-launch="cabinet"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2l10 6-10 6z" fill="currentColor"/></svg><span{tattr('ui.launch')}>{ja('ui.launch')}</span></button>
 <div class="stage-live"></div>
 </div>
 </section>

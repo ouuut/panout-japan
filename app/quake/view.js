@@ -167,7 +167,7 @@ async function boot(token) {
     try { const v = hostEl && hostEl.querySelector('.qk-veil'); if (v && v.parentNode) v.parentNode.removeChild(v); } catch (e) {}
     return null;
   }
-  // 遮罩撤除：等画布真正画出震点（亮点占比超阈值）且至少 2.6s，最长 12s 由 mount 兜底
+  // 遮罩撤除：等画布真正画出震点（亮点占比超阈值）且至少 2.6s；暗色画布阈值可能偏低，4.4s 兜底
   try {
     const v = hostEl && hostEl.querySelector('.qk-veil');
     if (v) {
@@ -188,7 +188,7 @@ async function boot(token) {
             dotsOk = n / (c2.width * c2.height) > 0.035;
           }
         } catch (e) {}
-        if ((dotsOk && Date.now() - t0 >= 2600) || tries > 40) return done();
+        if ((dotsOk && Date.now() - t0 >= 2600) || tries > 8) return done();
         setTimeout(tick, 500);
       };
       setTimeout(tick, 400);
