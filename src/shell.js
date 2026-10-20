@@ -22,6 +22,10 @@
     return 'ja';
   }
 
+  function langLabel(l) {
+    return l === 'ja' ? '日本語' : l === 'zh' ? '中文' : 'EN';
+  }
+
   function tr(key) {
     if (dic && dic[key] && dic[key][lang()]) return dic[key][lang()];
     return '';
@@ -41,8 +45,10 @@
       var v = dic[els[j].dataset.t];
       if (v && v[l]) els[j].innerHTML = v[l];
     }
-    var live = document.querySelector('.stage[data-live="1"]');
+    var live = document.querySelector('.stage[data-live="1"] .stage-live');
     if (live && live._setVendorLang) live._setVendorLang(l);
+    var stageLang = document.querySelector('.stage-chrome [data-stage-lang]');
+    if (stageLang) stageLang.textContent = langLabel(l);
   }
 
   function loadDic() {
@@ -59,7 +65,7 @@
   }
 
   function syncVendorTheme(t) {
-    var live = document.querySelector('.stage[data-live="1"]');
+    var live = document.querySelector('.stage[data-live="1"] .stage-live');
     if (live && live._setVendorTheme) live._setVendorTheme(t);
   }
 
@@ -98,6 +104,66 @@
   function bootLang() {
     setLang(lang());
     loadDic().then(function () { setLang(lang()); });
+  }
+
+  function createStageChrome(stage, closeFn) {
+    var bar = document.createElement('div');
+    bar.className = 'stage-chrome';
+
+    var brand = document.createElement('a');
+    brand.className = 'stage-brand';
+    brand.href = '/';
+    brand.textContent = 'japan.ouuut.com';
+
+    var spacer = document.createElement('span');
+    spacer.className = 'stage-spacer';
+
+    var theme = document.createElement('div');
+    theme.className = 'stage-theme';
+    theme.setAttribute('role', 'group');
+    theme.setAttribute('aria-label', 'Theme');
+    var current = doc.dataset.theme || 'sage';
+    [['sage', 'Sage', '#E9EDE3', '#2F6B4F'],
+     ['dark', 'Dark', '#0E0E0C', '#FF6A3D']].forEach(function (row) {
+      var b = document.createElement('button');
+      b.className = 'theme-dot';
+      b.type = 'button';
+      b.dataset.themeSet = row[0];
+      b.setAttribute('aria-pressed', String(current === row[0]));
+      b.setAttribute('aria-label', row[1]);
+      b.title = row[1];
+      b.style.setProperty('--td-bg', row[2]);
+      b.style.setProperty('--td-accent', row[3]);
+      b.innerHTML = '<span class="td-dot"><span class="td-core"></span></span>';
+      b.addEventListener('click', function () { setTheme(this.dataset.themeSet, true); });
+      theme.appendChild(b);
+    });
+
+    var langBtn = document.createElement('button');
+    langBtn.className = 'stage-lang';
+    langBtn.type = 'button';
+    langBtn.setAttribute('data-stage-lang', '');
+    langBtn.setAttribute('aria-label', 'Language');
+    langBtn.title = 'Language';
+    langBtn.textContent = langLabel(lang());
+    langBtn.addEventListener('click', function () {
+      var next = LANGS[(LANGS.indexOf(lang()) + 1) % LANGS.length];
+      loadDic().then(function () { setLang(next); });
+    });
+
+    var close = document.createElement('button');
+    close.className = 'stage-close';
+    close.type = 'button';
+    close.setAttribute('aria-label', tr('ui.close') || 'Close');
+    close.innerHTML = '&times;';
+    close.addEventListener('click', closeFn);
+
+    bar.appendChild(brand);
+    bar.appendChild(spacer);
+    bar.appendChild(theme);
+    bar.appendChild(langBtn);
+    bar.appendChild(close);
+    return { bar: bar, close: close };
   }
 
   function launch(btn) {
@@ -139,15 +205,13 @@
       stage.dataset.live = '1';
       stage.classList.remove('is-preparing');
       document.body.classList.add('stage-open');
+      doc.classList.add('stage-open');
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 350);
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 900);
-      var close = document.createElement('button');
-      close.className = 'stage-close';
-      close.type = 'button';
-      close.setAttribute('aria-label', tr('ui.close') || 'Close');
-      close.innerHTML = '&times;';
-      close.addEventListener('click', function () {
+
+      var chrome = null;
+      var closeStage = function () {
         try {
           if (ch === 'quake') mod.unmountQuake();
           else if (ch === 'crime') mod.unmountCrime();
@@ -160,18 +224,26 @@
         stage.classList.remove('is-preparing');
         delete stage.dataset.busy;
         document.body.classList.remove('stage-open');
+        doc.classList.remove('stage-open');
         btn.disabled = false;
         label.textContent = prev;
-        close.remove();
+        if (chrome) chrome.bar.remove();
+        document.removeEventListener('keydown', onKey);
         setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
         try { window.dispatchEvent(new CustomEvent('pj:stage-closed', { detail: { ch: ch } })); } catch (e) {}
-      });
-      stage.appendChild(close);
+        try { btn.focus({ preventScroll: true }); } catch (e) {}
+      };
+      var onKey = function (e) { if (e.key === 'Escape') closeStage(); };
+      chrome = createStageChrome(stage, closeStage);
+      stage.appendChild(chrome.bar);
+      document.addEventListener('keydown', onKey);
+      try { chrome.close.focus({ preventScroll: true }); } catch (e) {}
     }).catch(function (err) {
       console.error(err);
       stage.classList.remove('is-preparing');
       stage.dataset.live = '0';
       document.body.classList.remove('stage-open');
+      doc.classList.remove('stage-open');
       label.textContent = tr('ui.failed') || 'Failed to load';
       btn.disabled = false;
       delete stage.dataset.busy;
@@ -237,6 +309,7 @@
     stage.classList.add('is-preparing');
     stage.dataset.live = '1';
     document.body.classList.add('stage-open');
+    doc.classList.add('stage-open');
     btn.click();
     return true;
   }

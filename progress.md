@@ -134,3 +134,11 @@
 - 修：quake stage 的 `.stage-live` 补 `id="v-quake-viewport"`；app 内旧品牌字符串（quake 页脚、crime 来源链接、cabinet 版权）改为 `japan.ouuut.com`。
 - 验：预览 1440 点地震出 2 canvas + 地球，点犯罪出 Leaflet `#crm-map`，点内阁出 ECharts canvas；三者 URL 均保持 `/preview/`，关闭后 `stage-open` 移除、面板恢复「開く」；根首页产品行点犯罪同样当前页启动；章节 `/crime/` 原 launch 仍可用；390px 点面板图片启动内阁，关闭按钮 48px 落在视口内、无横向溢出；无 JS 点地震入口回退到 `/quake/`；站点用户可见旧品牌 0。
 - 唯一 next：用户验收三图直启；确认后把 `/preview/` 切为根首页并展开章节细节。
+
+## 2026-10-21 · M4.5 四页收口 + 三章交互修正
+
+- 用户叫停并纠偏：一共只有 4 个页面，`/preview/` 总入口 + 地震 / 犯罪 / 内阁三章；`/` 不应再出旧首页，也不应再有方法页、年份页、区页、内阁任期页。此前构建实际 109 页，属于越界。
+- 收口：`/` 直接使用总入口三入口版；`/preview/` 只做跳转别名；删除方法 / 年份 / 区 / 内阁任期 / 404 路由；章节页移除对应链接（年份索引删除，区/内阁表改为纯文本）；导航、页脚、llms、sitemap、`_redirects` 全部收口。旧 109 页站点归档到 `F:/archive/20261021-panout-109pages-site`。构建输出 `pages: 4`。
+- 三章修正：全屏 stage 增加站点头（域名 / 主题 / 语言 / 关闭），主题和语言可直接在应用内切换；`syncVendorTheme` / `setLang` 选择器修正为 `.stage-live`，应用真正收到主题/语言；文档滚动条隐藏、内部滚动条主题化；内阁从 in-flow `stage-flow` 改为全屏，控件置顶、图表 flex 填满，dataZoom 改为主题色轨道，顶部内阁标签不再被裁切。
+- 验：`/` 为新总入口，`/preview/` → `/`，`/method/`、`/quake/2011/`、`/crime/chiyoda/`、`/cabinet/abe1/` 均 404；sitemap 4 条；4 个内容页 + 1 个跳转别名；1440/390 无横向溢出；1440 chrome 52px、390 chrome 48px；内阁 1440 图表 974px / 控件 81px，390 图表 847px / 控件 142px；主题切换后 quake `data-quake-theme=dark`、crime `data-crm-variant=tactical`、cabinet dataZoom 切 tactical；文档 `scrollbar-width:none`，内部滚动条为 muted/accent 主题色；无白色滚动条。
+- 唯一 next：用户验收四页收口与三章交互；线上未部署。

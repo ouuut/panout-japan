@@ -31,15 +31,20 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 button:disabled { cursor: progress; }
 ::selection { background: var(--accent); color: var(--bg); }
 
-/* Project scrollbar: never the OS default. */
-* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--muted) 38%, transparent) transparent; }
+/* Project scrollbar: classic, themed; never the OS overlay bar.
+   Keep scrollbar-width at auto so Chrome uses ::-webkit-scrollbar, not the
+   white Fluent overlay thumb. Firefox gets scrollbar-color. */
+* { scrollbar-color: color-mix(in srgb, var(--muted) 55%, transparent) transparent; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--muted) 38%, transparent);
+  background: color-mix(in srgb, var(--muted) 55%, transparent);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--muted) 62%, transparent); }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--accent) 70%, transparent); }
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+html.stage-open { overflow: hidden; }
 
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -782,34 +787,73 @@ html[lang="zh"] .launch { font-family: var(--zh-sans); }
 }
 .home-stage[data-live="1"]:not(.is-preparing) .home-stage-loading { display: none; }
 
+/* Stage chrome: site header controls stay available while an app is live. */
+:root { --stage-chrome-h: 52px; }
+.stage-chrome {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--stage-chrome-h);
+  z-index: 140;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--bg);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.stage-brand {
+  font-family: var(--wordmark);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -.01em;
+  color: var(--accent);
+}
+.stage-brand:hover { opacity: .82; color: var(--accent); }
+.stage-spacer { flex: 1; }
+.stage-theme { display: flex; align-items: center; gap: 4px; }
+.stage-chrome .theme-dot { width: 40px; height: 40px; }
+.stage-lang {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.stage-lang:hover { color: var(--accent); background: var(--surface); }
 .stage-close {
-  position: fixed;
-  top: 16px;
-  right: 18px;
-  z-index: 130;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--ink);
   color: var(--bg);
   display: grid;
   place-items: center;
   font-family: var(--mono);
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1;
+  flex: none;
 }
 .stage-close:hover { background: var(--accent); color: var(--bg); }
+@media (max-width: 760px) { :root { --stage-chrome-h: 48px; } }
+@media (max-width: 380px) { .stage-brand { display: none; } }
 
 .stage-flow { height: auto; min-height: 0; background: transparent; margin-top: clamp(28px, 4vw, 44px); }
 .stage-flow .stage-poster { position: relative; inset: auto; }
 .stage-flow .stage-live { position: relative; inset: auto; height: auto; min-height: 0; display: none; }
-.stage-flow[data-live="1"] .stage-live { display: block; }
+.stage-flow[data-live="1"] { position: fixed; inset: 0; z-index: 120; height: auto; margin: 0; border-radius: 0; background: var(--bg); }
+.stage-flow[data-live="1"] .stage-live { display: flex; flex-direction: column; position: absolute; inset: var(--stage-chrome-h) 0 0; height: auto; min-height: 0; }
 .stage-flow .launch { position: static; transform: none; margin: 18px 0 0; }
 .stage-flow .launch:hover { transform: none; }
 .stage-crime { height: clamp(380px, 52vw, 660px); }
 
 .stage:not(.stage-flow)[data-live="1"] { position: fixed; inset: 0; z-index: 120; height: auto; margin: 0; border-radius: 0; background: var(--bg); }
-.stage:not(.stage-flow)[data-live="1"] .stage-live { position: absolute; inset: 0; }
+.stage:not(.stage-flow)[data-live="1"] .stage-live { position: absolute; inset: var(--stage-chrome-h) 0 0; }
 .stage:not(.stage-flow)[data-live="1"] .stage-live,
 .stage:not(.stage-flow)[data-live="1"] .stage-live > * { height: 100%; min-height: 0; }
 .stage:not(.stage-flow)[data-live="1"] #crm-root { height: 100% !important; min-height: 0 !important; }

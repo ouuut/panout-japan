@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""build.py — render the whole japan.ouuut.com MPA into site/.
+"""build.py — render the four-page japan.ouuut.com site into site/.
 
 Single source of truth:
   app/quake/data/*      USGS hypocentres + coastline
@@ -694,7 +694,6 @@ def mast(active=""):
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
-{link('/method/', 'nav.method', 'method')}
 </nav>
 <div class="tools">
 {THEME_DOTS}
@@ -707,7 +706,6 @@ def mast(active=""):
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
-{link('/method/', 'nav.method', 'method')}
 </nav>
 <div class="mobile-foot">
 {LANG_NAV}
@@ -721,13 +719,11 @@ def foot():
     return f"""<footer class="foot"><div class="wrap foot-in">
 <div class="foot-top">
 <a class="wordmark" href="/" aria-label="{BRAND}">{WM}</a>
-<a href="/method/"{tattr('foot.method')}>{ja('foot.method')}</a>
 </div>
 <div class="foot-products">
 <a href="/quake/"{tattr('nav.quake')}>{ja('nav.quake')}</a>
 <a href="/crime/"{tattr('nav.crime')}>{ja('nav.crime')}</a>
 <a href="/cabinet/"{tattr('nav.cabinet')}>{ja('nav.cabinet')}</a>
-<a href="/method/"{tattr('nav.method')}>{ja('nav.method')}</a>
 </div>
 <div class="foot-bottom">
 <span>{BRAND} — <span{tattr('foot.tag')}>{ja('foot.tag')}</span></span>
@@ -776,95 +772,6 @@ def pager(prev_href, prev_label, next_href, next_label):
 
 
 # ---------------------------------------------------------------- pages
-def build_cover():
-    sp_rows = []
-    qvals = [len(QY[y]) / max(len(v) for v in QY.values()) for y in YEARS]
-    sp_rows.append(("cover.scale.quake", qvals, f"{n(len(Q))}", "quake"))
-    cvals = [(WARD_RATE[m["ward"]] or 0) / max(r for r in WARD_RATE.values() if r) for m in MUNI]
-    sp_rows.append(("cover.scale.crime", cvals, n(CHOME_COUNT), "crime"))
-    bvals = [sum(v for _, v in CAB_MONTHS[c["pm"]]) / max(1, len(CAB_MONTHS[c["pm"]])) / 100
-             for c in CAB["cabinets"]]
-    sp_rows.append(("cover.scale.cabinet", bvals, n(len(CAB["cabinets"])), "cabinet"))
-    spine = "".join(
-        f'<div class="spine-row"><span class="spine-lbl"{tattr(k)}>{ja(k)}</span>'
-        f'<span class="spine-bars" aria-hidden="true">'
-        + "".join(f'<i style="--v:{v:.3f}"></i>' for v in vals)
-        + f'</span><span class="spine-val">{val}</span></div>'
-        for k, vals, val, _ in sp_rows)
-
-    rows = [
-        ("01", "/quake/", "QUAKE", "40,079", "card.quake.unit", "card.quake.title",
-         "card.quake.claim", "USGS ComCat · 2000—2026.07", quake_thumb()),
-        ("02", "/crime/", "CRIME", "5,234", "card.crime.unit", "card.crime.title",
-         "card.crime.claim", "警視庁 · 2025", crime_thumb()),
-        ("03", "/cabinet/", "CABINET", "331", "card.cabinet.unit", "card.cabinet.title",
-         "card.cabinet.claim", "NHK / 日経 / 共同 · 1998—2026", cabinet_thumb()),
-    ]
-    prod_rows = "".join(
-        f"""<a class="prod-row rv" href="{href}" data-start-app="{href.strip('/')}">
-<div class="prod-num">{num}</div>
-<div class="prod-body">
-<div class="prod-main">
-<h2 class="prod-name"{tattr(tk)}>{ja(tk)}</h2>
-<p class="prod-domain"><span class="prod-count">{count}</span><span{tattr(uk)}>{ja(uk)}</span></p>
-<p class="prod-tagline"{tattr(ck)}>{ja(ck)}</p>
-<p class="prod-note">{note}</p>
-</div>
-<div class="prod-meta">
-<span class="prod-kw">{kw}</span>
-<span class="prod-status live"><span class="status-dot"></span>LIVE DATA</span>
-<span class="prod-action"><span{tattr('prod.open')}>{ja('prod.open')}</span> ↗</span>
-</div>
-</div>
-<div class="prod-visual">{thumb}</div>
-</a>"""
-        for num, href, kw, count, uk, tk, ck, note, thumb in rows)
-
-    body = f"""<main id="main">
-<section class="wrap cover">
-<div class="hero-grid">
-<div class="hero-content">
-<p class="eyebrow rv"{tattr('cover.kicker')}>{ja('cover.kicker')}</p>
-<h1 class="rv"{tattr('cover.title')}>{ja('cover.title')}</h1>
-<p class="lede rv"{tattr('cover.lede')}>{ja('cover.lede')}</p>
-<div class="hero-actions rv">
-<a class="btn-primary" href="#chapters"><span{tattr('cover.cta')}>{ja('cover.cta')}</span> ↓</a>
-<a class="btn-secondary" href="/method/"><span{tattr('cover.method')}>{ja('cover.method')}</span> ↗</a>
-</div>
-</div>
-<aside class="hero-panel rv" aria-label="Three scales">
-<div class="panel-head"><span>FIG. 01</span><span>THREE SCALES</span></div>
-<div class="spine">{spine}</div>
-<p class="panel-cap">2000—2026 · 40,079 / 5,234 / 331</p>
-</aside>
-</div>
-<div class="hero-wordmark-bottom rv" aria-hidden="true">
-<div class="datum-rail datum-rail-top"><span>{BRAND.upper()}</span><span>2000—2026</span><span>THREE SCALES</span></div>
-<div class="hero-wordmark-text">{WM}</div>
-<div class="datum-rail datum-rail-bottom"><span>35.68°N 139.69°E</span><span>QUAKE / CRIME / CABINET</span><span>JAPAN</span></div>
-</div>
-</section>
-<section class="wrap products-sec" id="chapters">
-<div class="section-label">
-<p class="eyebrow"{tattr('cover.section.eyebrow')}>{ja('cover.section.eyebrow')}</p>
-<h2 class="section-title"{tattr('cover.section.h')}>{ja('cover.section.h')}</h2>
-<p class="section-sub"{tattr('cover.section.sub')}>{ja('cover.section.sub')}</p>
-</div>
-<div class="prod-table">{prod_rows}</div>
-</section>
-</main>
-{home_stages()}"""
-    jsonld = {
-        "@context": "https://schema.org", "@type": "WebSite",
-        "name": BRAND, "url": SITE_URL + "/",
-        "inLanguage": ["ja", "zh", "en"],
-        "description": "地震・犯罪・内閣支持率を三つの尺度で見る、静的に生成されたデータサイト。",
-    }
-    return page("/", f"{BRAND} — 日本を、三つの尺度で見る",
-                "40,079の震源、5,234の町丁、331か月の内閣支持率。同じ国土を、引いて・寄って・通して見る。",
-                body, "", jsonld)
-
-
 def build_home_preview():
     """Local-only home prototype: three direct entry panels, one click each."""
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
@@ -907,15 +814,29 @@ def build_home_preview():
 <section class="wrap hp-method">
 <p class="hp-method-k">METHOD / SOURCES</p>
 <p class="hp-method-p" data-t="cover.section.sub">{ja('cover.section.sub')}</p>
-<a class="hp-method-link" href="/method/"><span data-t="cover.method">{ja('cover.method')}</span> ↗</a>
 </section>
 </main>
 {home_stages()}"""
 
-    return page("/preview/", f"{BRAND} — 三つの尺度（preview）",
-                "Three direct entries: earthquakes, crime, cabinets.",
-                body, "", None, register=False,
-                head_extra='<meta name="robots" content="noindex">\n<style>\n' + css + '\n</style>')
+    return page("/", f"{BRAND} — 日本を、三つの尺度で見る",
+                "40,079の震源、5,234の町丁、331か月の内閣支持率。三つの入口から直接起動する。",
+                body, "", None, register=True,
+                head_extra='<style>\n' + css + '\n</style>')
+
+
+def build_preview_redirect():
+    return f"""<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0;url=/">
+<link rel="canonical" href="{SITE_URL}/">
+<title>{BRAND}</title>
+</head>
+<body><p><a href="/">{BRAND}</a></p></body>
+</html>"""
 
 
 def build_quake():
@@ -943,13 +864,6 @@ def build_quake():
 <div class="beat"><div class="n">02</div><h3{tattr('q.beat2.t')}>{ja('q.beat2.t')}</h3><p{tattr('q.beat2.p')}>{ja('q.beat2.p')}</p></div>
 <div class="beat"><div class="n">03</div><h3{tattr('q.beat3.t')}>{ja('q.beat3.t')}</h3><p{tattr('q.beat3.p')}>{ja('q.beat3.p')}</p></div>
 </section>
-<section class="wrap rv">
-<h2 class="section-title"{tattr('q.index.title')}>{ja('q.index.title')}</h2>
-<p class="section-sub"{tattr('q.index.sub')}>{ja('q.index.sub')}</p>
-<div class="year-index">""" + "".join(
-        f'<a href="/quake/{y}/">{y}<span>{n(len(QY[y]))}</span></a>' for y in YEARS
-    ) + f"""</div>
-</section>
 </main>"""
     jsonld = {
         "@context": "https://schema.org", "@type": "Dataset",
@@ -964,53 +878,6 @@ def build_quake():
     return page("/quake/", f"地震 — 40,079の震源 | {BRAND}",
                 "2000年から2026年7月までのM4以上震源40,079点。年別・月別・深さ・エネルギーで見る。",
                 body, "quake", jsonld)
-
-
-def build_year(y):
-    ys = QY[y]
-    cnt = len(ys)
-    m6 = sum(1 for x in ys if x["mag"] >= 6)
-    mx = max(ys, key=lambda x: x["mag"])
-    e = YEAR_E[y]
-    share = e / TOTAL_E
-    months = [sum(1 for x in ys if x["time"][5:7] == f"{m:02d}") for m in range(1, 13)]
-    top = sorted(ys, key=lambda x: (x["mag"], x["time"]))[-10:][::-1]
-    rows = "".join(
-        f'<tr><td class="date">{esc(x["time"][:10])}</td><td>{esc(x["place"])}</td>'
-        f'<td class="num">{x["mag"]:.1f}</td><td class="num">{x["depthKm"]:.0f} km</td></tr>'
-        for x in top)
-    idx = YEARS.index(y)
-    prev_y = YEARS[idx - 1] if idx else None
-    next_y = YEARS[idx + 1] if idx + 1 < len(YEARS) else None
-    lede = (f"{y}年は{n(cnt)}点。全記録の{pct(cnt / len(Q))}%、"
-            f"エネルギーでは{pct(share)}%。最大はM{mx['mag']:.1f}。")
-    if y == "2026":
-        lede += "2026年は7月15日までの集計。"
-    body = f"""<main id="main">
-<section class="wrap chapter-head rv">
-<p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <a href="/quake/"{tattr('nav.quake')}>{ja('nav.quake')}</a> / {y}</p>
-<h1>{y}<span class="h1-sub">年</span></h1>
-<p class="lede">{esc(lede)}</p>
-{stats([('q.stat.count', n(cnt), ''), ('q.stat.strong', n(m6), ''),
-            ('q.stat.max', 'M' + f"{mx['mag']:.1f}", ''), ('d.year.energy', jfmt(e) + ' J', '')])}
-</section>
-<section class="wrap rv">
-<figure class="figure">
-{bar_svg(months, [str(m) for m in range(1, 13)], highlight=int(mx["time"][5:7]) - 1 if mx["time"][:4] == y else None)}
-<figcaption><span{tattr('d.year.months')}>{ja('d.year.months')}</span> · {y} · USGS</figcaption>
-</figure>
-<h2 class="section-title"{tattr('d.year.top')}>{ja('d.year.top')}</h2>
-<table class="data-table">
-<thead><tr><th{tattr('d.col.date')}>{ja('d.col.date')}</th><th{tattr('d.col.place')}>{ja('d.col.place')}</th><th class="num"{tattr('d.col.mag')}>{ja('d.col.mag')}</th><th class="num"{tattr('d.col.depth')}>{ja('d.col.depth')}</th></tr></thead>
-<tbody>{rows}</tbody></table>
-<p class="section-sub" style="margin-top:18px"{tattr('d.year.note')}>{ja('d.year.note')}</p>
-{pager(f"/quake/{prev_y}/" if prev_y else "", f"{prev_y}年" if prev_y else "",
-           f"/quake/{next_y}/" if next_y else "", f"{next_y}年" if next_y else "")}
-</section>
-</main>"""
-    return page(f"/quake/{y}/", f"{y}年の地震 — {n(cnt)}点 | {BRAND}",
-                f"{y}年のM4以上震源{n(cnt)}点、最大M{mx['mag']:.1f}。月別分布と主な地震。",
-                body, "quake")
 
 
 def build_crime():
@@ -1045,7 +912,7 @@ def build_crime():
 <thead><tr><th class="idx">#</th><th{tattr('d.col.name')}>{ja('d.col.name')}</th><th class="num"{tattr('d.col.count')}>{ja('d.col.count')}</th><th class="num"{tattr('d.col.pop')}>{ja('d.col.pop')}</th><th class="num"{tattr('d.col.rate')}>{ja('d.col.rate')}</th></tr></thead>
 <tbody>""" + "".join(
         f'<tr><td class="idx num muted">{WARD_RANK.get(m["ward"], "")}</td>'
-        f'<td><a href="/crime/{slug_ward(m["ward"])}/">{esc(m["ward"])}</a></td>'
+        f'<td>{esc(m["ward"])}</td>'
         f'<td class="num">{n((m.get("R7") or {}).get("total", 0))}</td>'
         f'<td class="num muted">{n(m.get("pop") or 0)}</td>'
         f'<td class="num">{f1(WARD_RATE[m["ward"]]) if WARD_RATE[m["ward"]] else "—"}</td></tr>'
@@ -1068,57 +935,6 @@ def build_crime():
                 body, "crime", jsonld)
 
 
-def build_ward(slug):
-    w = ward_by_slug(slug)
-    if not w:
-        return None
-    m = MUNI_BY[w]
-    pop = m.get("pop") or 0
-    tot = (m.get("R7") or {}).get("total", 0)
-    rate = WARD_RATE[w]
-    rank = WARD_RANK.get(w)
-    r8 = (m.get("R8cum") or {}).get("total", 0)
-    feats = [f["properties"] for f in CHOME["features"] if f["properties"].get("ward") == w]
-    feats = [p for p in feats if (p.get("pop") or 0) >= 200 and p.get("t")]
-    top = sorted(feats, key=lambda p: -(p.get("t") or 0))[:12]
-    rows = "".join(
-        f'<tr><td>{esc(p["name"])}</td><td class="num">{n(p.get("t") or 0)}</td>'
-        f'<td class="num muted">{n(p.get("pop") or 0)}</td>'
-        f'<td class="num">{f1((p.get("t") or 0) / p["pop"] * 1000)}</td></tr>'
-        for p in top)
-    lede = (f"{w}の2025年認知件数は{n(tot)}件、人口{n(pop)}人。"
-            f"人口1,000人あたり{f1(rate)}件。62区市町村中{rank}位。")
-    idx = sorted(MUNI, key=lambda x: WARD_RANK.get(x["ward"], 999))
-    i = [x["ward"] for x in idx].index(w)
-    prev_w = idx[i - 1]["ward"] if i else None
-    next_w = idx[i + 1]["ward"] if i + 1 < len(idx) else None
-    body = f"""<main id="main">
-<section class="wrap chapter-head rv">
-<p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <a href="/crime/"{tattr('nav.crime')}>{ja('nav.crime')}</a> / {esc(w)}</p>
-<h1>{esc(w)}</h1>
-<p class="lede">{esc(lede)}</p>
-{stats([('c.stat.total', n(tot), ''), ('d.col.pop', n(pop), ''),
-            ('d.col.rate', f1(rate) + '‰', ''), ('d.ward.r8', n(r8), '')])}
-</section>
-<section class="wrap rv">
-<figure class="figure">
-{ward_map(w)}
-<figcaption><span{tattr('d.ward.map')}>{ja('d.ward.map')}</span> · 2025 · 警視庁</figcaption>
-</figure>
-<h2 class="section-title"{tattr('d.ward.top')}>{ja('d.ward.top')}</h2>
-<table class="data-table">
-<thead><tr><th{tattr('d.col.name')}>{ja('d.col.name')}</th><th class="num"{tattr('d.col.count')}>{ja('d.col.count')}</th><th class="num"{tattr('d.col.pop')}>{ja('d.col.pop')}</th><th class="num"{tattr('d.col.rate')}>{ja('d.col.rate')}</th></tr></thead>
-<tbody>{rows}</tbody></table>
-<p class="section-sub" style="margin-top:18px"{tattr('d.ward.note')}>{ja('d.ward.note')}</p>
-{pager(f"/crime/{slug_ward(prev_w)}/" if prev_w else "", prev_w or "",
-           f"/crime/{slug_ward(next_w)}/" if next_w else "", next_w or "")}
-</section>
-</main>"""
-    return page(f"/crime/{slug}/", f"{w}の犯罪 — 2025年 | {BRAND}",
-                f"{w}の2025年認知件数{n(tot)}件、人口1,000人あたり{f1(rate)}件。町丁別の内訳。",
-                body, "crime")
-
-
 def build_cabinet():
     means = {c["pm"]: (sum(v for _, v in CAB_MONTHS[c["pm"]]) / max(1, len(CAB_MONTHS[c["pm"]])))
              for c in CAB["cabinets"]}
@@ -1136,7 +952,7 @@ def build_cabinet():
     swing = diffs[-1][0]
     rows = "".join(
         f'<tr><td class="idx num muted">{k + 1}</td>'
-        f'<td><a href="/cabinet/{c["id"]}/">{esc(c["pm"])}</a></td>'
+        f'<td>{esc(c["pm"])}</td>'
         f'<td class="muted">{esc(c["start"])} – {esc(c["end"])}</td>'
         f'<td class="num">{len(CAB_MONTHS[c["pm"]])}</td>'
         f'<td class="num">{f1(means[c["pm"]])}</td></tr>'
@@ -1190,125 +1006,8 @@ def build_cabinet():
                 body, "cabinet", jsonld)
 
 
-def build_pm(cid):
-    c = next((x for x in CAB["cabinets"] if x["id"] == cid), None)
-    if not c:
-        return None
-    series = CAB_MONTHS[c["pm"]]
-    vals = [v for _, v in series]
-    mean = sum(vals) / len(vals)
-    hi = max(series, key=lambda t: t[1])
-    lo = min(series, key=lambda t: t[1])
-    polls_n = sum(1 for p in POLLS if p["pm"] == c["pm"])
-    chart = line_svg([(ym[2:], v) for ym, v in series], auto=True)
-    ranked = sorted(series, key=lambda t: -t[1])
-    def rows(items):
-        return "".join(f'<tr><td class="num">{ym}</td><td class="num">{f1(v)}</td></tr>' for ym, v in items)
-    idx = [x["id"] for x in CAB["cabinets"]].index(cid)
-    prev_c = CAB["cabinets"][idx - 1] if idx else None
-    next_c = CAB["cabinets"][idx + 1] if idx + 1 < len(CAB["cabinets"]) else None
-    body = f"""<main id="main">
-<section class="wrap chapter-head rv">
-<p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <a href="/cabinet/"{tattr('nav.cabinet')}>{ja('nav.cabinet')}</a> / {esc(c['pm'])}</p>
-<h1>{esc(c['pm'])}</h1>
-<p class="lede">{esc(c['start'])} — {esc(c['end'])}。月次支持率の平均は{f1(mean)}。最高{f1(hi[1])}（{hi[0]}）、最低{f1(lo[1])}（{lo[0]}）。</p>
-{stats([('d.pm.term', esc(c['start'][:4]) + '–' + esc(c['end'][:4]), ''),
-            ('d.pm.months', n(len(series)), ''), ('b.stat.polls', n(polls_n), ''),
-            ('d.pm.mean', f1(mean), '')])}
-</section>
-<section class="wrap rv">
-<figure class="figure">
-{chart}
-<figcaption><span{tattr('d.pm.series')}>{ja('d.pm.series')}</span> · {esc(c['pm'])} · 月次平均</figcaption>
-</figure>
-<div class="two-col">
-<div><h2 class="section-title"{tattr('d.pm.high')}>{ja('d.pm.high')}</h2>
-<table class="data-table"><thead><tr><th>月</th><th class="num">%</th></tr></thead><tbody>{rows(ranked[:5])}</tbody></table></div>
-<div><h2 class="section-title"{tattr('d.pm.low')}>{ja('d.pm.low')}</h2>
-<table class="data-table"><thead><tr><th>月</th><th class="num">%</th></tr></thead><tbody>{rows(ranked[-5:][::-1])}</tbody></table></div>
-</div>
-<p class="section-sub" style="margin-top:18px"{tattr('d.pm.note')}>{ja('d.pm.note')}</p>
-{pager(f"/cabinet/{prev_c['id']}/" if prev_c else "", prev_c["pm"] if prev_c else "",
-           f"/cabinet/{next_c['id']}/" if next_c else "", next_c["pm"] if next_c else "")}
-</section>
-</main>"""
-    return page(f"/cabinet/{cid}/", f"{c['pm']}内閣の支持率 | {BRAND}",
-                f"{c['pm']}内閣（{c['start']}–{c['end']}）の月次支持率。平均{f1(mean)}、最高{f1(hi[1])}、最低{f1(lo[1])}。",
-                body, "cabinet")
-
-
 def fill_copy(s):
     return s.replace("{{B}}", str(N_BUCKETS)).replace("{{S}}", str(N_SINGLE))
-
-
-def build_method():
-    dls = [("/data/quakes.csv", "quakes.csv", n(len(Q)) + " 行"),
-           ("/data/crime.csv", "crime.csv", n(CHOME_COUNT) + " 行"),
-           ("/data/cabinet.csv", "cabinet.csv", n(len(POLLS)) + " 行")]
-    dl_html = "".join(f'<a href="{u}" download>{esc(name)}<span>{esc(sub)}</span></a>'
-                      for u, name, sub in dls)
-    body = f"""<main id="main">
-<section class="wrap narrow chapter-head rv">
-<p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <span{tattr('nav.method')}>{ja('nav.method')}</span></p>
-<h1{tattr('m.h1')}>{ja('m.h1')}</h1>
-<p class="lede"{tattr('m.lede')}>{ja('m.lede')}</p>
-</section>
-<section class="wrap narrow prose rv">
-<h2{tattr('m.data.h')}>{ja('m.data.h')}</h2>
-<h3{tattr('m.q.h')}>{ja('m.q.h')}</h3><p{tattr('m.q.p')}>{ja('m.q.p')}</p>
-<h3{tattr('m.c.h')}>{ja('m.c.h')}</h3><p{tattr('m.c.p')}>{ja('m.c.p')}</p>
-<h3{tattr('m.b.h')}>{ja('m.b.h')}</h3><p{tattr('m.b.p')}>{ja('m.b.p')}</p>
-<h2{tattr('m.cal.h')}>{ja('m.cal.h')}</h2>
-<p{tattr('m.cal.q')}>{ja('m.cal.q')}</p>
-<p{tattr('m.cal.c')}>{ja('m.cal.c')}</p>
-<p{tattr('m.cal.b')}>{ja('m.cal.b')}</p>
-<h2{tattr('m.err.h')}>{ja('m.err.h')}</h2>
-<div class="note">
-<p{tattr('m.err.1')}>{ja('m.err.1')}</p>
-<p{tattr('m.err.2')}>{ja('m.err.2')}</p>
-<p{tattr('m.err.3')}>{ja('m.err.3')}</p>
-<p{tattr('m.err.4')}>{ja('m.err.4')}</p>
-<p{tattr('m.err.5')}>{ja('m.err.5')}</p>
-<p{tattr('m.err.6')}>{ja('m.err.6')}</p>
-</div>
-<h2{tattr('m.upd.h')}>{ja('m.upd.h')}</h2>
-<p{tattr('m.upd.p')}>{ja('m.upd.p')} <code>python src/build.py</code> · {BUILD_STAMP}</p>
-<h2 id="download"{tattr('m.dl.h')}>{ja('m.dl.h')}</h2>
-<p{tattr('m.dl.p')}>{ja('m.dl.p')}</p>
-<div class="dl-list">{dl_html}</div>
-<h2{tattr('m.lic.h')}>{ja('m.lic.h')}</h2>
-<p{tattr('m.lic.p')}>{ja('m.lic.p')}</p>
-<h2{tattr('m.src.h')}>{ja('m.src.h')}</h2>
-<ul>
-<li><a href="https://www.usgs.gov/programs/earthquake-hazards" rel="noopener">USGS Earthquake Hazards Program</a> — ComCat, public domain</li>
-<li><a href="https://www.keishicho.metro.tokyo.lg.jp/about_mpd/jokyo_tokei/jokyo/ninchikensu.html" rel="noopener">警視庁 犯罪統計</a> — CC BY</li>
-<li><a href="https://www.nhk.or.jp/bunken/yoron/political/" rel="noopener">NHK放送文化研究所 世論調査</a></li>
-<li><a href="https://www.nhk.or.jp/senkyo/shijiritsu/" rel="noopener">NHK選挙WEB 内閣支持率</a></li>
-<li><a href="https://vdata.nikkei.com/newsgraphics/cabinet-approval-rating/" rel="noopener">日本経済新聞 内閣支持率データ</a></li>
-<li><a href="https://www.asahi.com/" rel="noopener">朝日新聞</a> · <a href="https://www.jiji.com/" rel="noopener">時事通信</a> · <a href="https://www.yomiuri.co.jp/" rel="noopener">読売新聞</a> · <a href="https://news.tbs.co.jp/" rel="noopener">JNN</a> · <a href="https://www.kyodo.co.jp/" rel="noopener">共同通信</a></li>
-</ul>
-</section>
-</main>"""
-    body = fill_copy(body)
-    return page("/method/", f"方法と出典 | {BRAND}",
-                "地震・犯罪・内閣支持率のデータ源、口径、既知の誤差、CSVダウンロード。",
-                body, "method")
-
-
-def build_404():
-    body = f"""<main id="main"><section class="wrap notfound">
-<div class="code">404</div>
-<h1{tattr('nf.h1')}>{ja('nf.h1')}</h1>
-<p{tattr('nf.p')}>{ja('nf.p')}</p>
-<div class="links">
-<a href="/quake/"{tattr('nav.quake')}>{ja('nav.quake')}</a>
-<a href="/crime/"{tattr('nav.crime')}>{ja('nav.crime')}</a>
-<a href="/cabinet/"{tattr('nav.cabinet')}>{ja('nav.cabinet')}</a>
-<a href="/"{tattr('nf.home')}>{ja('nf.home')}</a>
-</div>
-</section></main>"""
-    return page("/404.html", f"404 — この頁は、ない | {BRAND}",
-                "この頁は存在しない。三つの章から辿り直す。", body, "")
 
 
 # ---------------------------------------------------------------- main
@@ -1316,24 +1015,13 @@ def main():
     global CSS_VER, JS_VER, FONT_VER
     files = {}
 
-    files["/"] = build_cover()
-    files["/preview/"] = build_home_preview()
+    # Exactly four content pages: /, /quake/, /crime/, /cabinet/.
+    # /preview/ remains a tiny redirect for the old preview URL.
+    files["/"] = build_home_preview()
+    files["/preview/"] = build_preview_redirect()
     files["/quake/"] = build_quake()
-    for y in YEARS:
-        files[f"/quake/{y}/"] = build_year(y)
     files["/crime/"] = build_crime()
-    for m in MUNI:
-        s = slug_ward(m["ward"])
-        h = build_ward(s)
-        if h:
-            files[f"/crime/{s}/"] = h
     files["/cabinet/"] = build_cabinet()
-    for c in CAB["cabinets"]:
-        h = build_pm(c["id"])
-        if h:
-            files[f"/cabinet/{c['id']}/"] = h
-    files["/method/"] = build_method()
-    files["/404.html"] = build_404()
 
     # i18n dictionary (only the three languages; ja already in HTML)
     dic = {k: {"ja": fill_copy(v[0]), "zh": fill_copy(v[1]), "en": fill_copy(v[2])}
@@ -1435,6 +1123,24 @@ def write_site(files):
         enc = content if isinstance(content, bytes) else content.encode("utf-8")
         dest.write_bytes(enc)
 
+    # A rebuild must not leave old routes behind. Keep assets, drop stale HTML.
+    expected = set()
+    for path in files:
+        if path.endswith("/"):
+            expected.add((path.strip("/") + "/index.html").lstrip("/"))
+        else:
+            expected.add(path.lstrip("/"))
+    for f in SITE.rglob("*.html"):
+        rel = f.relative_to(SITE).as_posix()
+        if rel not in expected:
+            f.unlink()
+    for d in sorted([p for p in SITE.rglob("*") if p.is_dir()],
+                    key=lambda p: len(p.parts), reverse=True):
+        try:
+            d.rmdir()
+        except OSError:
+            pass
+
     # app runtime (views + vendor + data) — copied verbatim
     for ch in ("quake", "crime", "cabinet"):
         src = ROOT / "app" / ch
@@ -1518,7 +1224,7 @@ def write_meta(font_meta):
 
     (SITE / "_redirects").write_text(
         "/quake /quake/ 301\n/crime /crime/ 301\n/cabinet /cabinet/ 301\n"
-        "/method /method/ 301\n", encoding="utf-8")
+        "/preview / 301\n/preview/ / 301\n", encoding="utf-8")
 
     (SITE / "llms.txt").write_text(f"""# {BRAND}
 
@@ -1527,7 +1233,6 @@ def write_meta(font_meta):
 - [地震](/quake/): 2000–2026.07、M4以上の震源40,079点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。
 - [内閣](/cabinet/): 1998–2026、644調査、331か月、14内閣。
-- [方法と出典](/method/): 口径・既知の誤差・CSV。
 
 Build: {BUILD_STAMP}. Sources: USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
 """, encoding="utf-8")

@@ -19,7 +19,7 @@ const ECHARTS_URLS = [
   "https://unpkg.com/echarts@5.5.1/dist/echarts.min.js"
 ];
 const THEME_MAP = { mono: "editorial", sage: "editorial", dark: "tactical", tactical: "tactical", editorial: "editorial" };
-const CAB_CSS = "#v-cabinet-viewport,#cab-chart{width:100%}\n#cab-chart{height:100%;min-height:340px}\n.cab-viewport{position:relative}\n.cab-meta{position:absolute;top:10px;right:12px;z-index:5;display:flex;align-items:center;gap:8px;pointer-events:none;font-family:var(--font-mono,monospace);font-size:11px;letter-spacing:.06em}\n.cab-latest{display:none}\n.cab-range{color:var(--muted);white-space:nowrap}\n.cab-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px}\n.cab-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px;max-width:100%}\n.cab-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;line-height:1.4;font-family:inherit}\n.cab-pill:hover{color:var(--ink);background:var(--surface)}\n.cab-pill .cab-dot{width:6px;height:6px;border-radius:50%;background:var(--faint);flex-shrink:0}\n.cab-pill.cab-focused{background:var(--accent);color:#fff;font-weight:700}\n.cab-pill.cab-focused .cab-dot{background:#fff !important}\n.cab-pill.cab-exit-focus{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}\n.cab-pill.cab-exit-focus:hover{background:var(--accent);color:#fff}\n.cab-fail{display:flex;align-items:center;justify-content:center;min-height:240px;color:var(--muted);font-size:13px;padding:24px;text-align:center}\n@media(max-width:640px){.cab-meta{top:8px;right:8px;font-size:10px}#cab-chart{min-height:300px}}";
+const CAB_CSS = "#v-cabinet-viewport,#cab-chart{width:100%}\n#cab-chart{height:100%;min-height:340px}\n.cab-host{display:flex;flex-direction:column;height:100%;min-height:0}\n.cab-host>#cab-chart{order:0;flex:1 1 auto;height:auto;min-height:0}\n.cab-host>.cab-controls{order:-1;flex:0 0 auto;height:auto;min-height:0;padding:8px 12px 0}\n.cab-host>.cab-meta{height:auto;top:8px;right:12px}\n.cab-viewport{position:relative}\n.cab-meta{position:absolute;top:10px;right:12px;z-index:5;display:flex;align-items:center;gap:8px;pointer-events:none;font-family:var(--font-mono,monospace);font-size:11px;letter-spacing:.06em}\n.cab-latest{display:none}\n.cab-range{color:var(--muted);white-space:nowrap}\n.cab-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px}\n.cab-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px;max-width:100%}\n.cab-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;line-height:1.4;font-family:inherit}\n.cab-pill:hover{color:var(--ink);background:var(--surface)}\n.cab-pill .cab-dot{width:6px;height:6px;border-radius:50%;background:var(--faint);flex-shrink:0}\n.cab-pill.cab-focused{background:var(--accent);color:#fff;font-weight:700}\n.cab-pill.cab-focused .cab-dot{background:#fff !important}\n.cab-pill.cab-exit-focus{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}\n.cab-pill.cab-exit-focus:hover{background:var(--accent);color:#fff}\n.cab-fail{display:flex;align-items:center;justify-content:center;min-height:240px;color:var(--muted);font-size:13px;padding:24px;text-align:center}\n@media(max-width:640px){.cab-meta{top:8px;right:8px;font-size:10px}#cab-chart{min-height:300px}}";
 
 function syncVariantAttr() {
   try { if (refs.viewport) refs.viewport.dataset.cabVariant = currentVariant; } catch (e) {}
@@ -362,6 +362,7 @@ function mountCabinet(root, opts) {
   const host = typeof root === 'string' ? document.querySelector(root) : root;
   if (!host) throw new Error('cab: mount root missing');
   hostEl = host;
+  host.classList.add('cab-host');
   injectCss();
 
   const viewport = host.querySelector('#v-cabinet-viewport') || host.querySelector('.stage') || host;
@@ -448,6 +449,7 @@ function unmountCabinet() {
       }
     } catch (e) {}
   }
+  if (hostEl) { try { hostEl.classList.remove('cab-host'); } catch (e) {} }
   refs = {};
   hostEl = null;
   controlsEl = null;
@@ -621,7 +623,7 @@ function renderChart() {
     height: 24, bottom: 18,
     borderRadius: 8,
     borderColor: T.zoomBorder,
-    backgroundColor: T.zoomBg,
+    backgroundColor: T.zoomFill,
     fillerColor: T.zoomFill,
     handleSize: 14,
     brushSelect: false,
@@ -633,7 +635,7 @@ function renderChart() {
       color: T.zoomHandle, borderColor: 'rgba(0,0,0,0.28)', borderWidth: 1,
       shadowBlur: 5, shadowColor: 'rgba(0,0,0,0.35)', shadowOffsetY: 1.5
     },
-    emphasis: { handleStyle: { color: T.zoomHandle, borderColor: '#fff', shadowBlur: 7 } },
+    emphasis: { handleStyle: { color: T.zoomHandle, borderColor: T.zoomHandle, shadowBlur: 7 } },
     textStyle: { color: T.zoomText, fontSize: 10 }
   };
   if (focusWindow) {
@@ -647,7 +649,7 @@ function renderChart() {
   const lang = currentLang;
   const option = {
     backgroundColor: 'transparent',
-    grid: { left: gridL, right: gridR, top: 30, bottom: 100, borderColor: T.gridBorder },
+    grid: { left: gridL, right: gridR, top: 48, bottom: 100, borderColor: T.gridBorder },
     legend: { show: false },
     tooltip: {
       trigger: 'axis',

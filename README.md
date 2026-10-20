@@ -2,22 +2,22 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4.4 首页三图直接启动应用**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.5 四页收口 + 三章交互修正**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
-> 本地改版预览：`http://127.0.0.1:8900/preview/`（构建后 `cd site && python -m http.server 8900`）。
+> 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
 > 首页交互：三块数据板点击后在当前页全屏启动对应应用，不再跳章节页；无 JS 时回退为章节链接。
 
 ## 架构
 
-**一仓一构建一部署**：`python src/build.py` 从 `src/` + `app/{quake,crime,cabinet}/data` 生成整个 `site/`（109 个静态页），
+**一仓一构建一部署**：`python src/build.py` 从 `src/` + `app/{quake,crime,cabinet}/data` 生成整个 `site/`（**4 个内容页**），
 `site/` 原样部署到 Cloudflare Pages。没有运行时拼页、没有 hash 路由、没有客户端数据渲染。
 
 ```
 src/
   build.py      # 唯一构建入口：三语字典、页面模板、静态图表 SVG、CSV/i18n/sitemap/headers
   home_plates.py# 总入口预览的三张构建期数据板（地震/犯罪/内阁）
-  home-preview.css # 总入口三入口同屏原型（仅 /preview/）
+  home-preview.css # 总入口三入口同屏原型（/）
   svgkit.py     # Web Mercator、海岸线裁剪、SVG path
   fonts.py      # Outfit 800 + Noto Serif/Sans JP/SC 700/500 子集化 → site/assets/fonts (11 文件 ~1.1MB)
   fix_cabinet.py# 内阁数据修正（NHK 2008/09 列错位、同月双调查标注）
@@ -25,18 +25,18 @@ src/
   patch_vendor.py # quake bundle 的品牌字符串补丁（域名/出典/重载文案）
   slim_quake_data.py # 海岸线 0.05° 简化 + 震点数值精度收敛（原文件备份 .cache/quake-orig）
 app/
-  quake/        # 3D 地球（WebGL）+ 瓦片数据，只在章节页点「起動する」后懒挂
+  quake/        # 3D 地球（WebGL）+ 瓦片数据，首页/章节页点击后懒挂
   crime/        # Leaflet 町丁目地图，同一懒挂机制
   cabinet/      # ECharts 支持率长轴，同一懒挂机制
 site/           # 构建产物，gitignore
 ```
 
-页面：封面 1 + 地震 27 年页 + 犯罪 3 章 + 62 区页 + 内阁 14 任 + 方法论 + 404，共 **109 页**。
-详情页全部是静态数据页（表格、SVG 海报、CSV 下载）；交互视图在章节页通过 `.stage` 懒加载，闭合后 DOM 恢复海报。
+页面只有 **4 个内容页**：`/`（总入口）、`/quake/`、`/crime/`、`/cabinet/`。
+年份、区市町村、内阁任期不再生成独立详情页；数据保留在章节页表格与图表内。`/preview/` 只是旧链接的跳转别名。
 
 ### 当前改版预览
 
-`/preview/` 是总入口的三入口原型：三块数据板同屏并排，每块本身是 `<a>`，点一次直接进入地震 / 犯罪 / 内阁；没有“先选中、再打开”的中间状态，也没有额外交互脚本。它使用 `src/home_plates.py` + `src/home-preview.css`，不注册 sitemap，不改动 109 页生产页。下一步待方向确认后，才展开三个章节入口。
+`/` 是总入口：三块数据板同屏并排，每块本身是 `<a>`，点一次直接在当前页全屏启动地震 / 犯罪 / 内阁；没有“先选中、再打开”的中间状态。无 JS 时回退为章节链接。它使用 `src/home_plates.py` + `src/home-preview.css`。
 
 视觉系统与 `ouuut.com` 同源：sage/dark 两态自动主题（本地时间，手动可覆盖）、Outfit 800 字标、EN/JA/ZH 分流字阶、4px surface 块、零结构线条。
 
