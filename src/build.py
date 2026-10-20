@@ -851,79 +851,53 @@ def build_cover():
 
 
 def build_home_preview():
-    """Local-only home prototype. Not registered in PAGES/sitemap."""
+    """Local-only home prototype: three direct entry panels, one click each."""
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
-    js = (SRC / "home-preview.js").read_text(encoding="utf-8")
 
     rows = [
         ("quake", "01", "/quake/", "card.quake.title", "nav.quake", "40,079",
          "card.quake.unit", "card.quake.claim", "USGS ComCat · 2000—2026.07",
-         "ARCHIPELAGO / 27 YEARS", "USGS COM CAT",
          HP.quake_svg(Q, OUTLINE, YEARS)),
         ("crime", "02", "/crime/", "card.crime.title", "nav.crime", "5,234",
          "card.crime.unit", "card.crime.claim", "警視庁 · 2025",
-         "TOKYO / 5,234 CHOME", "MPD 2025",
          HP.crime_svg(POINTS, MUNI_POLY, WARD_RATE)),
         ("cabinet", "03", "/cabinet/", "card.cabinet.title", "nav.cabinet", "331",
          "card.cabinet.unit", "card.cabinet.claim", "NHK / Nikkei / Kyodo · 1998—2026",
-         "14 CABINETS / 331 MONTHS", "NHK / NIKKEI / KYODO",
          HP.cabinet_svg(ALL_MONTHS, MONTH_MEAN, CAB)),
     ]
 
-    states = []
-    layers = []
-    stops = []
-    for key, num, href, verb, topic, count, unit, claim, source, top, left, svg in rows:
-        active = key == "quake"
-        states.append(f"""<div class="hp-state{' is-active' if active else ''}" data-state="{key}" aria-hidden="{'false' if active else 'true'}">
-<div class="hp-state-head"><span class="hp-state-num">{num}</span><span class="hp-state-verb" data-t="{verb}">{ja(verb)}</span><span class="hp-state-topic" data-t="{topic}">{ja(topic)}</span></div>
-<p class="hp-state-value"><span class="hp-state-count">{count}</span><span class="hp-state-unit" data-t="{unit}">{ja(unit)}</span></p>
-<p class="hp-state-claim" data-t="{claim}">{ja(claim)}</p>
-<div class="hp-state-foot"><span class="hp-state-source">{source}</span><a class="hp-state-open" href="{href}"><span data-t="prod.open">{ja('prod.open')}</span> ↗</a></div>
-</div>""")
-        layers.append(f"""<div class="hp-layer{' is-active' if active else ''}" data-layer="{key}" aria-hidden="{'false' if active else 'true'}">
-<div class="hp-meta"><span>FIG. {num}</span><span>{top}</span></div>
-<div class="hp-visual">{svg}</div>
-<div class="hp-meta"><span>{left}</span><span class="hp-open">OPEN CHAPTER ↗</span></div>
-</div>""")
-        stops.append(f"""<a class="hp-stop" id="hp-stop-{key}" data-stop="{key}" href="{href}"{' aria-current="true"' if active else ''}>
-<span class="hp-stop-top"><span class="hp-stop-num">{num}</span><span class="hp-stop-verb" data-t="{verb}">{ja(verb)}</span></span>
-<span class="hp-stop-bottom"><span class="hp-stop-topic" data-t="{topic}">{ja(topic)}</span><span class="hp-stop-count">{count}</span></span>
+    entries = []
+    for key, num, href, verb, topic, count, unit, claim, source, svg in rows:
+        entries.append(f"""<a class="hp-entry" href="{href}">
+<div class="hp-entry-head"><span class="hp-num">{num}</span><span class="hp-verb" data-t="{verb}">{ja(verb)}</span><span class="hp-topic" data-t="{topic}">{ja(topic)}</span></div>
+<div class="hp-entry-visual" aria-hidden="true">{svg}</div>
+<div class="hp-entry-body">
+<p class="hp-count"><b>{count}</b><small data-t="{unit}">{ja(unit)}</small></p>
+<p class="hp-claim" data-t="{claim}">{ja(claim)}</p>
+<div class="hp-entry-foot"><span class="hp-source">{source}</span><span class="hp-enter"><span data-t="prod.open">{ja('prod.open')}</span> ↗</span></div>
+</div>
 </a>""")
 
-    ticks = "".join("<i></i>" for _ in range(30))
-    body = f"""<main id="main" class="hp" data-active="quake">
-<section class="wrap hp-hero">
-<div class="hp-top">
-<div class="hp-copy">
+    body = f"""<main id="main" class="hp">
+<section class="wrap hp-intro">
 <p class="eyebrow" data-t="cover.kicker">{ja('cover.kicker')}</p>
+<div class="hp-intro-row">
 <h1 data-t="cover.title">{ja('cover.title')}</h1>
 <p class="hp-lede" data-t="cover.lede">{ja('cover.lede')}</p>
-<div class="hp-states">{''.join(states)}</div>
 </div>
-<a class="hp-plate" href="/quake/" aria-labelledby="hp-stop-quake">
-{''.join(layers)}
-</a>
-</div>
-<div class="hp-ruler">
-<div class="hp-ruler-head"><span>SCALE / 3 STOPS</span><span>HOVER TO PREVIEW · SELECT TO OPEN</span></div>
-<div class="hp-track">
-<div class="hp-ticks" aria-hidden="true">{ticks}</div>
-<span class="hp-thumb" aria-hidden="true"></span>
-<div class="hp-stops">{''.join(stops)}</div>
-</div>
-</div>
+</section>
+<section class="wrap hp-band" aria-label="Three scales">
+{''.join(entries)}
 </section>
 <section class="wrap hp-method">
 <p class="hp-method-k">METHOD / SOURCES</p>
 <p class="hp-method-p" data-t="cover.section.sub">{ja('cover.section.sub')}</p>
 <a class="hp-method-link" href="/method/"><span data-t="cover.method">{ja('cover.method')}</span> ↗</a>
 </section>
-</main>
-<script>{js}</script>"""
+</main>"""
 
     return page("/preview/", "Pan Out Japan — 三つの尺度（preview）",
-                "Home prototype: one scale instrument, three data scales.",
+                "Three direct entries: earthquakes, crime, cabinets.",
                 body, "", None, register=False,
                 head_extra='<meta name="robots" content="noindex">\n<style>\n' + css + '\n</style>')
 

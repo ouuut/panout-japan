@@ -44,15 +44,15 @@ def quake_svg(quakes, outline, years, w=1000, h=760):
 
     out = []
     for level in sorted(buckets):
-        opacity = 0.06 + 0.17 * level
+        opacity = 0.09 + 0.18 * level
         d = "".join(
             f"M{x:.1f} {y:.1f}h{ww:.1f}v{hh:.1f}h{-ww:.1f}z"
             for x, y, ww, hh in buckets[level]
         )
         out.append(f'<path d="{d}" fill="var(--accent)" opacity="{opacity:.2f}"/>')
 
-    out.append(f'<path d="{coast}" fill="none" stroke="var(--ink)" stroke-width="1.2" '
-               f'opacity="0.9" stroke-linejoin="round"/>')
+    out.append(f'<path d="{coast}" fill="none" stroke="var(--ink)" stroke-width="1.4" '
+               f'opacity="0.95" stroke-linejoin="round"/>')
 
     mx, my = proj.xy(142.37, 38.30)
     out.append(f'<circle cx="{mx:.1f}" cy="{my:.1f}" r="9" fill="none" '
@@ -98,11 +98,11 @@ def crime_svg(points, muni_poly, ward_rate, w=1000, h=760):
     for f in features:
         g = make_valid(shape(f["geometry"]))
         rate = ward_rate.get(f["properties"]["ward_ja"]) or 0
-        opacity = 0.11 + 0.39 * math.sqrt(max(0.0, rate) / max_rate)
+        opacity = 0.04 + 0.16 * math.sqrt(max(0.0, rate) / max_rate)
         d = S.rings_path(g, proj, 0.0004)
         if d:
             out.append(f'<path d="{d}" fill="var(--accent)" fill-opacity="{opacity:.3f}" '
-                       f'stroke="var(--bg)" stroke-width="0.8" stroke-opacity="0.8"/>')
+                       f'stroke="var(--accent)" stroke-width="0.8" stroke-opacity="0.32"/>')
 
     groups = {0: [], 1: [], 2: [], 3: []}
     for p in points:
@@ -118,8 +118,8 @@ def crime_svg(points, muni_poly, ward_rate, w=1000, h=760):
         x, y = proj.xy(lon, lat)
         groups[level].append((x, y))
 
-    widths = [1.2, 1.8, 2.6, 3.6]
-    opacities = [0.30, 0.40, 0.52, 0.66]
+    widths = [1.3, 1.9, 2.6, 3.6]
+    opacities = [0.38, 0.50, 0.64, 0.80]
     for level, pts in groups.items():
         if not pts:
             continue
@@ -214,9 +214,9 @@ def cabinet_svg(months, month_mean, cabinet_data, w=1000, h=760):
                " ".join(f"L{x:.1f},{y:.1f}" for x, y in points) + \
                f" L{points[-1][0]:.1f},{base_y:.1f} Z"
         line = " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
-        out.append(f'<path d="{area}" fill="var(--accent)" opacity="0.075"/>')
+        out.append(f'<path d="{area}" fill="var(--accent)" opacity="0.10"/>')
         out.append(f'<polyline points="{line}" fill="none" stroke="var(--accent)" '
-                   f'stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>')
+                   f'stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>')
 
     # One seam worth naming; the ribbon already carries the other cabinets.
     for ym, label in (("2012-12", "2012 / 安倍2次"),):

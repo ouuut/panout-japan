@@ -111,3 +111,11 @@
 - 实现：`src/home_plates.py` 构建期生成三张数据板（地震密度/23区犯罪/331月内阁线）；`src/home-preview.css/js` 实现刻度选择、hover/focus 预览、键盘左右切换、无 JS 降级；`build.py` 新增 `/preview/` 路由（`register=False`，不进 sitemap）。
 - 验：1440/1024/768/390/360/320 双主题三语无页面横向溢出；1440 `rulerBottom=867`、768 `rulerBottom=877`、390 `rulerBottom=786`、320 `rulerBottom=824`；hover/focus/click/键盘/无 JS/reduced-motion 全过；字体面加载、控制台零错误；preview HTML 166KB / gzip 50KB。
 - 唯一 next：用户看首页预览，确认后展开三个章节入口（地震擦洗 / 犯罪放大镜 / 内阁时间带）。
+
+## 2026-10-21 · M4.2 总入口改三入口直连（一次点击）
+
+- 用户反馈：M4.1 的比例尺要先选尺度再开章，进三站需要两次点击，不合理，必须精简。
+- 改：删除比例尺选择器与 `home-preview.js`；三块数据板同屏并排，**每块整块是 `<a>`**，点任意位置一次直接进入 `/quake/`、`/crime/`、`/cabinet/`；无选中态、无二次 OPEN、无 JS 拦截。
+- 布局：1440 三栏 triptych（整块 band，无卡片边框/阴影）；≤1000 横向行；≤640 纵向。数据板按 416px 栏宽放大 SVG 注记，犯罪图改“浅填充 + 强点 + 区界”的点场。
+- 验：1440/1024/768/390/320 × ja/zh/en × sage/dark 全 0 横向溢出、3 个入口齐全；1440 band 底部 887px 在首屏；桌面点 `/crime/`、390 点 `/cabinet/` 均一次跳转成功；`/preview/` 仍 noindex、不进 sitemap；无自定义交互脚本。
+- 唯一 next：用户看总入口，确认后展开三个章节入口（地震擦洗 / 犯罪放大镜 / 内阁时间带）。

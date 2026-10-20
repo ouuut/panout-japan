@@ -2,7 +2,7 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4.1 总入口改版预览**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.2 总入口三入口直连预览**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**Pan Out Japan**（pan out = 拉远看全景 + 结果如人意；pan = パン/Japan 尾音），域名直球 `japan.ouuut.com`。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
 > 本地改版预览：`http://127.0.0.1:8900/preview/`（构建后 `cd site && python -m http.server 8900`）。
@@ -16,7 +16,7 @@
 src/
   build.py      # 唯一构建入口：三语字典、页面模板、静态图表 SVG、CSV/i18n/sitemap/headers
   home_plates.py# 总入口预览的三张构建期数据板（地震/犯罪/内阁）
-  home-preview.css / home-preview.js # 总入口比例尺原型（仅 /preview/）
+  home-preview.css # 总入口三入口同屏原型（仅 /preview/）
   svgkit.py     # Web Mercator、海岸线裁剪、SVG path
   fonts.py      # Outfit 800 + Noto Serif/Sans JP/SC 700/500 子集化 → site/assets/fonts (11 文件 ~1.1MB)
   fix_cabinet.py# 内阁数据修正（NHK 2008/09 列错位、同月双调查标注）
@@ -35,7 +35,7 @@ site/           # 构建产物，gitignore
 
 ### 当前改版预览
 
-`/preview/` 是总入口的**比例尺**原型：左侧为三章读数，右侧为构建期生成的数据板，底部三条刻度可 hover/focus 预览、点击直接进入章节。它使用 `src/home_plates.py` + `src/home-preview.css/js`，不注册 sitemap，不改动 109 页生产页。下一步待方向确认后，才展开三个章节入口。
+`/preview/` 是总入口的三入口原型：三块数据板同屏并排，每块本身是 `<a>`，点一次直接进入地震 / 犯罪 / 内阁；没有“先选中、再打开”的中间状态，也没有额外交互脚本。它使用 `src/home_plates.py` + `src/home-preview.css`，不注册 sitemap，不改动 109 页生产页。下一步待方向确认后，才展开三个章节入口。
 
 视觉系统与 `ouuut.com` 同源：sage/dark 两态自动主题（本地时间，手动可覆盖）、Outfit 800 字标、EN/JA/ZH 分流字阶、4px surface 块、零结构线条。
 
