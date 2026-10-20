@@ -103,3 +103,11 @@
 - 验：sitemap 108 页本地 200、h1 唯一 0 违例；1440/768/390/320 × ja/zh/en 0 横向溢出；12 个字体面 loaded；home/chapter/year/method 可见边框 0；无 JS 内容可见；reduced-motion 内容可见且 grain 关闭；ouuut.com 实测 sage/dark token 与 logo 33/800 逐值一致。
 - 部署：commit `fff7e76` → `wrangler pages deploy site --project-name=panout-site --branch=main`，线上 `https://japan.ouuut.com/` 已验：12 字体面 loaded、outfit 字标、JA/EN 切换、sage/dark 切换、390px 0 溢出；preview `https://bd1b2c86.panout-site.pages.dev`。
 - 线上核对：`/assets/app.css?v=faddf900` 12 个 @font-face、`auto-phrase` 在；`/assets/shell.js?v=93852dd4` 无 `startViewTransition`、THEMES=sage/dark；9 条路由 200 + 唯一 h1；404 直开正常。
+
+## 2026-10-21 · M4.1 总入口比例尺预览（本地 `/preview/`）
+
+- 用户纠偏：M4 把 ouuut 的品牌站布局（巨型字标、产品行、hero panel）整套搬进了数据站；要的是同一主题/字体，不是同一信息架构。
+- 方案：总入口改为「一把尺子，三个刻度」；只重做首页 + 三章入口，详情页保留。先出首页单页原型，不碰 109 页。
+- 实现：`src/home_plates.py` 构建期生成三张数据板（地震密度/23区犯罪/331月内阁线）；`src/home-preview.css/js` 实现刻度选择、hover/focus 预览、键盘左右切换、无 JS 降级；`build.py` 新增 `/preview/` 路由（`register=False`，不进 sitemap）。
+- 验：1440/1024/768/390/360/320 双主题三语无页面横向溢出；1440 `rulerBottom=867`、768 `rulerBottom=877`、390 `rulerBottom=786`、320 `rulerBottom=824`；hover/focus/click/键盘/无 JS/reduced-motion 全过；字体面加载、控制台零错误；preview HTML 166KB / gzip 50KB。
+- 唯一 next：用户看首页预览，确认后展开三个章节入口（地震擦洗 / 犯罪放大镜 / 内阁时间带）。

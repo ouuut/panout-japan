@@ -24,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import svgkit as S
+import home_plates as HP
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
@@ -623,7 +624,7 @@ JS_VER = "__JS_VER__"
 FONT_VER = "__FONT_VER__"
 
 
-def head(title, desc, path, jsonld=None):
+def head(title, desc, path, jsonld=None, extra_head=""):
     u = SITE_URL + path
     alts = "".join(
         f'<link rel="alternate" hreflang="{code}" href="{u}{"" if code == "ja" else "?lang=" + code}">'
@@ -661,6 +662,7 @@ def head(title, desc, path, jsonld=None):
 <link rel="stylesheet" href="/assets/app.css?v=__CSS_VER__">
 {boot}
 {ld}
+{extra_head}
 </head>
 <body>
 <a class="skip" href="#main"{tattr('skip')}>{ja('skip')}</a>
@@ -734,11 +736,12 @@ def foot():
 </body></html>"""
 
 
-def page(path, title, desc, body, active="", jsonld=None):
+def page(path, title, desc, body, active="", jsonld=None, register=True, head_extra=""):
     body = body.replace('<table class="data-table">', '<div class="table-scroll"><table class="data-table">')
     body = body.replace('</table>', '</table></div>')
-    html_doc = head(title, desc, path, jsonld) + mast(active) + body + foot()
-    PAGES.append((path, title, desc))
+    html_doc = head(title, desc, path, jsonld, head_extra) + mast(active) + body + foot()
+    if register:
+        PAGES.append((path, title, desc))
     return html_doc
 
 
@@ -845,6 +848,84 @@ def build_cover():
     return page("/", "Pan Out Japan — 日本を、三つの尺度で見る",
                 "40,079の震源、5,234の町丁、331か月の内閣支持率。同じ国土を、引いて・寄って・通して見る。",
                 body, "", jsonld)
+
+
+def build_home_preview():
+    """Local-only home prototype. Not registered in PAGES/sitemap."""
+    css = (SRC / "home-preview.css").read_text(encoding="utf-8")
+    js = (SRC / "home-preview.js").read_text(encoding="utf-8")
+
+    rows = [
+        ("quake", "01", "/quake/", "card.quake.title", "nav.quake", "40,079",
+         "card.quake.unit", "card.quake.claim", "USGS ComCat · 2000—2026.07",
+         "ARCHIPELAGO / 27 YEARS", "USGS COM CAT",
+         HP.quake_svg(Q, OUTLINE, YEARS)),
+        ("crime", "02", "/crime/", "card.crime.title", "nav.crime", "5,234",
+         "card.crime.unit", "card.crime.claim", "警視庁 · 2025",
+         "TOKYO / 5,234 CHOME", "MPD 2025",
+         HP.crime_svg(POINTS, MUNI_POLY, WARD_RATE)),
+        ("cabinet", "03", "/cabinet/", "card.cabinet.title", "nav.cabinet", "331",
+         "card.cabinet.unit", "card.cabinet.claim", "NHK / Nikkei / Kyodo · 1998—2026",
+         "14 CABINETS / 331 MONTHS", "NHK / NIKKEI / KYODO",
+         HP.cabinet_svg(ALL_MONTHS, MONTH_MEAN, CAB)),
+    ]
+
+    states = []
+    layers = []
+    stops = []
+    for key, num, href, verb, topic, count, unit, claim, source, top, left, svg in rows:
+        active = key == "quake"
+        states.append(f"""<div class="hp-state{' is-active' if active else ''}" data-state="{key}" aria-hidden="{'false' if active else 'true'}">
+<div class="hp-state-head"><span class="hp-state-num">{num}</span><span class="hp-state-verb" data-t="{verb}">{ja(verb)}</span><span class="hp-state-topic" data-t="{topic}">{ja(topic)}</span></div>
+<p class="hp-state-value"><span class="hp-state-count">{count}</span><span class="hp-state-unit" data-t="{unit}">{ja(unit)}</span></p>
+<p class="hp-state-claim" data-t="{claim}">{ja(claim)}</p>
+<div class="hp-state-foot"><span class="hp-state-source">{source}</span><a class="hp-state-open" href="{href}"><span data-t="prod.open">{ja('prod.open')}</span> ↗</a></div>
+</div>""")
+        layers.append(f"""<div class="hp-layer{' is-active' if active else ''}" data-layer="{key}" aria-hidden="{'false' if active else 'true'}">
+<div class="hp-meta"><span>FIG. {num}</span><span>{top}</span></div>
+<div class="hp-visual">{svg}</div>
+<div class="hp-meta"><span>{left}</span><span class="hp-open">OPEN CHAPTER ↗</span></div>
+</div>""")
+        stops.append(f"""<a class="hp-stop" id="hp-stop-{key}" data-stop="{key}" href="{href}"{' aria-current="true"' if active else ''}>
+<span class="hp-stop-top"><span class="hp-stop-num">{num}</span><span class="hp-stop-verb" data-t="{verb}">{ja(verb)}</span></span>
+<span class="hp-stop-bottom"><span class="hp-stop-topic" data-t="{topic}">{ja(topic)}</span><span class="hp-stop-count">{count}</span></span>
+</a>""")
+
+    ticks = "".join("<i></i>" for _ in range(30))
+    body = f"""<main id="main" class="hp" data-active="quake">
+<section class="wrap hp-hero">
+<div class="hp-top">
+<div class="hp-copy">
+<p class="eyebrow" data-t="cover.kicker">{ja('cover.kicker')}</p>
+<h1 data-t="cover.title">{ja('cover.title')}</h1>
+<p class="hp-lede" data-t="cover.lede">{ja('cover.lede')}</p>
+<div class="hp-states">{''.join(states)}</div>
+</div>
+<a class="hp-plate" href="/quake/" aria-labelledby="hp-stop-quake">
+{''.join(layers)}
+</a>
+</div>
+<div class="hp-ruler">
+<div class="hp-ruler-head"><span>SCALE / 3 STOPS</span><span>HOVER TO PREVIEW · SELECT TO OPEN</span></div>
+<div class="hp-track">
+<div class="hp-ticks" aria-hidden="true">{ticks}</div>
+<span class="hp-thumb" aria-hidden="true"></span>
+<div class="hp-stops">{''.join(stops)}</div>
+</div>
+</div>
+</section>
+<section class="wrap hp-method">
+<p class="hp-method-k">METHOD / SOURCES</p>
+<p class="hp-method-p" data-t="cover.section.sub">{ja('cover.section.sub')}</p>
+<a class="hp-method-link" href="/method/"><span data-t="cover.method">{ja('cover.method')}</span> ↗</a>
+</section>
+</main>
+<script>{js}</script>"""
+
+    return page("/preview/", "Pan Out Japan — 三つの尺度（preview）",
+                "Home prototype: one scale instrument, three data scales.",
+                body, "", None, register=False,
+                head_extra='<meta name="robots" content="noindex">\n<style>\n' + css + '\n</style>')
 
 
 def build_quake():
@@ -1246,6 +1327,7 @@ def main():
     files = {}
 
     files["/"] = build_cover()
+    files["/preview/"] = build_home_preview()
     files["/quake/"] = build_quake()
     for y in YEARS:
         files[f"/quake/{y}/"] = build_year(y)

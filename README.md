@@ -2,9 +2,10 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4 ouuut 视觉对齐**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.1 总入口改版预览**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**Pan Out Japan**（pan out = 拉远看全景 + 结果如人意；pan = パン/Japan 尾音），域名直球 `japan.ouuut.com`。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
+> 本地改版预览：`http://127.0.0.1:8900/preview/`（构建后 `cd site && python -m http.server 8900`）。
 
 ## 架构
 
@@ -14,6 +15,8 @@
 ```
 src/
   build.py      # 唯一构建入口：三语字典、页面模板、静态图表 SVG、CSV/i18n/sitemap/headers
+  home_plates.py# 总入口预览的三张构建期数据板（地震/犯罪/内阁）
+  home-preview.css / home-preview.js # 总入口比例尺原型（仅 /preview/）
   svgkit.py     # Web Mercator、海岸线裁剪、SVG path
   fonts.py      # Outfit 800 + Noto Serif/Sans JP/SC 700/500 子集化 → site/assets/fonts (11 文件 ~1.1MB)
   fix_cabinet.py# 内阁数据修正（NHK 2008/09 列错位、同月双调查标注）
@@ -29,6 +32,10 @@ site/           # 构建产物，gitignore
 
 页面：封面 1 + 地震 27 年页 + 犯罪 3 章 + 62 区页 + 内阁 14 任 + 方法论 + 404，共 **109 页**。
 详情页全部是静态数据页（表格、SVG 海报、CSV 下载）；交互视图在章节页通过 `.stage` 懒加载，闭合后 DOM 恢复海报。
+
+### 当前改版预览
+
+`/preview/` 是总入口的**比例尺**原型：左侧为三章读数，右侧为构建期生成的数据板，底部三条刻度可 hover/focus 预览、点击直接进入章节。它使用 `src/home_plates.py` + `src/home-preview.css/js`，不注册 sitemap，不改动 109 页生产页。下一步待方向确认后，才展开三个章节入口。
 
 视觉系统与 `ouuut.com` 同源：sage/dark 两态自动主题（本地时间，手动可覆盖）、Outfit 800 字标、EN/JA/ZH 分流字阶、4px surface 块、零结构线条。
 
