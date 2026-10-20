@@ -101,4 +101,5 @@
 - 图表：crime 色阶改 sage/orange 单色顺序带；cabinet 14 任改 accent 顺序色；loader/面板变量对齐 token。
 - 修复：移除 `startViewTransition`（relay 下旧主题快照卡住）；crime 全屏 `#crm-root/#crm-map` 高度 100%；cabinet stage-flow 去掉 62vh 空洞；移动表格 idx 列 42px；CJK `word-break:auto-phrase` 修 `同/じ` 断词；`#chapters` scroll-margin 避吸顶页头。
 - 验：sitemap 108 页本地 200、h1 唯一 0 违例；1440/768/390/320 × ja/zh/en 0 横向溢出；12 个字体面 loaded；home/chapter/year/method 可见边框 0；无 JS 内容可见；reduced-motion 内容可见且 grain 关闭；ouuut.com 实测 sage/dark token 与 logo 33/800 逐值一致。
-- 待办：部署 `panout-site` 并线上复验。
+- 部署：commit `fff7e76` → `wrangler pages deploy site --project-name=panout-site --branch=main`，线上 `https://japan.ouuut.com/` 已验：12 字体面 loaded、outfit 字标、JA/EN 切换、sage/dark 切换、390px 0 溢出；preview `https://bd1b2c86.panout-site.pages.dev`。
+- 线上核对：`/assets/app.css?v=faddf900` 12 个 @font-face、`auto-phrase` 在；`/assets/shell.js?v=93852dd4` 无 `startViewTransition`、THEMES=sage/dark；9 条路由 200 + 唯一 h1；404 直开正常。
