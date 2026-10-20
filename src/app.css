@@ -1,4 +1,4 @@
-/* Pan Out Japan · app.css — layout, type, chrome.
+/* japan.ouuut.com · app.css — layout, type, chrome.
    Same publication system as ouuut.com: sage/dark, zero structural lines,
    Outfit wordmark, 4px surface blocks, mono data rails. */
 
@@ -211,7 +211,7 @@ html[lang="zh"] .foot, html[lang="zh"] .pager {
 .wordmark {
   display: inline-flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 0;
   font-family: var(--wordmark);
   font-weight: 800;
   font-size: 33px;
@@ -555,7 +555,7 @@ html[lang="zh"] .spine-lbl { font-family: var(--zh-sans); }
 .hero-wordmark-text {
   display: inline-flex;
   align-items: baseline;
-  gap: .16em;
+  gap: 0;
   font-family: var(--wordmark);
   font-weight: 800;
   font-size: clamp(64px, 16vw, 232px);
@@ -1123,6 +1123,11 @@ html body #crm-root .panel-card { border-radius: 4px !important; }
   .stage-crime { height: clamp(360px, 78vw, 620px); }
   .foot-top, .foot-bottom { flex-direction: column; align-items: flex-start; gap: 20px; }
   .foot .wordmark { margin-bottom: 28px; }
+}
+
+@media (max-width: 340px) {
+  .wordmark { font-size: 26px; }
+  .masthead-in { gap: 6px; }
 }
 
 @media (max-width: 640px) {

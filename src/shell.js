@@ -1,4 +1,4 @@
-/* Pan Out Japan · shell.js — theme, language, header, reveal, lazy chapter launch.
+/* japan.ouuut.com · shell.js — theme, language, header, reveal, lazy chapter launch.
    No framework, no build step. Everything degrades without JS. */
 (function () {
   'use strict';

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""build.py — render the whole Pan Out Japan MPA into site/.
+"""build.py — render the whole japan.ouuut.com MPA into site/.
 
 Single source of truth:
   app/quake/data/*      USGS hypocentres + coastline
@@ -30,6 +30,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 SRC = ROOT / "src"
 SITE_URL = "https://japan.ouuut.com"
+BRAND = "japan.ouuut.com"
+WM = '<span class="wm-main">japan</span><span class="wm-tld">.ouuut.com</span>'
 BUILD_DATE = "2026-10-19"
 BUILD_STAMP = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -392,7 +394,7 @@ COPY = {
     "skip": ("本文へ", "跳到正文", "Skip to content"),
     "crumb.home": ("表紙", "封面", "Cover"),
 
-    "cover.kicker": ("PAN OUT JAPAN · 2000—2026", "PAN OUT JAPAN · 2000—2026", "PAN OUT JAPAN · 2000—2026"),
+    "cover.kicker": ("JAPAN.OUUUT.COM · 2000—2026", "JAPAN.OUUUT.COM · 2000—2026", "JAPAN.OUUUT.COM · 2000—2026"),
     "cover.title": ("日本を、<br><em>三つの尺度</em>で見る。", "用<em>三种尺度</em>，<br>看日本。", "Japan, at<br><em>three scales</em>."),
     "cover.lede": ("引いて見る地震、寄って見る犯罪、通して見る内閣。同じ国土を、別々の時間で測る。",
                    "拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。",
@@ -649,7 +651,7 @@ def head(title, desc, path, jsonld=None, extra_head=""):
 <link rel="canonical" href="{u}">
 {alts}
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Pan Out Japan">
+<meta property="og:site_name" content="{BRAND}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:url" content="{u}">
@@ -687,7 +689,7 @@ def mast(active=""):
         return f'<a href="{href}"{cur}{tattr(key)}>{ja(key)}</a>'
 
     return f"""<header class="masthead"><div class="wrap masthead-in">
-<a class="wordmark" href="/" aria-label="Pan Out Japan"><span class="wm-main">pan out</span><span class="wm-tld">japan</span></a>
+<a class="wordmark" href="/" aria-label="{BRAND}">{WM}</a>
 <nav class="chapters" aria-label="Chapters">
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
@@ -718,7 +720,7 @@ def mast(active=""):
 def foot():
     return f"""<footer class="foot"><div class="wrap foot-in">
 <div class="foot-top">
-<a class="wordmark" href="/" aria-label="Pan Out Japan"><span class="wm-main">pan out</span><span class="wm-tld">japan</span></a>
+<a class="wordmark" href="/" aria-label="{BRAND}">{WM}</a>
 <a href="/method/"{tattr('foot.method')}>{ja('foot.method')}</a>
 </div>
 <div class="foot-products">
@@ -728,7 +730,7 @@ def foot():
 <a href="/method/"{tattr('nav.method')}>{ja('nav.method')}</a>
 </div>
 <div class="foot-bottom">
-<span>Pan Out Japan — <span{tattr('foot.tag')}>{ja('foot.tag')}</span></span>
+<span>{BRAND} — <span{tattr('foot.tag')}>{ja('foot.tag')}</span></span>
 <span><a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a> · <span{tattr('foot.built')}>{ja('foot.built')}</span> · {BUILD_DATE}</span>
 </div>
 </div></footer>
@@ -825,8 +827,8 @@ def build_cover():
 </aside>
 </div>
 <div class="hero-wordmark-bottom rv" aria-hidden="true">
-<div class="datum-rail datum-rail-top"><span>PAN OUT JAPAN</span><span>2000—2026</span><span>THREE SCALES</span></div>
-<div class="hero-wordmark-text"><span class="wm-main">pan out</span><span class="wm-tld">japan</span></div>
+<div class="datum-rail datum-rail-top"><span>{BRAND.upper()}</span><span>2000—2026</span><span>THREE SCALES</span></div>
+<div class="hero-wordmark-text">{WM}</div>
 <div class="datum-rail datum-rail-bottom"><span>35.68°N 139.69°E</span><span>QUAKE / CRIME / CABINET</span><span>JAPAN</span></div>
 </div>
 </section>
@@ -841,11 +843,11 @@ def build_cover():
 </main>"""
     jsonld = {
         "@context": "https://schema.org", "@type": "WebSite",
-        "name": "Pan Out Japan", "url": SITE_URL + "/",
+        "name": BRAND, "url": SITE_URL + "/",
         "inLanguage": ["ja", "zh", "en"],
         "description": "地震・犯罪・内閣支持率を三つの尺度で見る、静的に生成されたデータサイト。",
     }
-    return page("/", "Pan Out Japan — 日本を、三つの尺度で見る",
+    return page("/", f"{BRAND} — 日本を、三つの尺度で見る",
                 "40,079の震源、5,234の町丁、331か月の内閣支持率。同じ国土を、引いて・寄って・通して見る。",
                 body, "", jsonld)
 
@@ -896,7 +898,7 @@ def build_home_preview():
 </section>
 </main>"""
 
-    return page("/preview/", "Pan Out Japan — 三つの尺度（preview）",
+    return page("/preview/", f"{BRAND} — 三つの尺度（preview）",
                 "Three direct entries: earthquakes, crime, cabinets.",
                 body, "", None, register=False,
                 head_extra='<meta name="robots" content="noindex">\n<style>\n' + css + '\n</style>')
@@ -945,7 +947,7 @@ def build_quake():
         "creator": {"@type": "Organization", "name": "USGS"},
         "url": SITE_URL + "/quake/",
     }
-    return page("/quake/", "地震 — 40,079の震源 | Pan Out Japan",
+    return page("/quake/", f"地震 — 40,079の震源 | {BRAND}",
                 "2000年から2026年7月までのM4以上震源40,079点。年別・月別・深さ・エネルギーで見る。",
                 body, "quake", jsonld)
 
@@ -992,7 +994,7 @@ def build_year(y):
            f"/quake/{next_y}/" if next_y else "", f"{next_y}年" if next_y else "")}
 </section>
 </main>"""
-    return page(f"/quake/{y}/", f"{y}年の地震 — {n(cnt)}点 | Pan Out Japan",
+    return page(f"/quake/{y}/", f"{y}年の地震 — {n(cnt)}点 | {BRAND}",
                 f"{y}年のM4以上震源{n(cnt)}点、最大M{mx['mag']:.1f}。月別分布と主な地震。",
                 body, "quake")
 
@@ -1047,7 +1049,7 @@ def build_crime():
         "creator": {"@type": "Organization", "name": "警視庁"},
         "url": SITE_URL + "/crime/",
     }
-    return page("/crime/", "犯罪 — 5,234の町丁 | Pan Out Japan",
+    return page("/crime/", f"犯罪 — 5,234の町丁 | {BRAND}",
                 "2025年の東京都内5,234町丁の認知件数。人口あたりの率で62区市町村を並べる。",
                 body, "crime", jsonld)
 
@@ -1098,7 +1100,7 @@ def build_ward(slug):
            f"/crime/{slug_ward(next_w)}/" if next_w else "", next_w or "")}
 </section>
 </main>"""
-    return page(f"/crime/{slug}/", f"{w}の犯罪 — 2025年 | Pan Out Japan",
+    return page(f"/crime/{slug}/", f"{w}の犯罪 — 2025年 | {BRAND}",
                 f"{w}の2025年認知件数{n(tot)}件、人口1,000人あたり{f1(rate)}件。町丁別の内訳。",
                 body, "crime")
 
@@ -1169,7 +1171,7 @@ def build_cabinet():
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "url": SITE_URL + "/cabinet/",
     }
-    return page("/cabinet/", "内閣 — 331か月の支持率 | Pan Out Japan",
+    return page("/cabinet/", f"内閣 — 331か月の支持率 | {BRAND}",
                 "1998年から2026年までの内閣支持率644調査。月次平均331か月、14内閣。",
                 body, "cabinet", jsonld)
 
@@ -1216,7 +1218,7 @@ def build_pm(cid):
            f"/cabinet/{next_c['id']}/" if next_c else "", next_c["pm"] if next_c else "")}
 </section>
 </main>"""
-    return page(f"/cabinet/{cid}/", f"{c['pm']}内閣の支持率 | Pan Out Japan",
+    return page(f"/cabinet/{cid}/", f"{c['pm']}内閣の支持率 | {BRAND}",
                 f"{c['pm']}内閣（{c['start']}–{c['end']}）の月次支持率。平均{f1(mean)}、最高{f1(hi[1])}、最低{f1(lo[1])}。",
                 body, "cabinet")
 
@@ -1274,7 +1276,7 @@ def build_method():
 </section>
 </main>"""
     body = fill_copy(body)
-    return page("/method/", "方法と出典 | Pan Out Japan",
+    return page("/method/", f"方法と出典 | {BRAND}",
                 "地震・犯罪・内閣支持率のデータ源、口径、既知の誤差、CSVダウンロード。",
                 body, "method")
 
@@ -1291,7 +1293,7 @@ def build_404():
 <a href="/"{tattr('nf.home')}>{ja('nf.home')}</a>
 </div>
 </section></main>"""
-    return page("/404.html", "404 — この頁は、ない | Pan Out Japan",
+    return page("/404.html", f"404 — この頁は、ない | {BRAND}",
                 "この頁は存在しない。三つの章から辿り直す。", body, "")
 
 
@@ -1431,7 +1433,7 @@ def write_site(files):
     fav = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
            f'<rect width="64" height="64" fill="#E9EDE3"/>'
            f'<text x="31" y="48" text-anchor="middle" font-family="Outfit,Helvetica,Arial,sans-serif" '
-           f'font-weight="800" font-size="46" fill="#2F6B4F">p</text></svg>')
+           f'font-weight="800" font-size="46" fill="#2F6B4F">J</text></svg>')
     (SITE / "assets/favicon.svg").write_text(fav, encoding="utf-8")
 
 
@@ -1504,7 +1506,7 @@ def write_meta(font_meta):
         "/quake /quake/ 301\n/crime /crime/ 301\n/cabinet /cabinet/ 301\n"
         "/method /method/ 301\n", encoding="utf-8")
 
-    (SITE / "llms.txt").write_text(f"""# Pan Out Japan
+    (SITE / "llms.txt").write_text(f"""# {BRAND}
 
 > 日本を三つの尺度で見る静的データサイト。地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）。
 

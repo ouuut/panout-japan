@@ -119,3 +119,10 @@
 - 布局：1440 三栏 triptych（整块 band，无卡片边框/阴影）；≤1000 横向行；≤640 纵向。数据板按 416px 栏宽放大 SVG 注记，犯罪图改“浅填充 + 强点 + 区界”的点场。
 - 验：1440/1024/768/390/320 × ja/zh/en × sage/dark 全 0 横向溢出、3 个入口齐全；1440 band 底部 887px 在首屏；桌面点 `/crime/`、390 点 `/cabinet/` 均一次跳转成功；`/preview/` 仍 noindex、不进 sitemap；无自定义交互脚本。
 - 唯一 next：用户看总入口，确认后展开三个章节入口（地震擦洗 / 犯罪放大镜 / 内阁时间带）。
+
+## 2026-10-21 · M4.3 品牌改为 japan.ouuut.com
+
+- 用户纠偏：logo 与首页巨型字标仍是 Pan Out Japan；不是这个品牌，应该是域名 `japan.ouuut.com`。
+- 改：`build.py` 增设 `BRAND` / `WM`；页头、页脚、首页巨型字标、封面 kicker、所有 title / og:site_name / WebSite schema / llms.txt 全部改为 `japan.ouuut.com`；favicon 字母 `p` → `J`；字标 `japan` + `.ouuut.com` 两段，去掉两段间 gap；≤340px 页头字标降为 26px，避免 320px 挤压。
+- 验：`site/` 旧品牌 0 命中；1440 巨型字标 1,133px / 内容 1,430px，390 为 288 / 380，320 为 236 / 270；1440/1024/768/390/360/320 × ja/en/zh × sage/dark 0 横向溢出；320 页头 logo 128px、工具右缘 290px；390 一次点击 `/quake/` 成功；无 JS 时 logo/巨型字标仍为域名。
+- 唯一 next：用户确认新字标；确认后展开三个章节入口（地震擦洗 / 犯罪放大镜 / 内阁时间带）。
