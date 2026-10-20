@@ -151,3 +151,18 @@
 - 修 quake 内嵌加载遮罩：暗色画布亮点阈值可能不达标，兜底从 `tries > 40`（约 20s）降到 `tries > 8`（约 4.4s），避免图区长时间被“読み込み中”盖住。
 - 验：`/` 无 `.stage`，三入口为普通链接；三章 `.stage[data-live=1]` 内嵌 canvas，`stage-chrome`/`stage-close`/`[data-launch]` 均为 0；1440 与移动端无横向溢出；页面可正常滚动，无 body 锁；header 主题/语言切换后 quake `data-quake-theme=dark`、crime `data-crm-variant=tactical`，中文 H1 生效；`/preview/` 仍跳 `/`，旧路由仍 404。
 - 唯一 next：用户验收独立页面模式；线上未部署。
+
+## 2026-10-21 · M4.7 吸顶 header + 全屏应用
+
+- 用户再次纠偏：三章不要章节导语、统计块、beats、数据表这些“废话”，要吸顶 header 下直接全屏看地震/犯罪/内阁。
+- 三章改为 `body.chapter-app` + `main.chapter-app-page`：header 保持 sticky，应用 stage 高度 `calc(100dvh - var(--nav-h))`，全宽、无圆角、无页边距；页面本身不滚动，交互全部在应用内部。
+- 删除三章可见的 chapter-head / stats / beats / crime 区表 / cabinet 内阁表；footer 在章节页不再输出。title、description、JSON-LD 与 `sr-only` H1/lede 保留，作为 SEO/GEO 的最低保底；全屏 canvas 可见正文减少是明确的取舍。
+- 构建加 `fullscreen=True` 分支：`<body class="chapter-app">`、跳过 footer、但仍输出 shell.js 与闭合标签；新增 `.sr-only`、`.chapter-app-page`、`body.chapter-app` 样式。
+- 验：`/quake/`、`/crime/`、`/cabinet/` 均为 header + 全屏 stage，页面 `scrollHeight == innerHeight`，无章节导语/统计/beats/表格/footer；三章应用自动挂载；主题/语言在 header 切换；无弹层/关闭按钮；旧路由仍 404。
+- 唯一 next：用户验收全屏模式；线上未部署。
+
+## 2026-10-21 · M4.7a 全屏填充修正
+
+- crime 应用会给 `.stage-live` 写 inline `min-height:70vh`，全屏时地图只占 70%。全屏页用 `.chapter-app-page .stage-live` 的 `!important` 覆盖为 `inset:0 / height:100%`，`#crm-root`、`#crm-map` 同步 100%，实测 1053px 全填。
+- quake 震点在数据加载后不会自动重绘，手动 `resize` 后才出现。`mountStage` 增加 2.4s / 5s / 8s / 12s 的延迟 resize，保证数据到位后点云上屏。
+- 验：1440 与移动端三章均 header + 全屏 stage，`scrollHeight == innerHeight`；crime map / cabinet chart 填满；quake 延迟后显示点云；无章节正文/footer/关闭按钮。

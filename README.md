@@ -2,11 +2,11 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4.6 四页独立 + 应用内嵌**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.7 四页独立 + 全屏应用**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
-> 页面模式：三章是独立页面，应用直接嵌在各自章节页内，滚动到图区自动挂载；没有弹层、没有关闭按钮、没有页中页。
+> 页面模式：三章是独立页面，吸顶 header 下直接是全屏应用；没有章节导语、统计块、beats、数据表、footer、弹层或关闭按钮。SEO/GEO 保留 title/description/JSON-LD 与 `sr-only` H1。
 
 ## 架构
 
@@ -25,9 +25,9 @@ src/
   patch_vendor.py # quake bundle 的品牌字符串补丁（域名/出典/重载文案）
   slim_quake_data.py # 海岸线 0.05° 简化 + 震点数值精度收敛（原文件备份 .cache/quake-orig）
 app/
-  quake/        # 3D 地球（WebGL）+ 瓦片数据，章节页滚动到图区自动挂载
-  crime/        # Leaflet 町丁目地图，同一内嵌挂载机制
-  cabinet/      # ECharts 支持率长轴，同一内嵌挂载机制
+  quake/        # 3D 地球（WebGL）+ 瓦片数据，章节页全屏自动挂载
+  crime/        # Leaflet 町丁目地图，同一全屏挂载机制
+  cabinet/      # ECharts 支持率长轴，同一全屏挂载机制
 site/           # 构建产物，gitignore
 ```
 
@@ -36,7 +36,7 @@ site/           # 构建产物，gitignore
 
 ### 当前改版预览
 
-`/` 是总入口：三块数据板同屏并排，每块本身是 `<a>`，直接进入对应章节页；没有弹层、没有“先选中、再打开”的中间状态。三章各自是独立 URL，应用内嵌在图区，静态标题、数据表、说明文字始终在 HTML 里，爬虫和 AI 不需要点击或执行 JS 就能读到正文。它使用 `src/home_plates.py` + `src/home-preview.css`。
+`/` 是总入口：三块数据板同屏并排，每块本身是 `<a>`，直接进入对应章节页；没有弹层、没有“先选中、再打开”的中间状态。三章各自是独立 URL，进入后是吸顶 header + 全屏应用，页面本身不滚动，交互全部在应用内。SEO/GEO 以 title、description、JSON-LD 和 `sr-only` H1 保底；全屏 canvas 的可见正文较少，这是全屏取舍。它使用 `src/home_plates.py` + `src/home-preview.css`。
 
 视觉系统与 `ouuut.com` 同源：sage/dark 两态自动主题（本地时间，手动可覆盖）、Outfit 800 字标、EN/JA/ZH 分流字阶、4px surface 块、零结构线条。
 

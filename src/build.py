@@ -626,7 +626,7 @@ JS_VER = "__JS_VER__"
 FONT_VER = "__FONT_VER__"
 
 
-def head(title, desc, path, jsonld=None, extra_head=""):
+def head(title, desc, path, jsonld=None, extra_head="", body_class=""):
     u = SITE_URL + path
     alts = "".join(
         f'<link rel="alternate" hreflang="{code}" href="{u}{"" if code == "ja" else "?lang=" + code}">'
@@ -666,7 +666,7 @@ def head(title, desc, path, jsonld=None, extra_head=""):
 {ld}
 {extra_head}
 </head>
-<body>
+<body{body_class}>
 <a class="skip" href="#main"{tattr('skip')}>{ja('skip')}</a>
 <div class="grain" aria-hidden="true"></div>
 <div class="scroll-progress" aria-hidden="true"></div>
@@ -715,6 +715,10 @@ def mast(active=""):
 """
 
 
+def shell_tail():
+    return '<script src="/assets/shell.js?v=__JS_VER__" defer></script>\n</body></html>'
+
+
 def foot():
     return f"""<footer class="foot"><div class="wrap foot-in">
 <div class="foot-top">
@@ -730,14 +734,15 @@ def foot():
 <span><a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a> · <span{tattr('foot.built')}>{ja('foot.built')}</span> · {BUILD_DATE}</span>
 </div>
 </div></footer>
-<script src="/assets/shell.js?v=__JS_VER__" defer></script>
-</body></html>"""
+{shell_tail()}"""
 
 
-def page(path, title, desc, body, active="", jsonld=None, register=True, head_extra=""):
+def page(path, title, desc, body, active="", jsonld=None, register=True, head_extra="", fullscreen=False):
     body = body.replace('<table class="data-table">', '<div class="table-scroll"><table class="data-table">')
     body = body.replace('</table>', '</table></div>')
-    html_doc = head(title, desc, path, jsonld, head_extra) + mast(active) + body + foot()
+    body_class = ' class="chapter-app"' if fullscreen else ''
+    html_doc = head(title, desc, path, jsonld, head_extra, body_class) + mast(active) + body
+    html_doc += shell_tail() if fullscreen else foot()
     if register:
         PAGES.append((path, title, desc))
     return html_doc
@@ -827,29 +832,14 @@ def build_preview_redirect():
 
 
 def build_quake():
-    m6 = sum(1 for x in Q if x["mag"] >= 6)
-    mx = max(Q, key=lambda x: x["mag"])
-    e2011 = YEAR_E["2011"] / TOTAL_E
-    body = f"""<main id="main">
-<section class="wrap chapter-head rv">
-<p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <span{tattr('q.eyebrow')}>{ja('q.eyebrow')}</span></p>
-<h1{tattr('q.h1')}>{ja('q.h1')}</h1>
-<p class="lede"{tattr('q.lede')}>{ja('q.lede')}</p>
-{stats([('q.stat.count', n(len(Q)), ''), ('q.stat.strong', n(m6), ''),
-            ('q.stat.max', 'M' + f"{mx['mag']:.1f}", ''), ('q.stat.energy', pct(e2011) + '%', '')])}
-</section>
-<section class="wrap rv">
+    body = f"""<main id="main" class="chapter-app-page">
+<h1 class="sr-only"{tattr('q.h1')}>{ja('q.h1')}</h1>
+<p class="sr-only"{tattr('q.lede')}>{ja('q.lede')}</p>
 <div class="stage" data-live="0" data-stage-auto="quake" data-view="quake">
 <div class="stage-poster">{quake_poster()}</div>
 <p class="stage-caption">M4+ · {n(len(Q))} hypocentres · 2000–2026.07 · USGS ComCat</p>
 <div class="stage-live" id="v-quake-viewport"></div>
 </div>
-</section>
-<section class="wrap beats rv">
-<div class="beat"><div class="n">01</div><h3{tattr('q.beat1.t')}>{ja('q.beat1.t')}</h3><p{tattr('q.beat1.p')}>{ja('q.beat1.p')}</p></div>
-<div class="beat"><div class="n">02</div><h3{tattr('q.beat2.t')}>{ja('q.beat2.t')}</h3><p{tattr('q.beat2.p')}>{ja('q.beat2.p')}</p></div>
-<div class="beat"><div class="n">03</div><h3{tattr('q.beat3.t')}>{ja('q.beat3.t')}</h3><p{tattr('q.beat3.p')}>{ja('q.beat3.p')}</p></div>
-</section>
 </main>"""
     jsonld = {
         "@context": "https://schema.org", "@type": "Dataset",
@@ -863,47 +853,18 @@ def build_quake():
     }
     return page("/quake/", f"地震 — 40,079の震源 | {BRAND}",
                 "2000年から2026年7月までのM4以上震源40,079点。年別・月別・深さ・エネルギーで見る。",
-                body, "quake", jsonld)
+                body, "quake", jsonld, fullscreen=True)
 
 
 def build_crime():
-    rates = [r for r in WARD_RATE.values() if r]
-    rates_sorted = sorted(rates)
-    med = rates_sorted[len(rates_sorted) // 2]
-    body = f"""<main id="main">
-<section class="wrap chapter-head rv">
-<p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <span{tattr('c.eyebrow')}>{ja('c.eyebrow')}</span></p>
-<h1{tattr('c.h1')}>{ja('c.h1')}</h1>
-<p class="lede"{tattr('c.lede')}>{ja('c.lede')}</p>
-{stats([('c.stat.total', n(TOTAL_CRIME), ''), ('c.stat.wards', n(len(MUNI)), ''),
-            ('c.stat.median', f1(CHOME_MEDIAN) + '‰', ''), ('c.stat.max', n(CHOME_MAX) + '‰', '')])}
-</section>
-<section class="wrap rv">
+    body = f"""<main id="main" class="chapter-app-page">
+<h1 class="sr-only"{tattr('c.h1')}>{ja('c.h1')}</h1>
+<p class="sr-only"{tattr('c.lede')}>{ja('c.lede')}</p>
 <div class="stage stage-crime" data-live="0" data-stage-auto="crime" data-view="crime">
 <div class="stage-poster">{crime_poster()}</div>
 <p class="stage-caption">1 dot = 1 町丁 · 本土 {n(len([p for p in POINTS if p.get("lng") and 138.9 <= p["lng"] <= 139.96 and 35.46 <= p["lat"] <= 35.92]))} chome（島嶼部は枠外）· 2025 · 警視庁</p>
 <div class="stage-live"></div>
 </div>
-</section>
-<section class="wrap beats rv">
-<div class="beat"><div class="n">01</div><h3{tattr('c.beat1.t')}>{ja('c.beat1.t')}</h3><p{tattr('c.beat1.p')}>{ja('c.beat1.p')}</p></div>
-<div class="beat"><div class="n">02</div><h3{tattr('c.beat2.t')}>{ja('c.beat2.t')}</h3><p{tattr('c.beat2.p')}>{ja('c.beat2.p')}</p></div>
-<div class="beat"><div class="n">03</div><h3{tattr('c.beat3.t')}>{ja('c.beat3.t')}</h3><p{tattr('c.beat3.p')}>{ja('c.beat3.p')}</p></div>
-</section>
-<section class="wrap rv">
-<h2 class="section-title"{tattr('c.index.title')}>{ja('c.index.title')}</h2>
-<p class="section-sub"{tattr('c.index.sub')}>{ja('c.index.sub')}</p>
-<table class="data-table">
-<thead><tr><th class="idx">#</th><th{tattr('d.col.name')}>{ja('d.col.name')}</th><th class="num"{tattr('d.col.count')}>{ja('d.col.count')}</th><th class="num"{tattr('d.col.pop')}>{ja('d.col.pop')}</th><th class="num"{tattr('d.col.rate')}>{ja('d.col.rate')}</th></tr></thead>
-<tbody>""" + "".join(
-        f'<tr><td class="idx num muted">{WARD_RANK.get(m["ward"], "")}</td>'
-        f'<td>{esc(m["ward"])}</td>'
-        f'<td class="num">{n((m.get("R7") or {}).get("total", 0))}</td>'
-        f'<td class="num muted">{n(m.get("pop") or 0)}</td>'
-        f'<td class="num">{f1(WARD_RATE[m["ward"]]) if WARD_RATE[m["ward"]] else "—"}</td></tr>'
-        for m in sorted(MUNI, key=lambda x: WARD_RANK.get(x["ward"], 999))) + f"""</tbody>
-</table>
-</section>
 </main>"""
     jsonld = {
         "@context": "https://schema.org", "@type": "Dataset",
@@ -917,42 +878,14 @@ def build_crime():
     }
     return page("/crime/", f"犯罪 — 5,234の町丁 | {BRAND}",
                 "2025年の東京都内5,234町丁の認知件数。人口あたりの率で62区市町村を並べる。",
-                body, "crime", jsonld)
+                body, "crime", jsonld, fullscreen=True)
 
 
 def build_cabinet():
-    means = {c["pm"]: (sum(v for _, v in CAB_MONTHS[c["pm"]]) / max(1, len(CAB_MONTHS[c["pm"]])))
-             for c in CAB["cabinets"]}
-    overall = sum(v for _, v in MONTH_MEAN.items()) / len(MONTH_MEAN)
-    diffs = []
-    for c in CAB["cabinets"]:
-        ks = [ym for ym, _ in CAB_MONTHS[c["pm"]]]
-        mm = dict(CAB_MONTHS[c["pm"]])
-        for a, b in zip(ks, ks[1:]):
-            ya, ma = map(int, a.split("-"))
-            yb, mb = map(int, b.split("-"))
-            if (yb * 12 + mb) - (ya * 12 + ma) == 1:
-                diffs.append((mm[b] - mm[a], b))
-    diffs.sort()
-    swing = diffs[-1][0]
-    rows = "".join(
-        f'<tr><td class="idx num muted">{k + 1}</td>'
-        f'<td>{esc(c["pm"])}</td>'
-        f'<td class="muted">{esc(c["start"])} – {esc(c["end"])}</td>'
-        f'<td class="num">{len(CAB_MONTHS[c["pm"]])}</td>'
-        f'<td class="num">{f1(means[c["pm"]])}</td></tr>'
-        for k, c in enumerate(CAB["cabinets"]))
     series = [(ym[2:], v) for ym, v in sorted(MONTH_MEAN.items())]
-    body = f"""<main id="main">
-<section class="wrap chapter-head rv">
-<p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <span{tattr('b.eyebrow')}>{ja('b.eyebrow')}</span></p>
-<h1{tattr('b.h1')}>{ja('b.h1')}</h1>
-<p class="lede"{tattr('b.lede')}>{ja('b.lede')}</p>
-{stats([('b.stat.polls', n(len(POLLS)), ''), ('b.stat.months', n(len(MONTH_MEAN)), ''),
-            ('b.stat.cabinets', n(len(CAB["cabinets"])), ''),
-            ('b.stat.swing', ('+' if swing > 0 else '') + f1(swing), 'pt')])}
-</section>
-<section class="wrap rv">
+    body = f"""<main id="main" class="chapter-app-page">
+<h1 class="sr-only"{tattr('b.h1')}>{ja('b.h1')}</h1>
+<p class="sr-only"{tattr('b.lede')}>{ja('b.lede')}</p>
 <div class="stage stage-cabinet" data-live="0" data-stage-auto="cabinet" data-view="cabinet">
 <div class="stage-poster">
 <figure class="figure" style="margin:0">
@@ -962,19 +895,6 @@ def build_cabinet():
 </div>
 <div class="stage-live"></div>
 </div>
-</section>
-<section class="wrap beats rv">
-<div class="beat"><div class="n">01</div><h3{tattr('b.beat1.t')}>{ja('b.beat1.t')}</h3><p{tattr('b.beat1.p')}>{ja('b.beat1.p')}</p></div>
-<div class="beat"><div class="n">02</div><h3{tattr('b.beat2.t')}>{ja('b.beat2.t')}</h3><p{tattr('b.beat2.p')}>{ja('b.beat2.p')}</p></div>
-<div class="beat"><div class="n">03</div><h3{tattr('b.beat3.t')}>{ja('b.beat3.t')}</h3><p{tattr('b.beat3.p')}>{ja('b.beat3.p')}</p></div>
-</section>
-<section class="wrap rv">
-<h2 class="section-title"{tattr('b.index.title')}>{ja('b.index.title')}</h2>
-<p class="section-sub"{tattr('b.index.sub')}>{ja('b.index.sub')}</p>
-<table class="data-table">
-<thead><tr><th class="idx">#</th><th>内閣</th><th>在任</th><th class="num"{tattr('d.pm.months')}>{ja('d.pm.months')}</th><th class="num"{tattr('d.pm.mean')}>{ja('d.pm.mean')}</th></tr></thead>
-<tbody>{rows}</tbody></table>
-</section>
 </main>"""
     jsonld = {
         "@context": "https://schema.org", "@type": "Dataset",
@@ -987,7 +907,7 @@ def build_cabinet():
     }
     return page("/cabinet/", f"内閣 — 331か月の支持率 | {BRAND}",
                 "1998年から2026年までの内閣支持率644調査。月次平均331か月、14内閣。",
-                body, "cabinet", jsonld)
+                body, "cabinet", jsonld, fullscreen=True)
 
 
 def fill_copy(s):

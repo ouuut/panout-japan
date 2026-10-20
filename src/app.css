@@ -45,6 +45,49 @@ button:disabled { cursor: progress; }
 html { scrollbar-width: none; }
 html::-webkit-scrollbar { display: none; }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body.chapter-app { height: 100dvh; overflow: hidden; }
+.chapter-app-page {
+  height: calc(100vh - var(--nav-h));
+  height: calc(100dvh - var(--nav-h));
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.chapter-app-page .stage {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+}
+.chapter-app-page .stage-live {
+  position: absolute !important;
+  inset: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+.chapter-app-page .stage-live #crm-root {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+.chapter-app-page .stage-live #crm-map,
+.chapter-app-page .stage-live .leaflet-container {
+  height: 100% !important;
+}
+
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
