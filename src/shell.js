@@ -137,6 +137,7 @@
       live._setVendorTheme(opts.theme);
 
       stage.dataset.live = '1';
+      stage.classList.remove('is-preparing');
       document.body.classList.add('stage-open');
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 350);
@@ -156,23 +157,88 @@
         live._setVendorLang = null;
         live._setVendorTheme = null;
         stage.dataset.live = '0';
+        stage.classList.remove('is-preparing');
         delete stage.dataset.busy;
         document.body.classList.remove('stage-open');
         btn.disabled = false;
         label.textContent = prev;
         close.remove();
         setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
+        try { window.dispatchEvent(new CustomEvent('pj:stage-closed', { detail: { ch: ch } })); } catch (e) {}
       });
       stage.appendChild(close);
     }).catch(function (err) {
       console.error(err);
+      stage.classList.remove('is-preparing');
+      stage.dataset.live = '0';
+      document.body.classList.remove('stage-open');
       label.textContent = tr('ui.failed') || 'Failed to load';
+      btn.disabled = false;
+      delete stage.dataset.busy;
+      try { window.dispatchEvent(new CustomEvent('pj:stage-error', { detail: { ch: ch } })); } catch (e) {}
       setTimeout(function () {
         label.textContent = prev;
-        btn.disabled = false;
-        delete stage.dataset.busy;
       }, 2000);
     });
+  }
+
+  function startLabel(panel) {
+    return panel.querySelector('.hp-enter span, .prod-action span');
+  }
+
+  function resetStartPanel(panel) {
+    panel.classList.remove('is-launching');
+    panel.removeAttribute('aria-busy');
+    var label = startLabel(panel);
+    if (label && label.dataset.prevLabel !== undefined) {
+      label.textContent = label.dataset.prevLabel;
+      delete label.dataset.prevLabel;
+    }
+  }
+
+  function resetStartPanels() {
+    var panels = document.querySelectorAll('[data-start-app].is-launching');
+    for (var i = 0; i < panels.length; i++) {
+      resetStartPanel(panels[i]);
+      try { panels[i].focus({ preventScroll: true }); } catch (e) {}
+    }
+  }
+
+  function failStartPanels() {
+    var panels = document.querySelectorAll('[data-start-app].is-launching');
+    for (var i = 0; i < panels.length; i++) {
+      var panel = panels[i];
+      var label = startLabel(panel);
+      if (label) label.textContent = tr('ui.failed') || 'Failed to load';
+      panel.classList.remove('is-launching');
+      panel.removeAttribute('aria-busy');
+      (function (p) {
+        setTimeout(function () {
+          if (!p.classList.contains('is-launching')) resetStartPanel(p);
+        }, 1800);
+      })(panel);
+    }
+  }
+
+  function startHome(panel) {
+    var ch = panel.dataset.startApp;
+    var stage = document.querySelector('.home-stage[data-view="' + ch + '"]');
+    if (!stage) return false;
+    if (stage.dataset.busy || stage.dataset.live === '1') return true;
+    var btn = stage.querySelector('[data-launch]');
+    if (!btn) return false;
+    var label = startLabel(panel);
+    if (label) {
+      if (label.dataset.prevLabel === undefined) label.dataset.prevLabel = label.textContent;
+      label.textContent = tr('ui.launching') || 'Loading…';
+    }
+    panel.classList.add('is-launching');
+    panel.setAttribute('aria-busy', 'true');
+    stage.classList.add('is-preparing');
+    stage.dataset.live = '1';
+    document.body.classList.add('stage-open');
+    btn.click();
+    return true;
   }
 
   function legacyHash() {
@@ -275,6 +341,16 @@
     for (var k = 0; k < btns.length; k++) {
       btns[k].addEventListener('click', function () { launch(this); });
     }
+
+    var starts = document.querySelectorAll('[data-start-app]');
+    for (var m = 0; m < starts.length; m++) {
+      starts[m].addEventListener('click', function (e) {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (startHome(this)) e.preventDefault();
+      });
+    }
+    window.addEventListener('pj:stage-closed', resetStartPanels);
+    window.addEventListener('pj:stage-error', failStartPanels);
   }
 
   if (document.readyState === 'loading') {

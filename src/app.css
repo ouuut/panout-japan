@@ -761,6 +761,27 @@ html[lang="zh"] .launch { font-family: var(--zh-sans); }
 .stage-live { position: absolute; inset: 0; }
 .stage-live > * { height: 100%; }
 
+/* Homepage entries start the app in place: no chapter page, no second click. */
+.home-stage { display: none; }
+.home-stage[data-live="1"] { display: block; }
+.home-stage .launch { display: none; }
+.home-stage-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.home-stage[data-live="1"]:not(.is-preparing) .home-stage-loading { display: none; }
+
 .stage-close {
   position: fixed;
   top: 16px;

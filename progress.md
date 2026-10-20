@@ -126,3 +126,11 @@
 - 改：`build.py` 增设 `BRAND` / `WM`；页头、页脚、首页巨型字标、封面 kicker、所有 title / og:site_name / WebSite schema / llms.txt 全部改为 `japan.ouuut.com`；favicon 字母 `p` → `J`；字标 `japan` + `.ouuut.com` 两段，去掉两段间 gap；≤340px 页头字标降为 26px，避免 320px 挤压。
 - 验：`site/` 旧品牌 0 命中；1440 巨型字标 1,133px / 内容 1,430px，390 为 288 / 380，320 为 236 / 270；1440/1024/768/390/360/320 × ja/en/zh × sage/dark 0 横向溢出；320 页头 logo 128px、工具右缘 290px；390 一次点击 `/quake/` 成功；无 JS 时 logo/巨型字标仍为域名。
 - 唯一 next：用户确认新字标；确认后展开三个章节入口（地震擦洗 / 犯罪放大镜 / 内阁时间带）。
+
+## 2026-10-21 · M4.4 首页三图直接启动应用
+
+- 用户要求：点首页三张图直接加载启动，不要跳到章节页再点「起動する」。
+- 改：首页预览与本地根首页各加 3 个隐藏 `.home-stage`；面板/产品行加 `data-start-app`。点击由 `shell.js` 拦截：当前页全屏 stage、loading 层、直接 import `/app/<ch>/view.js` 并 mount；URL 不变，关闭按钮回首页并恢复面板文案。无 JS 时仍按 `<a href>` 回退到章节页。章节页原有 launch 保留。
+- 修：quake stage 的 `.stage-live` 补 `id="v-quake-viewport"`；app 内旧品牌字符串（quake 页脚、crime 来源链接、cabinet 版权）改为 `japan.ouuut.com`。
+- 验：预览 1440 点地震出 2 canvas + 地球，点犯罪出 Leaflet `#crm-map`，点内阁出 ECharts canvas；三者 URL 均保持 `/preview/`，关闭后 `stage-open` 移除、面板恢复「開く」；根首页产品行点犯罪同样当前页启动；章节 `/crime/` 原 launch 仍可用；390px 点面板图片启动内阁，关闭按钮 48px 落在视口内、无横向溢出；无 JS 点地震入口回退到 `/quake/`；站点用户可见旧品牌 0。
+- 唯一 next：用户验收三图直启；确认后把 `/preview/` 切为根首页并展开章节细节。

@@ -1,4 +1,4 @@
-/* Pan Out Japan · Quake view (single-page mount)
+/* japan.ouuut.com · Quake view (single-page mount)
  * Source: sites/quake/dist/assets/index-*.js + dist/data/*.json (read-only rollback anchor).
  * Vendor (app/quake/vendor/quake-core.js) is the dist bundle with deterministic
  * string patches ONLY (no logic edits):

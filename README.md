@@ -2,10 +2,11 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4.3 品牌改为域名**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.4 首页三图直接启动应用**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
 > 本地改版预览：`http://127.0.0.1:8900/preview/`（构建后 `cd site && python -m http.server 8900`）。
+> 首页交互：三块数据板点击后在当前页全屏启动对应应用，不再跳章节页；无 JS 时回退为章节链接。
 
 ## 架构
 

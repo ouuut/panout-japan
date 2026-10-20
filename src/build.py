@@ -738,6 +738,18 @@ def foot():
 </body></html>"""
 
 
+def home_stages():
+    out = []
+    for ch in ("quake", "crime", "cabinet"):
+        live_id = ' id="v-quake-viewport"' if ch == "quake" else ''
+        out.append(f"""<div class="stage home-stage" data-live="0" data-view="{ch}">
+<div class="stage-live"{live_id}></div>
+<div class="home-stage-loading" role="status"><span data-t="ui.launching">{ja('ui.launching')}</span></div>
+<button class="launch" data-launch="{ch}" hidden><span>{ja('ui.launch')}</span></button>
+</div>""")
+    return "".join(out)
+
+
 def page(path, title, desc, body, active="", jsonld=None, register=True, head_extra=""):
     body = body.replace('<table class="data-table">', '<div class="table-scroll"><table class="data-table">')
     body = body.replace('</table>', '</table></div>')
@@ -789,7 +801,7 @@ def build_cover():
          "card.cabinet.claim", "NHK / 日経 / 共同 · 1998—2026", cabinet_thumb()),
     ]
     prod_rows = "".join(
-        f"""<a class="prod-row rv" href="{href}">
+        f"""<a class="prod-row rv" href="{href}" data-start-app="{href.strip('/')}">
 <div class="prod-num">{num}</div>
 <div class="prod-body">
 <div class="prod-main">
@@ -840,7 +852,8 @@ def build_cover():
 </div>
 <div class="prod-table">{prod_rows}</div>
 </section>
-</main>"""
+</main>
+{home_stages()}"""
     jsonld = {
         "@context": "https://schema.org", "@type": "WebSite",
         "name": BRAND, "url": SITE_URL + "/",
@@ -870,7 +883,7 @@ def build_home_preview():
 
     entries = []
     for key, num, href, verb, topic, count, unit, claim, source, svg in rows:
-        entries.append(f"""<a class="hp-entry" href="{href}">
+        entries.append(f"""<a class="hp-entry" href="{href}" data-start-app="{key}">
 <div class="hp-entry-head"><span class="hp-num">{num}</span><span class="hp-verb" data-t="{verb}">{ja(verb)}</span><span class="hp-topic" data-t="{topic}">{ja(topic)}</span></div>
 <div class="hp-entry-visual" aria-hidden="true">{svg}</div>
 <div class="hp-entry-body">
@@ -896,7 +909,8 @@ def build_home_preview():
 <p class="hp-method-p" data-t="cover.section.sub">{ja('cover.section.sub')}</p>
 <a class="hp-method-link" href="/method/"><span data-t="cover.method">{ja('cover.method')}</span> ↗</a>
 </section>
-</main>"""
+</main>
+{home_stages()}"""
 
     return page("/preview/", f"{BRAND} — 三つの尺度（preview）",
                 "Three direct entries: earthquakes, crime, cabinets.",

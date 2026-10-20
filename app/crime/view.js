@@ -1,4 +1,4 @@
-/* Pan Out Japan · Crime view (single-page mount)
+/* japan.ouuut.com · Crime view (single-page mount)
  * Source: sites/crime/site/index.html (read-only rollback anchor, 2459 lines).
  * Frozen verbatim: I18N dict + rateOf/buildScales/colorFor + chomeRateOf + updateHistogram/moveHistCursor/hideHistCursor/updateLegendBar + card builders + initMap/highlightParentBoundary/initZoomSlider/applyMode/select + fitTokyo23 + COLOR_RAMPS/VARIANTS/CF maps.
  * Stripped shell chrome: header/topbar/search-box/lang-group/palette+theme buttons/site-domain/SEO-head writes/boot Promise.all.
@@ -959,7 +959,7 @@ function metaFooterCardHtml() {
         </div>
         ${faqHtml}
       </div>
-      <div class="faq-source">${t.siteBy} · <a href="../" style="color:var(--accent)">Pan Out Japan</a> · <a href="../quake/" style="color:var(--accent)">${t.navQuake || "quake"}</a> · <a href="../cabinet/" style="color:var(--accent)">${t.navCabinet || "cabinet"}</a></div>
+      <div class="faq-source">${t.siteBy} · <a href="../" style="color:var(--accent)">japan.ouuut.com</a> · <a href="../quake/" style="color:var(--accent)">${t.navQuake || "quake"}</a> · <a href="../cabinet/" style="color:var(--accent)">${t.navCabinet || "cabinet"}</a></div>
     </div>`;
 }
 

@@ -1,4 +1,4 @@
-/* Pan Out Japan · Cabinet view (single-page mount)
+/* japan.ouuut.com · Cabinet view (single-page mount)
  * Source: sites/cabinet/index.html (read-only rollback anchor, 895 lines).
  * Frozen verbatim: I18N dict + checkI18n block + helpers(fmtMonth/fmtLatest) +
  *   VARIANT_CHART palettes + RANGES + bucket/series/tooltip/markLine/dataZoom math.
@@ -43,7 +43,7 @@ const I18N = {
     exitFocus: '✕ 全部表示', exitTitle: 'クリックで全首相の線を元に戻す',
     pillTitle: 'クリックでこの首相の線にフォーカス',
     yName: '支持率 (%)', avgWord: '平均', corpAvg: '社平均',
-    footRights: '© Pan Out Japan',
+    footRights: '© japan.ouuut.com',
     footSources: 'データ：USGS · 警視庁 · NHK ｜ CC BY 公開統計',
     footHome: '← トップへ戻る',
     chartFail: 'グラフライブラリの読み込みに失敗しました。ネットワークと CDN フォールバックを確認してください。'
@@ -65,7 +65,7 @@ const I18N = {
     pillTitle: '点击聚焦该首相曲线',
     ranges: { '3m': '3个月', '1y': '1年', '2y': '2年', '5y': '5年', '10y': '10年', 'all': '全期间' },
     yName: '支持率 (%)', avgWord: '平均', corpAvg: '家媒体平均',
-    footRights: '© Pan Out Japan',
+    footRights: '© japan.ouuut.com',
     footSources: '数据：USGS · 警视厅 · NHK ｜ CC BY 公开统计',
     footHome: '← 返回门面',
     chartFail: '图表库加载失败，请检查网络与 CDN 备用链路。'
@@ -87,7 +87,7 @@ const I18N = {
     exitFocus: '✕ Show all', exitTitle: 'Click to restore all PM lines',
     pillTitle: 'Click to focus this PM’s line',
     yName: 'Approval (%)', avgWord: 'avg', corpAvg: 'poll avg',
-    footRights: '© Pan Out Japan',
+    footRights: '© japan.ouuut.com',
     footSources: 'Data: USGS · MPD Tokyo · NHK ｜ CC BY open statistics',
     footHome: '← Back to home',
     chartFail: 'Failed to load the chart library. Check your network and the CDN fallback.'

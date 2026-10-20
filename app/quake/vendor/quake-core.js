@@ -4700,7 +4700,7 @@ if (uDissolveActive > 0.5) {
   <div class="eq-bottom-right">
     <p class="eq-hint" id="eq-hint" aria-live="polite">左键平移 右键旋转</p>
     <footer class="eq-footer" id="eq-footer">
-      © Pan Out Japan · 出典 <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a>
+      © japan.ouuut.com · 出典 <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a>
       · <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>
     </footer>
     <div class="eq-depth-range" id="eq-depth-range" title="拖两端：用这一段颜色给全部震源上色">
