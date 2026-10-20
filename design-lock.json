@@ -1,7 +1,141 @@
 {
   "project": "panout-japan",
-  "updated": "2026-10-12",
-  "source_of_truth": "用户 2026-10-12 拍板：产品 Pan Out Japan / 域 japan.ouuut.com；设计跟 ouuut 品牌走（ouuut-v2 的 Tokyo Expedition Magazine Editorial），开工前先读 ouuut-v2/design-lock.json",
-  "style": "Tokyo Expedition Magazine Editorial / ouuut 家族纸质编辑风（开工时从 ouuut-v2 取 token 快照冻结）",
-  "note": "M0 开工时把色板/字体/字号快照进本锁；后续设计改动先读锁再动手，用户拍板新值当轮更新锁"
+  "updated": "2026-10-21",
+  "source_of_truth": "ouuut-v2 design-lock + live computed styles at 1440px, 2026-10-21. japan.ouuut.com must read as the same publication as ouuut.com.",
+  "style": "Tokyo Expedition Magazine Editorial / ouuut family. Two themes only: sage (day) and dark (night). Zero structural lines.",
+  "themes": ["sage", "dark"],
+  "theme_boot": "localStorage pj-theme wins; otherwise sage 06:00-17:59, dark otherwise. No mono.",
+  "tokens": {
+    "sage": {
+      "bg": "#E9EDE3",
+      "ink": "#17211A",
+      "muted": "#56635A",
+      "accent": "#2F6B4F",
+      "accent_ink": "#2F6B4F",
+      "surface": "rgba(23,33,26,.045)",
+      "accent_soft": "rgba(47,107,79,.08)"
+    },
+    "dark": {
+      "bg": "#0E0E0C",
+      "ink": "#EDEBE4",
+      "muted": "#A09E96",
+      "accent": "#FF6A3D",
+      "accent_ink": "#F2653A",
+      "surface": "rgba(237,235,228,.055)",
+      "accent_soft": "rgba(255,106,61,.12)"
+    },
+    "layout": {
+      "maxw": "1360px",
+      "pad": "clamp(20px,4vw,56px)",
+      "gap": "clamp(24px,3vw,48px)",
+      "sec_y": "clamp(5rem,11vw,9.5rem)",
+      "nav_h": "72px",
+      "radius": "4px",
+      "button_radius": "2px"
+    }
+  },
+  "typography": {
+    "wordmark": "Outfit 800 33px, all accent, suffix 45% font-size",
+    "serif": "Instrument Serif 400 / Noto Serif JP 700 / Noto Serif SC 700",
+    "sans": "Geist 400-500 / Noto Sans JP 500 / Noto Sans SC 500",
+    "mono": "JetBrains Mono 400-500",
+    "cover_h1": {
+      "en": "clamp(2rem,6.2vw,5.7rem) / 400 / .96",
+      "ja": "clamp(1.9rem,5vw,4.6rem) / 700 / 1.3",
+      "zh": "clamp(1.9rem,5.6vw,5.2rem) / 700 / 1.28"
+    },
+    "page_h1": "clamp(2rem,4vw,3.5rem) / 400 EN, 700 CJK / 1.12-1.2",
+    "section_h2": "clamp(1.6rem,3.4vw,2.8rem) / 400 EN, 700 CJK / 1.12",
+    "row_name": "clamp(28px,3.2vw,42px) / 400 EN, 700 CJK",
+    "body": "17px / 1.65 EN, 1.8 CJK",
+    "small": "15px / 1.7",
+    "micro": "11px mono / 12px CJK sans",
+    "nav": "12px mono .08em uppercase / 12px CJK sans",
+    "footer": "12px mono",
+    "button": "13px mono 600 uppercase, 52px high, 2px radius"
+  },
+  "assertions": [
+    {
+      "id": "theme-two-only",
+      "kind": "redline",
+      "check": "No mono theme in HTML/JS/CSS; data-theme is sage or dark",
+      "threshold": "mono hits = 0",
+      "how": "grep -R \"mono\" site src | filter allowed font-family refs"
+    },
+    {
+      "id": "token-parity",
+      "kind": "probe",
+      "check": "Computed --bg/--ink/--muted/--accent/--surface equal ouuut.com at same theme",
+      "threshold": "all 5 exact",
+      "how": "playwright getComputedStyle on both origins"
+    },
+    {
+      "id": "wordmark-outfit",
+      "kind": "probe",
+      "check": "Logo font-family Outfit, weight 800, size 33px, color accent",
+      "threshold": "all exact",
+      "how": "getComputedStyle('.wordmark')"
+    },
+    {
+      "id": "type-parity",
+      "kind": "probe",
+      "check": "JA cover H1 72/700/1.3, section 44.8/700, body 17; EN cover H1 89.28/400/.96",
+      "threshold": "within 1px",
+      "how": "playwright computed styles at 1440px"
+    },
+    {
+      "id": "zero-line",
+      "kind": "redline",
+      "check": "No visible border/outline on structural elements",
+      "threshold": "visible structural lines = 0",
+      "how": "scan computed border-width/outline-width excluding focus rings"
+    },
+    {
+      "id": "font-load",
+      "kind": "probe",
+      "check": "All declared faces loaded; every visible CJK element's first family covers its text",
+      "threshold": "missing = 0",
+      "how": "document.fonts.check per element"
+    },
+    {
+      "id": "overflow-zero",
+      "kind": "probe",
+      "check": "scrollWidth <= clientWidth + 1 at 1440/1280/768/390/360, all 3 langs",
+      "threshold": "violations = 0",
+      "how": "playwright viewport sweep"
+    },
+    {
+      "id": "pages-200",
+      "kind": "probe",
+      "check": "All sitemap pages return 200 and contain one h1",
+      "threshold": "failures = 0",
+      "how": "crawl local build"
+    },
+    {
+      "id": "charts-token",
+      "kind": "probe",
+      "check": "No hardcoded brand palette hex in app/*/view.js chart ramps",
+      "threshold": "legacy brand hex = 0",
+      "how": "grep palette arrays"
+    },
+    {
+      "id": "reduced-motion",
+      "kind": "probe",
+      "check": "prefers-reduced-motion disables reveal/animation, content visible",
+      "threshold": "opacity 1, content present",
+      "how": "playwright emulateMedia"
+    },
+    {
+      "id": "no-js",
+      "kind": "probe",
+      "check": "JS disabled: content, tables, links visible; no blank reveal states",
+      "threshold": "h1 + nav + table visible",
+      "how": "playwright javaScriptEnabled=false"
+    }
+  ],
+  "notes": [
+    "Homepage uses three prod-style rows, not three cards.",
+    "Charts use one signal hue per theme; no rainbow categorical palette.",
+    "Motion: grain, scroll progress, header scrolled, .rv reveal, theme view-transition. No custom cursor/particles."
+  ]
 }

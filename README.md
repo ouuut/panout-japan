@@ -2,7 +2,7 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M3 静态重建**（2026-10-19）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4 ouuut 视觉对齐**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**Pan Out Japan**（pan out = 拉远看全景 + 结果如人意；pan = パン/Japan 尾音），域名直球 `japan.ouuut.com`。
 
 ## 架构
@@ -14,7 +14,7 @@
 src/
   build.py      # 唯一构建入口：三语字典、页面模板、静态图表 SVG、CSV/i18n/sitemap/headers
   svgkit.py     # Web Mercator、海岸线裁剪、SVG path
-  fonts.py      # Noto Sans/Serif JP 子集化 → site/assets/fonts (8 文件 ~490KB)
+  fonts.py      # Outfit 800 + Noto Serif/Sans JP/SC 700/500 子集化 → site/assets/fonts (11 文件 ~1.1MB)
   fix_cabinet.py# 内阁数据修正（NHK 2008/09 列错位、同月双调查标注）
   fetch_fonts.py# 字体源下载
   patch_vendor.py # quake bundle 的品牌字符串补丁（域名/出典/重载文案）
@@ -29,10 +29,12 @@ site/           # 构建产物，gitignore
 页面：封面 1 + 地震 27 年页 + 犯罪 3 章 + 62 区页 + 内阁 14 任 + 方法论 + 404，共 **109 页**。
 详情页全部是静态数据页（表格、SVG 海报、CSV 下载）；交互视图在章节页通过 `.stage` 懒加载，闭合后 DOM 恢复海报。
 
+视觉系统与 `ouuut.com` 同源：sage/dark 两态自动主题（本地时间，手动可覆盖）、Outfit 800 字标、EN/JA/ZH 分流字阶、4px surface 块、零结构线条。
+
 ## 构建与发布
 
 ```bash
-python src/build.py                        # 生成 site/（约 26s）
+python src/build.py                        # 生成 site/（约 80s，含字体子集）
 cd site && python -m http.server 8900      # 本地预览
 npx wrangler pages deploy site --project-name=panout-site --branch=main
 ```
@@ -45,7 +47,7 @@ npx wrangler pages deploy site --project-name=panout-site --branch=main
 | 章 | 口径 | 源 |
 |---|---|---|
 | 地震 | 27 年（2000–2026.07），M4+，40,079 次；2011 年按次数 14.6% / 按能量 86.7% | USGS ComCat |
-| 犯罪 | 2023 全年，5,234 町丁，中位 4.4‰，最高 1,332‰ | 都道府県警察 町丁目別犯罪統計 |
+| 犯罪 | 2025 全年，5,234 町丁，中位 4.4‰，最高 1,332‰ | 警視庁 町丁目別犯罪統計 |
 | 内阁 | 14 任 331 个月，644 次调查；最大单月变动 +20.5 | 各社世论调查汇总（NHK/日经/共同/时事/朝日/读卖） |
 
 修正记录见 `src/fix_cabinet.py` 与 `app/cabinet/data.json` 的 `_meta`。

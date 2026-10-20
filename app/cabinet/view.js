@@ -131,32 +131,32 @@ function checkI18n() {
    ECharts 收敛到 tactical：曲线主色 accent，网格/文字按 token
    ============================================================ */
 const VARIANTS = [
-  { id: 'tactical',   swatch: '#d0801a' },
-  { id: 'editorial',  swatch: '#9f3c2c' }
+  { id: 'tactical',   swatch: '#FF6A3D' },
+  { id: 'editorial',  swatch: '#2F6B4F' }
 ];
 const VARIANT_CHART = {
   tactical: {
-    palette: ['#d0801a', '#e8a33d', '#f0c46c', '#f7dd9a', '#bb7a24', '#9c6830', '#77542f', '#57412f', '#e07b39', '#c85a2e', '#d99a5b', '#b25f46', '#a89984', '#6f675b'],
+    palette: ['#ba3a21', '#c54121', '#cf4921', '#da5121', '#df5c26', '#e2682e', '#e57336', '#e77f3e', '#ea8a46', '#ec944f', '#ee9f57', '#f0a960', '#f2b269', '#f4bb71'],
     chart: {
       gridBorder: 'transparent',
       tooltipBg: 'rgba(20,18,16,0.96)', tooltipBorder: 'rgba(255,244,232,0.14)',
-      tooltipText: '#f5f0e8', tooltipMuted: '#a89d8d', tooltipDim: '#6f675b',
-      axisLine: 'rgba(255,244,232,0.16)', axisLabel: '#a89d8d',
-      splitLine: 'rgba(255,244,232,0.10)', splitLineType: 'dashed',
-      zoomBorder: 'rgba(255,244,232,0.14)', zoomBg: '#0d0c0b', zoomFill: 'rgba(208,128,26,0.16)', zoomHandle: '#d0801a', zoomText: '#6f675b',
-      markLabelBg: 'rgba(20,18,16,0.92)', pointBorder: '#141210'
+      tooltipText: '#EDEBE4', tooltipMuted: '#A09E96', tooltipDim: '#A09E96',
+      axisLine: 'rgba(237,235,228,0.16)', axisLabel: '#A09E96',
+      splitLine: 'rgba(237,235,228,0.10)', splitLineType: 'dashed',
+      zoomBorder: 'rgba(237,235,228,0.14)', zoomBg: '#0E0E0C', zoomFill: 'rgba(255,106,61,0.16)', zoomHandle: '#FF6A3D', zoomText: '#A09E96',
+      markLabelBg: 'rgba(20,18,16,0.92)', pointBorder: '#0E0E0C'
     }
   },
   editorial: {
-    palette: ['#9f3c2c', '#c41e3a', '#b25f46', '#8a5a24', '#2c4a6e', '#4a6a8a', '#3d6b6b', '#5a8a7a', '#2f6b4f', '#6b4a6b', '#8a3a5a', '#7a6a4a', '#3a4a6a', '#1a1714'],
+    palette: ['#2d533d', '#305c44', '#34654c', '#386e53', '#3b775b', '#3e8063', '#41896c', '#449375', '#479d7e', '#4aa687', '#4db091', '#54b69a', '#5bbba2', '#63bfaa'],
     chart: {
       gridBorder: 'transparent',
-      tooltipBg: 'rgba(250,248,245,0.97)', tooltipBorder: '#e2ddd3',
-      tooltipText: '#181614', tooltipMuted: '#6e675c', tooltipDim: '#9c9486',
-      axisLine: 'rgba(24,22,20,0.20)', axisLabel: '#6e675c',
-      splitLine: 'rgba(24,22,20,0.08)', splitLineType: 'dashed',
-      zoomBorder: '#e2ddd3', zoomBg: '#faf8f5', zoomFill: 'rgba(159,60,44,0.12)', zoomHandle: '#9f3c2c', zoomText: '#9c9486',
-      markLabelBg: 'rgba(250,248,245,0.93)', pointBorder: '#faf8f5'
+      tooltipBg: 'rgba(233,237,227,0.97)', tooltipBorder: 'rgba(23,33,26,0.12)',
+      tooltipText: '#17211A', tooltipMuted: '#56635A', tooltipDim: '#56635A',
+      axisLine: 'rgba(23,33,26,0.20)', axisLabel: '#56635A',
+      splitLine: 'rgba(23,33,26,0.08)', splitLineType: 'dashed',
+      zoomBorder: 'rgba(23,33,26,0.12)', zoomBg: '#E9EDE3', zoomFill: 'rgba(47,107,79,0.12)', zoomHandle: '#2F6B4F', zoomText: '#56635A',
+      markLabelBg: 'rgba(233,237,227,0.93)', pointBorder: '#E9EDE3'
     }
   }
 };

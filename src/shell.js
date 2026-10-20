@@ -1,10 +1,10 @@
-/* Pan Out Japan · shell.js — theme, language, lazy chapter launch.
+/* Pan Out Japan · shell.js — theme, language, header, reveal, lazy chapter launch.
    No framework, no build step. Everything degrades without JS. */
 (function () {
   'use strict';
 
   var doc = document.documentElement;
-  var THEMES = ['mono', 'sage', 'dark'];
+  var THEMES = ['sage', 'dark'];
   var LANGS = ['ja', 'zh', 'en'];
   var dic = null;
   var scriptSrc = (document.currentScript && document.currentScript.src) || '';
@@ -53,22 +53,46 @@
       .catch(function () { return null; });
   }
 
-  function setTheme(t) {
-    if (THEMES.indexOf(t) < 0) t = 'mono';
+  function autoTheme() {
+    var h = new Date().getHours();
+    return (h >= 6 && h < 18) ? 'sage' : 'dark';
+  }
+
+  function syncVendorTheme(t) {
+    var live = document.querySelector('.stage[data-live="1"]');
+    if (live && live._setVendorTheme) live._setVendorTheme(t);
+  }
+
+  function applyTheme(t) {
+    if (THEMES.indexOf(t) < 0) t = 'sage';
     doc.dataset.theme = t;
-    put('pj-theme', t);
-    var btn = document.querySelector('[data-theme-btn]');
-    if (btn) {
-      var label = tr('ui.theme') || 'Theme';
-      btn.setAttribute('aria-label', label);
-      btn.setAttribute('title', label);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', t === 'dark' ? '#0E0E0C' : '#E9EDE3');
+    var dots = document.querySelectorAll('[data-theme-set]');
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].setAttribute('aria-pressed', String(dots[i].dataset.themeSet === t));
+    }
+    var sage = tr('ui.theme.sage') || 'Sage';
+    var dark = tr('ui.theme.dark') || 'Dark';
+    if (dots.length) {
+      for (var k = 0; k < dots.length; k++) {
+        var label = dots[k].dataset.themeSet === 'dark' ? dark : sage;
+        dots[k].setAttribute('aria-label', label);
+        dots[k].setAttribute('title', label);
+      }
     }
     try { window.dispatchEvent(new CustomEvent('pj:theme', { detail: t })); } catch (e) {}
+    syncVendorTheme(t);
+  }
+
+  function setTheme(t, save) {
+    if (save) put('pj-theme', t);
+    applyTheme(t);
   }
 
   function bootTheme() {
-    var t = get('pj-theme');
-    setTheme(THEMES.indexOf(t) >= 0 ? t : 'mono');
+    var saved = get('pj-theme');
+    applyTheme(THEMES.indexOf(saved) >= 0 ? saved : autoTheme());
   }
 
   function bootLang() {
@@ -90,7 +114,7 @@
 
     var url = '/app/' + ch + '/view.js' + (VER ? '?v=' + VER : '');
     import(url).then(function (mod) {
-      var opts = { base: '/', lang: lang(), theme: doc.dataset.theme || 'mono' };
+      var opts = { base: '/', lang: lang(), theme: doc.dataset.theme || 'sage' };
       if (ch === 'quake') mod.mountQuake(live, opts);
       else if (ch === 'crime') mod.mountCrime(live, opts);
       else mod.mountCabinet(live, opts);
@@ -102,11 +126,21 @@
           else if (ch === 'cabinet' && mod.setCabinetLang) mod.setCabinetLang(l);
         } catch (e) {}
       };
+      live._setVendorTheme = function (t) {
+        try {
+          if (ch === 'quake' && mod.setQuakeTheme) mod.setQuakeTheme(t);
+          else if (ch === 'crime' && mod.setCrimeTheme) mod.setCrimeTheme(t);
+          else if (ch === 'cabinet' && mod.setCabinetTheme) mod.setCabinetTheme(t);
+        } catch (e) {}
+      };
       live._setVendorLang(opts.lang);
+      live._setVendorTheme(opts.theme);
 
       stage.dataset.live = '1';
       document.body.classList.add('stage-open');
       setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 60);
+      setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 350);
+      setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, 900);
       var close = document.createElement('button');
       close.className = 'stage-close';
       close.type = 'button';
@@ -120,6 +154,7 @@
         } catch (e) {}
         live.innerHTML = '';
         live._setVendorLang = null;
+        live._setVendorTheme = null;
         stage.dataset.live = '0';
         delete stage.dataset.busy;
         document.body.classList.remove('stage-open');
@@ -149,10 +184,77 @@
     }
   }
 
+  function setupHeader() {
+    var header = document.querySelector('.masthead');
+    var bar = document.querySelector('.scroll-progress');
+    function onScroll() {
+      var y = window.scrollY || window.pageYOffset || 0;
+      if (header) header.classList.toggle('scrolled', y > 8);
+      if (bar) {
+        var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        bar.style.width = Math.min(100, Math.max(0, y / max * 100)) + '%';
+      }
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+  }
+
+  function setupMenu() {
+    var btn = document.querySelector('[data-burger]');
+    var menu = document.getElementById('mobile-menu');
+    if (!btn || !menu) return;
+    function close() {
+      menu.classList.remove('open');
+      document.body.classList.remove('menu-open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+    function toggle() {
+      var open = !menu.classList.contains('open');
+      menu.classList.toggle('open', open);
+      document.body.classList.toggle('menu-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    btn.addEventListener('click', toggle);
+    var links = menu.querySelectorAll('a');
+    for (var i = 0; i < links.length; i++) links[i].addEventListener('click', close);
+    menu.querySelectorAll('[data-lang], [data-theme-set]').forEach(function (el) {
+      el.addEventListener('click', close);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') close();
+    });
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 760) close();
+    });
+  }
+
+  function setupReveal() {
+    var els = document.querySelectorAll('.rv');
+    if (!els.length) return;
+    if (!('IntersectionObserver' in window)) {
+      for (var i = 0; i < els.length; i++) els[i].classList.add('in');
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      for (var j = 0; j < entries.length; j++) {
+        if (entries[j].isIntersecting) {
+          entries[j].target.classList.add('in');
+          io.unobserve(entries[j].target);
+        }
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    for (var k = 0; k < els.length; k++) io.observe(els[k]);
+  }
+
   function init() {
+    doc.classList.add('js');
     bootTheme();
     bootLang();
     legacyHash();
+    setupHeader();
+    setupMenu();
+    setupReveal();
 
     var langs = document.querySelectorAll('[data-lang]');
     for (var i = 0; i < langs.length; i++) {
@@ -162,15 +264,16 @@
       });
     }
 
-    var tb = document.querySelector('[data-theme-btn]');
-    if (tb) tb.addEventListener('click', function () {
-      var cur = doc.dataset.theme || 'mono';
-      setTheme(THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length]);
-    });
+    var dots = document.querySelectorAll('[data-theme-set]');
+    for (var j = 0; j < dots.length; j++) {
+      dots[j].addEventListener('click', function () {
+        setTheme(this.dataset.themeSet, true);
+      });
+    }
 
     var btns = document.querySelectorAll('[data-launch]');
-    for (var j = 0; j < btns.length; j++) {
-      btns[j].addEventListener('click', function () { launch(this); });
+    for (var k = 0; k < btns.length; k++) {
+      btns[k].addEventListener('click', function () { launch(this); });
     }
   }
 

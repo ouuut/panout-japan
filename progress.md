@@ -89,3 +89,16 @@
 - 载荷实测（gzip，brotli 更低）：封面 35.4KB→8.7KB、地震章 52.1/15.6、犯罪章 67.4/22.6、内阁章 16.9/5.1；CSS 22.1/5.4；shell.js 6.0/1.9；i18n 18.6/7.6；字体 8 文件 491KB（unicode-range 按需）。
 - a11y 底线：109 页 h1 唯一（0 违例）、`:focus-visible` 有；移动端按钮 40px 高、导航链 38px（>WCAG 24px）。
 - 残留：部署待 CF 凭据（`wrangler whoami` 未认证、本机无 token）。
+
+## 2026-10-21 · M4 ouuut 视觉对齐（全站 109 页）
+
+- 用户令：japan.ouuut.com 各页设计语言与 ouuut.com 完全一致，含左上 logo 字体。
+- 主题：删除 mono；sage/dark 两态按本地时间自动（6–17 sage，其余 dark），手动点选写 `pj-theme`；`theme-color` 随主题更新。
+- 字标：Outfit 800 / 33px / accent，`pan out` + `japan` 45%；重子集 Outfit 800（10KB）覆盖 `panoutjapan` + ASCII；favicon 改 Outfit `p`。
+- 字阶：EN Instrument 400、JA/ZH Noto Serif 700；正文 17px（EN 1.65 / CJK 1.8）；cover H1 EN 89.28/400/.96、JA 72/700/1.3、ZH 80.64/700/1.28；section 44.8/700；page H1 56/700；logo 33/800。
+- 组件：页头 72px + 90% blur + scrolled；2 主题点（44px 命中）/文本语言链/移动汉堡+全屏菜单；首页两栏 hero + 三尺度面板 + Outfit 巨型字标 + 三条 ouuut 式索引行；stage 4px surface 无阴影；表格 15px + 单色顺序带 + 移动横向滚动；页脚品牌字标 + 12px 三行。
+- 字体：Outfit 800 + Noto Serif/Sans JP 700/500 + Noto Serif/Sans SC 700/500 + Instrument/Geist/JetBrains，11 文件 1.06MB；CJK 子集并入 app/*.js 剥注释后的 UI 字符串（1230 字符）。
+- 图表：crime 色阶改 sage/orange 单色顺序带；cabinet 14 任改 accent 顺序色；loader/面板变量对齐 token。
+- 修复：移除 `startViewTransition`（relay 下旧主题快照卡住）；crime 全屏 `#crm-root/#crm-map` 高度 100%；cabinet stage-flow 去掉 62vh 空洞；移动表格 idx 列 42px；CJK `word-break:auto-phrase` 修 `同/じ` 断词；`#chapters` scroll-margin 避吸顶页头。
+- 验：sitemap 108 页本地 200、h1 唯一 0 违例；1440/768/390/320 × ja/zh/en 0 横向溢出；12 个字体面 loaded；home/chapter/year/method 可见边框 0；无 JS 内容可见；reduced-motion 内容可见且 grain 关闭；ouuut.com 实测 sage/dark token 与 logo 33/800 逐值一致。
+- 待办：部署 `panout-site` 并线上复验。

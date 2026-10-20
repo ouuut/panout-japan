@@ -1,20 +1,38 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""fonts.py — subset CJK variable fonts to the site's own character set.
+"""fonts.py — subset every face the panout-japan UI actually needs.
 
-Inputs : .cache/fonts/NotoSansJP-VF.ttf, NotoSerifJP-VF.ttf
-Output : site/assets/fonts/*.woff2 + @font-face CSS
-Latin   : reused from ouuut-v2 assets/fonts (already small subsets)
+Inputs
+  .cache/fonts/NotoSansJP-VF.ttf, NotoSerifJP-VF.ttf
+  F:/projects/saaaai-v3/tools/.cache/Noto{Sans,Serif}SC[wght].ttf
+  F:/archive/20261014-omp-data-retire/dirs/tmp_fonts/outfit.ttf
+  F:/projects/ouuut-v2/assets/fonts/ (Latin statics already split by ouuut)
+
+Output
+  site/assets/fonts/*.woff2 + @font-face CSS
+
+Roles
+  Outfit 800        wordmark / giant wordmark / 404
+  Instrument 400    EN headings
+  Geist 400/500     EN body + UI
+  JetBrains 400/500 Latin numerals + eyebrow
+  Noto Serif JP 700 / SC 700   CJK headings
+  Noto Sans JP 500 / SC 500    CJK body + UI
 """
 import hashlib
 import shutil
 from pathlib import Path
 
 LATIN_DIR = Path("F:/projects/ouuut-v2/assets/fonts")
+SC_CACHE = Path("F:/projects/saaaai-v3/tools/.cache")
+OUTFIT_SRC = Path("F:/archive/20261014-omp-data-retire/dirs/tmp_fonts/outfit.ttf")
 
+# name, source path or filename in cache_dir, weight, family
 CJK = [
-    ("noto-sans-jp-400", "NotoSansJP-VF.ttf", 400, "Noto Sans JP"),
-    ("noto-serif-jp-400", "NotoSerifJP-VF.ttf", 400, "Noto Serif JP"),
+    ("noto-serif-jp-700", "NotoSerifJP-VF.ttf", 700, "Noto Serif JP"),
+    ("noto-sans-jp-500", "NotoSansJP-VF.ttf", 500, "Noto Sans JP"),
+    ("noto-serif-sc-700", SC_CACHE / "NotoSerifSC[wght].ttf", 700, "Noto Serif SC"),
+    ("noto-sans-sc-500", SC_CACHE / "NotoSansSC[wght].ttf", 500, "Noto Sans SC"),
 ]
 
 LATIN = [
@@ -27,7 +45,7 @@ LATIN = [
 ]
 
 
-def _subset_cjk(src, dst, text, weight):
+def _subset(src, dst, text, weight):
     from fontTools.ttLib import TTFont
     from fontTools.varLib.instancer import instantiateVariableFont
     from fontTools import subset
@@ -56,23 +74,36 @@ def build(charset, out_dir, cache_dir):
 
     files = []
     faces = []
+
+    # Wordmark: Outfit 800, ASCII + product name. Subsetting a VF keeps the file tiny.
+    outfit_text = "".join(chr(i) for i in range(32, 127)) + "panoutjapan"
+    outfit_dst = out_dir / "outfit-800.woff2"
+    _subset(OUTFIT_SRC, outfit_dst, outfit_text, 800)
+    files.append(outfit_dst)
+    faces.append(("Outfit", 800, "normal", outfit_dst.name))
+
     for name, src_name, weight, family in CJK:
-        src = cache_dir / src_name
+        src = src_name if isinstance(src_name, Path) else cache_dir / src_name
         dst = out_dir / (name + ".woff2")
         if not src.exists():
             raise FileNotFoundError(str(src))
-        _subset_cjk(src, dst, charset, weight)
+        _subset(src, dst, charset, weight)
         files.append(dst)
         faces.append((family, weight, "normal", dst.name))
 
     for src_name, name, family, weight, style in LATIN:
         src = LATIN_DIR / src_name
         if not src.exists():
-            continue
+            raise FileNotFoundError(str(src))
         dst = out_dir / (name + ".woff2")
         shutil.copyfile(src, dst)
         files.append(dst)
         faces.append((family, weight, style, dst.name))
+
+    keep = {p.name for p in files}
+    for old in out_dir.glob("*.woff2"):
+        if old.name not in keep:
+            old.unlink()
 
     h = hashlib.sha1()
     for p in files:

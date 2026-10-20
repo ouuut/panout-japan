@@ -396,6 +396,16 @@ COPY = {
     "cover.lede": ("引いて見る地震、寄って見る犯罪、通して見る内閣。同じ国土を、別々の時間で測る。",
                    "拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。",
                    "Pull back for earthquakes, zoom in for crime, stretch out for cabinets. One land, three kinds of time."),
+    "cover.cta": ("三つの章へ", "进入三个章节", "Enter the chapters"),
+    "cover.method": ("方法と出典", "方法与来源", "Method & sources"),
+    "cover.section.eyebrow": ("THREE SCALES / 三つの章", "THREE SCALES / 三个章节", "THREE SCALES / THREE CHAPTERS"),
+    "cover.section.h": ("同じ国土を、三つの時間で。", "同一片国土，三种时间。", "One land, three kinds of time."),
+    "cover.section.sub": ("数字はすべて一次資料から静的に生成。年を切り、町丁に寄り、内閣を並べる。",
+                          "所有数字由一次资料静态生成。切年、入町丁、排内阁。",
+                          "Every number is statically generated from primary sources. Cut by year, zoom into districts, line up cabinets."),
+    "ui.theme.sage": ("Sage", "浅色", "Sage"),
+    "ui.theme.dark": ("Dark", "深色", "Dark"),
+    "prod.open": ("開く", "打开", "Open"),
     "cover.scale.quake": ("列島 · 27年", "列岛 · 27年", "Archipelago · 27 yrs"),
     "cover.scale.crime": ("東京 · 62区市町村", "东京 · 62区市町村", "Tokyo · 62 wards"),
     "cover.scale.cabinet": ("内閣 · 14", "内阁 · 14", "Cabinets · 14"),
@@ -622,8 +632,14 @@ def head(title, desc, path, jsonld=None):
     ld = ""
     if jsonld:
         ld = '<script type="application/ld+json">' + json.dumps(jsonld, ensure_ascii=False) + "</script>"
+    boot = ("<script>try{var d=document.documentElement;d.classList.add('js');"
+            "var t=null;try{t=localStorage.getItem('pj-theme')}catch(e){}"
+            "if(t!=='sage'&&t!=='dark'){var h=new Date().getHours();t=(h>=6&&h<18)?'sage':'dark';}"
+            "d.dataset.theme=t;"
+            "var l=localStorage.getItem('pj-lang');if(l)d.lang=l;"
+            "}catch(e){}</script>")
     return f"""<!doctype html>
-<html lang="ja" data-theme="mono">
+<html lang="ja" data-theme="sage">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -638,16 +654,29 @@ def head(title, desc, path, jsonld=None):
 <meta property="og:url" content="{u}">
 <meta property="og:locale" content="ja_JP">
 <meta name="twitter:card" content="summary">
-<meta name="theme-color" content="#F3F1EA">
+<meta name="theme-color" content="#E9EDE3">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/assets/fonts/noto-serif-jp-400.woff2?v=__FONT_VER__" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/noto-serif-jp-700.woff2?v=__FONT_VER__" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/outfit-800.woff2?v=__FONT_VER__" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/app.css?v=__CSS_VER__">
-<script>try{{var d=document.documentElement;d.dataset.theme=localStorage.getItem('pj-theme')||'mono';var l=localStorage.getItem('pj-lang');if(l)d.lang=l;}}catch(e){{}}</script>
+{boot}
 {ld}
 </head>
 <body>
 <a class="skip" href="#main"{tattr('skip')}>{ja('skip')}</a>
+<div class="grain" aria-hidden="true"></div>
+<div class="scroll-progress" aria-hidden="true"></div>
 """
+
+
+THEME_DOTS = """<div class="theme-switcher" role="group" aria-label="Theme">
+<button class="theme-dot" type="button" data-theme-set="sage" aria-pressed="true" aria-label="Sage" title="Sage" style="--td-bg:#E9EDE3;--td-accent:#2F6B4F"><span class="td-dot"><span class="td-core"></span></span></button>
+<button class="theme-dot" type="button" data-theme-set="dark" aria-pressed="false" aria-label="Dark" title="Dark" style="--td-bg:#0E0E0C;--td-accent:#FF6A3D"><span class="td-dot"><span class="td-core"></span></span></button>
+</div>"""
+
+LANG_NAV = """<div class="lang-nav" role="group" aria-label="Language">
+<button type="button" data-lang="en" aria-pressed="false">EN</button><span class="lang-sep">·</span><button type="button" data-lang="ja" aria-pressed="true">日本語</button><span class="lang-sep">·</span><button type="button" data-lang="zh" aria-pressed="false">中文</button>
+</div>"""
 
 
 def mast(active=""):
@@ -656,43 +685,65 @@ def mast(active=""):
         return f'<a href="{href}"{cur}{tattr(key)}>{ja(key)}</a>'
 
     return f"""<header class="masthead"><div class="wrap masthead-in">
-<a class="wordmark" href="/">Pan Out <span>Japan</span><small>Japan in three scales</small></a>
+<a class="wordmark" href="/" aria-label="Pan Out Japan"><span class="wm-main">pan out</span><span class="wm-tld">japan</span></a>
 <nav class="chapters" aria-label="Chapters">
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
-{link('/method/', 'nav.method', 'method').replace('<a ', '<a class="nav-method" ')}
+{link('/method/', 'nav.method', 'method')}
 </nav>
 <div class="tools">
-<button data-lang="ja" aria-pressed="true">JA</button>
-<button data-lang="zh" aria-pressed="false">中</button>
-<button data-lang="en" aria-pressed="false">EN</button>
-<button class="theme-toggle" data-theme-btn aria-label="{esc(ja('ui.theme'))}" title="{esc(ja('ui.theme'))}">
-<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 2.8a7.2 7.2 0 0 1 0 14.4z" fill="currentColor"/></svg>
-</button>
+{THEME_DOTS}
+{LANG_NAV}
+<button class="burger" type="button" data-burger aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu"><span></span><span></span></button>
 </div>
 </div></header>
+<div class="mobile-menu" id="mobile-menu">
+<nav class="mobile-nav-links" aria-label="Chapters">
+{link('/quake/', 'nav.quake', 'quake')}
+{link('/crime/', 'nav.crime', 'crime')}
+{link('/cabinet/', 'nav.cabinet', 'cabinet')}
+{link('/method/', 'nav.method', 'method')}
+</nav>
+<div class="mobile-foot">
+{LANG_NAV}
+{THEME_DOTS}
+</div>
+</div>
 """
 
 
 def foot():
     return f"""<footer class="foot"><div class="wrap foot-in">
+<div class="foot-top">
+<a class="wordmark" href="/" aria-label="Pan Out Japan"><span class="wm-main">pan out</span><span class="wm-tld">japan</span></a>
+<a href="/method/"{tattr('foot.method')}>{ja('foot.method')}</a>
+</div>
+<div class="foot-products">
+<a href="/quake/"{tattr('nav.quake')}>{ja('nav.quake')}</a>
+<a href="/crime/"{tattr('nav.crime')}>{ja('nav.crime')}</a>
+<a href="/cabinet/"{tattr('nav.cabinet')}>{ja('nav.cabinet')}</a>
+<a href="/method/"{tattr('nav.method')}>{ja('nav.method')}</a>
+</div>
+<div class="foot-bottom">
 <span>Pan Out Japan — <span{tattr('foot.tag')}>{ja('foot.tag')}</span></span>
-<span><a href="/method/"{tattr('foot.method')}>{ja('foot.method')}</a> · <a href="/method/#download">CSV</a> · <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a></span>
-<span><span{tattr('foot.built')}>{ja('foot.built')}</span> · {BUILD_DATE}</span>
+<span><a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a> · <span{tattr('foot.built')}>{ja('foot.built')}</span> · {BUILD_DATE}</span>
+</div>
 </div></footer>
 <script src="/assets/shell.js?v=__JS_VER__" defer></script>
 </body></html>"""
 
 
 def page(path, title, desc, body, active="", jsonld=None):
+    body = body.replace('<table class="data-table">', '<div class="table-scroll"><table class="data-table">')
+    body = body.replace('</table>', '</table></div>')
     html_doc = head(title, desc, path, jsonld) + mast(active) + body + foot()
     PAGES.append((path, title, desc))
     return html_doc
 
 
 def stats(items):
-    out = ['<dl class="stats">']
+    out = ['<dl class="stats rv">']
     for label_key, value, unit in items:
         u = f"<small>{esc(unit)}</small>" if unit else ""
         out.append(f'<div><dt{tattr(label_key)}>{ja(label_key)}</dt>'
@@ -724,35 +775,65 @@ def build_cover():
         + f'</span><span class="spine-val">{val}</span></div>'
         for k, vals, val, _ in sp_rows)
 
+    rows = [
+        ("01", "/quake/", "QUAKE", "40,079", "card.quake.unit", "card.quake.title",
+         "card.quake.claim", "USGS ComCat · 2000—2026.07", quake_thumb()),
+        ("02", "/crime/", "CRIME", "5,234", "card.crime.unit", "card.crime.title",
+         "card.crime.claim", "警視庁 · 2025", crime_thumb()),
+        ("03", "/cabinet/", "CABINET", "331", "card.cabinet.unit", "card.cabinet.title",
+         "card.cabinet.claim", "NHK / 日経 / 共同 · 1998—2026", cabinet_thumb()),
+    ]
+    prod_rows = "".join(
+        f"""<a class="prod-row rv" href="{href}">
+<div class="prod-num">{num}</div>
+<div class="prod-body">
+<div class="prod-main">
+<h2 class="prod-name"{tattr(tk)}>{ja(tk)}</h2>
+<p class="prod-domain"><span class="prod-count">{count}</span><span{tattr(uk)}>{ja(uk)}</span></p>
+<p class="prod-tagline"{tattr(ck)}>{ja(ck)}</p>
+<p class="prod-note">{note}</p>
+</div>
+<div class="prod-meta">
+<span class="prod-kw">{kw}</span>
+<span class="prod-status live"><span class="status-dot"></span>LIVE DATA</span>
+<span class="prod-action"><span{tattr('prod.open')}>{ja('prod.open')}</span> ↗</span>
+</div>
+</div>
+<div class="prod-visual">{thumb}</div>
+</a>"""
+        for num, href, kw, count, uk, tk, ck, note, thumb in rows)
+
     body = f"""<main id="main">
 <section class="wrap cover">
-<p class="eyebrow rise"{tattr('cover.kicker')}>{ja('cover.kicker')}</p>
-<h1 class="rise"{tattr('cover.title')}>{ja('cover.title')}</h1>
-<p class="lede rise"{tattr('cover.lede')}>{ja('cover.lede')}</p>
-<div class="spine rise">{spine}</div>
-<div class="cover-grid">
-<a class="chapter-card rise" href="/quake/">
-<div class="num">40,079</div>
-<div class="unit"{tattr('card.quake.unit')}>{ja('card.quake.unit')}</div>
-<h2{tattr('card.quake.title')}>{ja('card.quake.title')}</h2>
-<p{tattr('card.quake.claim')}>{ja('card.quake.claim')}</p>
-<div class="thumb">{quake_thumb()}</div>
-</a>
-<a class="chapter-card rise" href="/crime/">
-<div class="num">5,234</div>
-<div class="unit"{tattr('card.crime.unit')}>{ja('card.crime.unit')}</div>
-<h2{tattr('card.crime.title')}>{ja('card.crime.title')}</h2>
-<p{tattr('card.crime.claim')}>{ja('card.crime.claim')}</p>
-<div class="thumb">{crime_thumb()}</div>
-</a>
-<a class="chapter-card rise" href="/cabinet/">
-<div class="num">331</div>
-<div class="unit"{tattr('card.cabinet.unit')}>{ja('card.cabinet.unit')}</div>
-<h2{tattr('card.cabinet.title')}>{ja('card.cabinet.title')}</h2>
-<p{tattr('card.cabinet.claim')}>{ja('card.cabinet.claim')}</p>
-<div class="thumb">{cabinet_thumb()}</div>
-</a>
+<div class="hero-grid">
+<div class="hero-content">
+<p class="eyebrow rv"{tattr('cover.kicker')}>{ja('cover.kicker')}</p>
+<h1 class="rv"{tattr('cover.title')}>{ja('cover.title')}</h1>
+<p class="lede rv"{tattr('cover.lede')}>{ja('cover.lede')}</p>
+<div class="hero-actions rv">
+<a class="btn-primary" href="#chapters"><span{tattr('cover.cta')}>{ja('cover.cta')}</span> ↓</a>
+<a class="btn-secondary" href="/method/"><span{tattr('cover.method')}>{ja('cover.method')}</span> ↗</a>
 </div>
+</div>
+<aside class="hero-panel rv" aria-label="Three scales">
+<div class="panel-head"><span>FIG. 01</span><span>THREE SCALES</span></div>
+<div class="spine">{spine}</div>
+<p class="panel-cap">2000—2026 · 40,079 / 5,234 / 331</p>
+</aside>
+</div>
+<div class="hero-wordmark-bottom rv" aria-hidden="true">
+<div class="datum-rail datum-rail-top"><span>PAN OUT JAPAN</span><span>2000—2026</span><span>THREE SCALES</span></div>
+<div class="hero-wordmark-text"><span class="wm-main">pan out</span><span class="wm-tld">japan</span></div>
+<div class="datum-rail datum-rail-bottom"><span>35.68°N 139.69°E</span><span>QUAKE / CRIME / CABINET</span><span>JAPAN</span></div>
+</div>
+</section>
+<section class="wrap products-sec" id="chapters">
+<div class="section-label">
+<p class="eyebrow"{tattr('cover.section.eyebrow')}>{ja('cover.section.eyebrow')}</p>
+<h2 class="section-title"{tattr('cover.section.h')}>{ja('cover.section.h')}</h2>
+<p class="section-sub"{tattr('cover.section.sub')}>{ja('cover.section.sub')}</p>
+</div>
+<div class="prod-table">{prod_rows}</div>
 </section>
 </main>"""
     jsonld = {
@@ -771,14 +852,14 @@ def build_quake():
     mx = max(Q, key=lambda x: x["mag"])
     e2011 = YEAR_E["2011"] / TOTAL_E
     body = f"""<main id="main">
-<section class="wrap chapter-head">
+<section class="wrap chapter-head rv">
 <p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <span{tattr('q.eyebrow')}>{ja('q.eyebrow')}</span></p>
 <h1{tattr('q.h1')}>{ja('q.h1')}</h1>
 <p class="lede"{tattr('q.lede')}>{ja('q.lede')}</p>
 {stats([('q.stat.count', n(len(Q)), ''), ('q.stat.strong', n(m6), ''),
             ('q.stat.max', 'M' + f"{mx['mag']:.1f}", ''), ('q.stat.energy', pct(e2011) + '%', '')])}
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <div class="stage" data-live="0" data-view="quake">
 <div class="stage-poster">{quake_poster()}</div>
 <p class="stage-caption">M4+ · {n(len(Q))} hypocentres · 2000–2026.07 · USGS ComCat</p>
@@ -786,12 +867,12 @@ def build_quake():
 <div class="stage-live" id="v-quake-viewport"></div>
 </div>
 </section>
-<section class="wrap beats">
+<section class="wrap beats rv">
 <div class="beat"><div class="n">01</div><h3{tattr('q.beat1.t')}>{ja('q.beat1.t')}</h3><p{tattr('q.beat1.p')}>{ja('q.beat1.p')}</p></div>
 <div class="beat"><div class="n">02</div><h3{tattr('q.beat2.t')}>{ja('q.beat2.t')}</h3><p{tattr('q.beat2.p')}>{ja('q.beat2.p')}</p></div>
 <div class="beat"><div class="n">03</div><h3{tattr('q.beat3.t')}>{ja('q.beat3.t')}</h3><p{tattr('q.beat3.p')}>{ja('q.beat3.p')}</p></div>
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <h2 class="section-title"{tattr('q.index.title')}>{ja('q.index.title')}</h2>
 <p class="section-sub"{tattr('q.index.sub')}>{ja('q.index.sub')}</p>
 <div class="year-index">""" + "".join(
@@ -835,14 +916,14 @@ def build_year(y):
     if y == "2026":
         lede += "2026年は7月15日までの集計。"
     body = f"""<main id="main">
-<section class="wrap chapter-head">
+<section class="wrap chapter-head rv">
 <p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <a href="/quake/"{tattr('nav.quake')}>{ja('nav.quake')}</a> / {y}</p>
 <h1>{y}<span class="h1-sub">年</span></h1>
 <p class="lede">{esc(lede)}</p>
 {stats([('q.stat.count', n(cnt), ''), ('q.stat.strong', n(m6), ''),
             ('q.stat.max', 'M' + f"{mx['mag']:.1f}", ''), ('d.year.energy', jfmt(e) + ' J', '')])}
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <figure class="figure">
 {bar_svg(months, [str(m) for m in range(1, 13)], highlight=int(mx["time"][5:7]) - 1 if mx["time"][:4] == y else None)}
 <figcaption><span{tattr('d.year.months')}>{ja('d.year.months')}</span> · {y} · USGS</figcaption>
@@ -866,14 +947,14 @@ def build_crime():
     rates_sorted = sorted(rates)
     med = rates_sorted[len(rates_sorted) // 2]
     body = f"""<main id="main">
-<section class="wrap chapter-head">
+<section class="wrap chapter-head rv">
 <p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <span{tattr('c.eyebrow')}>{ja('c.eyebrow')}</span></p>
 <h1{tattr('c.h1')}>{ja('c.h1')}</h1>
 <p class="lede"{tattr('c.lede')}>{ja('c.lede')}</p>
 {stats([('c.stat.total', n(TOTAL_CRIME), ''), ('c.stat.wards', n(len(MUNI)), ''),
             ('c.stat.median', f1(CHOME_MEDIAN) + '‰', ''), ('c.stat.max', n(CHOME_MAX) + '‰', '')])}
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <div class="stage stage-crime" data-live="0" data-view="crime">
 <div class="stage-poster">{crime_poster()}</div>
 <p class="stage-caption">1 dot = 1 町丁 · 本土 {n(len([p for p in POINTS if p.get("lng") and 138.9 <= p["lng"] <= 139.96 and 35.46 <= p["lat"] <= 35.92]))} chome（島嶼部は枠外）· 2025 · 警視庁</p>
@@ -881,16 +962,16 @@ def build_crime():
 <div class="stage-live"></div>
 </div>
 </section>
-<section class="wrap beats">
+<section class="wrap beats rv">
 <div class="beat"><div class="n">01</div><h3{tattr('c.beat1.t')}>{ja('c.beat1.t')}</h3><p{tattr('c.beat1.p')}>{ja('c.beat1.p')}</p></div>
 <div class="beat"><div class="n">02</div><h3{tattr('c.beat2.t')}>{ja('c.beat2.t')}</h3><p{tattr('c.beat2.p')}>{ja('c.beat2.p')}</p></div>
 <div class="beat"><div class="n">03</div><h3{tattr('c.beat3.t')}>{ja('c.beat3.t')}</h3><p{tattr('c.beat3.p')}>{ja('c.beat3.p')}</p></div>
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <h2 class="section-title"{tattr('c.index.title')}>{ja('c.index.title')}</h2>
 <p class="section-sub"{tattr('c.index.sub')}>{ja('c.index.sub')}</p>
 <table class="data-table">
-<thead><tr><th>#</th><th{tattr('d.col.name')}>{ja('d.col.name')}</th><th class="num"{tattr('d.col.count')}>{ja('d.col.count')}</th><th class="num"{tattr('d.col.pop')}>{ja('d.col.pop')}</th><th class="num"{tattr('d.col.rate')}>{ja('d.col.rate')}</th></tr></thead>
+<thead><tr><th class="idx">#</th><th{tattr('d.col.name')}>{ja('d.col.name')}</th><th class="num"{tattr('d.col.count')}>{ja('d.col.count')}</th><th class="num"{tattr('d.col.pop')}>{ja('d.col.pop')}</th><th class="num"{tattr('d.col.rate')}>{ja('d.col.rate')}</th></tr></thead>
 <tbody>""" + "".join(
         f'<tr><td class="idx num muted">{WARD_RANK.get(m["ward"], "")}</td>'
         f'<td><a href="/crime/{slug_ward(m["ward"])}/">{esc(m["ward"])}</a></td>'
@@ -941,14 +1022,14 @@ def build_ward(slug):
     prev_w = idx[i - 1]["ward"] if i else None
     next_w = idx[i + 1]["ward"] if i + 1 < len(idx) else None
     body = f"""<main id="main">
-<section class="wrap chapter-head">
+<section class="wrap chapter-head rv">
 <p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <a href="/crime/"{tattr('nav.crime')}>{ja('nav.crime')}</a> / {esc(w)}</p>
 <h1>{esc(w)}</h1>
 <p class="lede">{esc(lede)}</p>
 {stats([('c.stat.total', n(tot), ''), ('d.col.pop', n(pop), ''),
             ('d.col.rate', f1(rate) + '‰', ''), ('d.ward.r8', n(r8), '')])}
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <figure class="figure">
 {ward_map(w)}
 <figcaption><span{tattr('d.ward.map')}>{ja('d.ward.map')}</span> · 2025 · 警視庁</figcaption>
@@ -991,7 +1072,7 @@ def build_cabinet():
         for k, c in enumerate(CAB["cabinets"]))
     series = [(ym[2:], v) for ym, v in sorted(MONTH_MEAN.items())]
     body = f"""<main id="main">
-<section class="wrap chapter-head">
+<section class="wrap chapter-head rv">
 <p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <span{tattr('b.eyebrow')}>{ja('b.eyebrow')}</span></p>
 <h1{tattr('b.h1')}>{ja('b.h1')}</h1>
 <p class="lede"{tattr('b.lede')}>{ja('b.lede')}</p>
@@ -999,7 +1080,7 @@ def build_cabinet():
             ('b.stat.cabinets', n(len(CAB["cabinets"])), ''),
             ('b.stat.swing', ('+' if swing > 0 else '') + f1(swing), 'pt')])}
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <div class="stage stage-flow" data-live="0" data-view="cabinet">
 <div class="stage-poster">
 <figure class="figure" style="margin:0">
@@ -1011,16 +1092,16 @@ def build_cabinet():
 <div class="stage-live"></div>
 </div>
 </section>
-<section class="wrap beats">
+<section class="wrap beats rv">
 <div class="beat"><div class="n">01</div><h3{tattr('b.beat1.t')}>{ja('b.beat1.t')}</h3><p{tattr('b.beat1.p')}>{ja('b.beat1.p')}</p></div>
 <div class="beat"><div class="n">02</div><h3{tattr('b.beat2.t')}>{ja('b.beat2.t')}</h3><p{tattr('b.beat2.p')}>{ja('b.beat2.p')}</p></div>
 <div class="beat"><div class="n">03</div><h3{tattr('b.beat3.t')}>{ja('b.beat3.t')}</h3><p{tattr('b.beat3.p')}>{ja('b.beat3.p')}</p></div>
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <h2 class="section-title"{tattr('b.index.title')}>{ja('b.index.title')}</h2>
 <p class="section-sub"{tattr('b.index.sub')}>{ja('b.index.sub')}</p>
 <table class="data-table">
-<thead><tr><th>#</th><th>内閣</th><th>在任</th><th class="num"{tattr('d.pm.months')}>{ja('d.pm.months')}</th><th class="num"{tattr('d.pm.mean')}>{ja('d.pm.mean')}</th></tr></thead>
+<thead><tr><th class="idx">#</th><th>内閣</th><th>在任</th><th class="num"{tattr('d.pm.months')}>{ja('d.pm.months')}</th><th class="num"{tattr('d.pm.mean')}>{ja('d.pm.mean')}</th></tr></thead>
 <tbody>{rows}</tbody></table>
 </section>
 </main>"""
@@ -1056,7 +1137,7 @@ def build_pm(cid):
     prev_c = CAB["cabinets"][idx - 1] if idx else None
     next_c = CAB["cabinets"][idx + 1] if idx + 1 < len(CAB["cabinets"]) else None
     body = f"""<main id="main">
-<section class="wrap chapter-head">
+<section class="wrap chapter-head rv">
 <p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <a href="/cabinet/"{tattr('nav.cabinet')}>{ja('nav.cabinet')}</a> / {esc(c['pm'])}</p>
 <h1>{esc(c['pm'])}</h1>
 <p class="lede">{esc(c['start'])} — {esc(c['end'])}。月次支持率の平均は{f1(mean)}。最高{f1(hi[1])}（{hi[0]}）、最低{f1(lo[1])}（{lo[0]}）。</p>
@@ -1064,7 +1145,7 @@ def build_pm(cid):
             ('d.pm.months', n(len(series)), ''), ('b.stat.polls', n(polls_n), ''),
             ('d.pm.mean', f1(mean), '')])}
 </section>
-<section class="wrap">
+<section class="wrap rv">
 <figure class="figure">
 {chart}
 <figcaption><span{tattr('d.pm.series')}>{ja('d.pm.series')}</span> · {esc(c['pm'])} · 月次平均</figcaption>
@@ -1096,12 +1177,12 @@ def build_method():
     dl_html = "".join(f'<a href="{u}" download>{esc(name)}<span>{esc(sub)}</span></a>'
                       for u, name, sub in dls)
     body = f"""<main id="main">
-<section class="wrap narrow chapter-head">
+<section class="wrap narrow chapter-head rv">
 <p class="eyebrow"><a href="/"{tattr('crumb.home')}>{ja('crumb.home')}</a> / <span{tattr('nav.method')}>{ja('nav.method')}</span></p>
 <h1{tattr('m.h1')}>{ja('m.h1')}</h1>
 <p class="lede"{tattr('m.lede')}>{ja('m.lede')}</p>
 </section>
-<section class="wrap narrow prose">
+<section class="wrap narrow prose rv">
 <h2{tattr('m.data.h')}>{ja('m.data.h')}</h2>
 <h3{tattr('m.q.h')}>{ja('m.q.h')}</h3><p{tattr('m.q.p')}>{ja('m.q.p')}</p>
 <h3{tattr('m.c.h')}>{ja('m.c.h')}</h3><p{tattr('m.c.p')}>{ja('m.c.p')}</p>
@@ -1243,6 +1324,19 @@ def collect_chars(files, i18n_json):
         chars.update(p.get("name") or "")
     for y in YEARS:
         chars.update(y)
+    # Interactive views carry their own Japanese/Chinese UI strings. Strip JS
+    # comments first (the skill's lesson: comments alone can be 5x the visible
+    # CJK), then feed every remaining string character into the subset.
+    for js in (ROOT / "app").rglob("*.js"):
+        if not js.is_file():
+            continue
+        try:
+            src = js.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        src = re.sub(r"/\*.*?\*/", "", src, flags=re.S)
+        src = re.sub(r"(?m)//.*$", "", src)
+        chars.update(src)
     # ASCII + common punctuation + arrows/units
     chars.update(chr(i) for i in range(32, 127))
     chars.update("　、。・「」『』（）—–…‰×÷±→←↑↓▶●○■□◆◇①②③④⑤⑥⑦⑧⑨⑩"
@@ -1279,10 +1373,9 @@ def write_site(files):
 
     # favicon
     fav = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
-           f'<rect width="64" height="64" rx="14" fill="#12120F"/>'
-           f'<text x="32" y="42" text-anchor="middle" font-family="Georgia,serif" '
-           f'font-size="30" fill="#F3F1EA">P</text>'
-           f'<circle cx="46" cy="44" r="4" fill="#E8431A"/></svg>')
+           f'<rect width="64" height="64" fill="#E9EDE3"/>'
+           f'<text x="31" y="48" text-anchor="middle" font-family="Outfit,Helvetica,Arial,sans-serif" '
+           f'font-weight="800" font-size="46" fill="#2F6B4F">p</text></svg>')
     (SITE / "assets/favicon.svg").write_text(fav, encoding="utf-8")
 
 

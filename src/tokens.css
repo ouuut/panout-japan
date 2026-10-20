@@ -1,64 +1,88 @@
 /* Pan Out Japan · tokens — single source of truth.
-   Family: ouuut Tokyo Expedition Magazine Editorial. Zero rules: no borders. */
+   Family: ouuut Tokyo Expedition Magazine Editorial. Two themes: sage / dark.
+   Zero structural lines: hierarchy comes from surface blocks, whitespace and type. */
 
 :root {
-  --bg: #F3F1EA;
-  --bg-2: #ECE9E0;
-  --ink: #12120F;
-  --muted: #65635C;
-  --faint: #8E8B82;
-  --accent: #E8431A;
-  --accent-ink: #C53916;
-  --surface: rgba(18, 18, 15, .045);
-  --surface-2: rgba(18, 18, 15, .075);
-  --stage: #E7E3D9;
-  --shadow: 0 1px 0 rgba(255, 255, 255, .55), 0 18px 40px -24px rgba(18, 18, 15, .35);
+  /* ---- surfaces / ink (sage is the default so no-theme renders correctly) ---- */
+  --bg: #E9EDE3;
+  --ink: #17211A;
+  --muted: #56635A;
+  --accent: #2F6B4F;
+  --accent-ink: var(--accent);
+  --accent-soft: rgba(47, 107, 79, .08);
+  --surface: rgba(23, 33, 26, .045);
 
-  --serif: 'Instrument Serif', 'Noto Serif JP', Georgia, 'Times New Roman', serif;
-  --sans: 'Geist', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* ---- type families ---- */
+  --serif: 'Instrument Serif', 'Serif Fallback', 'Noto Serif SC', 'Noto Serif JP', Georgia, 'Times New Roman', serif;
+  --sans: 'Geist', 'Noto Sans SC', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --wordmark: 'Outfit', 'Geist', sans-serif;
+  --zh-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif;
+  --zh-sans: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --ja-serif: 'Noto Serif JP', 'Source Han Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --ja-sans: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif;
 
-  --pad: clamp(20px, 5vw, 72px);
-  --maxw: 1280px;
-  --gut: clamp(20px, 3vw, 40px);
+  /* ---- layout ---- */
+  --pad: clamp(20px, 4vw, 56px);
+  --maxw: 1360px;
+  --gap: clamp(24px, 3vw, 48px);
+  --sec-y: clamp(5rem, 11vw, 9.5rem);
+  --nav-h: 72px;
+  --radius: 4px;
+  --btn-radius: 2px;
 
-  --fs-display: clamp(46px, 8.2vw, 118px);
-  --fs-h1: clamp(32px, 4.8vw, 64px);
-  --fs-h2: clamp(21px, 2.3vw, 30px);
-  --fs-h3: clamp(17px, 1.5vw, 20px);
-  --fs-body: 16px;
-  --fs-small: 13px;
-  --fs-micro: 11px;
-  --lh: 1.78;
+  /* ---- type scale ---- */
+  --fs-eyebrow: 11px;
+  --fs-body: 17px;
+  --fs-small: 15px;
+  --fs-lead: clamp(18px, 1.8vw, 22px);
+  --fs-h1-en: clamp(2rem, 6.2vw, 5.7rem);
+  --fs-h1-ja: clamp(1.9rem, 5vw, 4.6rem);
+  --fs-h1-zh: clamp(1.9rem, 5.6vw, 5.2rem);
+  --fs-page: clamp(2rem, 4vw, 3.5rem);
+  --fs-section: clamp(1.6rem, 3.4vw, 2.8rem);
+  --fs-h3: clamp(1.35rem, 2.4vw, 1.9rem);
+  --lh-en: 1.65;
+  --lh-cjk: 1.8;
 
   --ease: cubic-bezier(.22, .7, .28, 1);
 }
 
+/* ≥900px: hero becomes two columns; text column is ~48% of viewport,
+   so the cover H1 clamps are re-declared here (same rule as ouuut). */
+@media (min-width: 900px) {
+  :root {
+    --fs-h1-en: clamp(2.6rem, 6.2vw, 5.7rem);
+    --fs-h1-ja: clamp(1.9rem, 5vw, 4.6rem);
+    --fs-h1-zh: clamp(1.9rem, 5.6vw, 5.2rem);
+  }
+}
+
 html[data-theme="sage"] {
   --bg: #E9EDE3;
-  --bg-2: #E1E6D9;
   --ink: #17211A;
   --muted: #56635A;
-  --faint: #7D8A80;
   --accent: #2F6B4F;
-  --accent-ink: #265A42;
+  --accent-ink: var(--accent);
+  --accent-soft: rgba(47, 107, 79, .08);
   --surface: rgba(23, 33, 26, .045);
-  --surface-2: rgba(23, 33, 26, .08);
-  --stage: #DDE4D2;
-  --shadow: 0 1px 0 rgba(255, 255, 255, .5), 0 18px 40px -24px rgba(23, 33, 26, .32);
 }
 
 html[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0E0E0C;
-  --bg-2: #151513;
   --ink: #EDEBE4;
   --muted: #A09E96;
-  --faint: #6F6E68;
   --accent: #FF6A3D;
   --accent-ink: #F2653A;
-  --surface: rgba(237, 235, 228, .05);
-  --surface-2: rgba(237, 235, 228, .09);
-  --stage: #171715;
-  --shadow: 0 18px 40px -24px rgba(0, 0, 0, .8);
+  --accent-soft: rgba(255, 106, 61, .12);
+  --surface: rgba(237, 235, 228, .055);
+}
+
+/* Metric-compatible serif fallback. Instrument Serif is 72% the width of Georgia
+   in the same string; without this the EN H1 would reflow when the webfont lands. */
+@font-face {
+  font-family: 'Serif Fallback';
+  src: local('Georgia'), local('Times New Roman'), local('Times');
+  size-adjust: 72%;
 }

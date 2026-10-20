@@ -82,7 +82,7 @@ const I18N = {
     tooltipZoomIn: "放大",
     tooltipZoomOut: "缩小",
     loaderAria: "正在载入空间数据",
-    accentNames: { amber: "暖橙", crimson: "绯红", steel: "战术蓝" }
+    accentNames: { sage: "鼠尾草绿", amber: "暖橙", crimson: "绯红", steel: "战术蓝" }
   },
   ja: {
     siteTitleEditorial: "東京都犯罪発生状況アトラス",
@@ -150,7 +150,7 @@ const I18N = {
     tooltipZoomIn: "拡大",
     tooltipZoomOut: "縮小",
     loaderAria: "空間データを読み込み中",
-    accentNames: { amber: "暖橙", crimson: "クリムゾン", steel: "スチールブルー" }
+    accentNames: { sage: "セージ", amber: "暖橙", crimson: "クリムゾン", steel: "スチールブルー" }
   },
   en: {
     siteTitleEditorial: "Tokyo Crime Rate Atlas",
@@ -218,7 +218,7 @@ const I18N = {
     tooltipZoomIn: "Zoom in",
     tooltipZoomOut: "Zoom out",
     loaderAria: "Loading spatial data",
-    accentNames: { amber: "Amber", crimson: "Crimson", steel: "Steel Blue" }
+    accentNames: { sage: "Sage", amber: "Amber", crimson: "Crimson", steel: "Steel Blue" }
   }
 };
 
@@ -251,30 +251,22 @@ if (initLdr) {
 // 0.5 低饱和重点色系统 (4 套精心调配 · 一键热切换)
 // =====================================================================
 const ACCENT_PALETTES = [
-  { id: "amber" },
-  { id: "crimson" },
-  { id: "steel" }
+  { id: "sage" }
 ];
 
+/* One signal hue per theme: sage green on paper, vermilion on charcoal.
+   The map is a sequential scale, not a categorical rainbow. */
 const COLOR_RAMPS = {
-  amber: {
-    tactical: ["#141210", "#1f1a16", "#2c251e", "#3e342a", "#57412f", "#77542f", "#9c6830", "#bb7a24", "#d0801a"],
-    editorial: ["#f7f4ed", "#f0e9dc", "#e5d4be", "#d7b497", "#c4886b", "#b25f46", "#9f3c2c", "#871f1f", "#520c0c"]
-  },
-  crimson: {
-    tactical: ["#141210", "#201a18", "#302224", "#452a2d", "#602b32", "#7f2c36", "#a02f3a", "#c03a3d", "#de4848"],
-    editorial: ["#faf5f5", "#f4e6e6", "#e8cfcf", "#d8b2b2", "#c48888", "#b05e5e", "#993a3a", "#802222", "#5e1414"]
-  },
-  steel: {
-    tactical: ["#141210", "#1d1d1f", "#292b2f", "#363c43", "#43505c", "#50637a", "#5c7690", "#527fa0", "#4a8bb2"],
-    editorial: ["#f4f6fa", "#e6ecf5", "#cfdced", "#b2c7e0", "#8eaecd", "#6c93b8", "#4b79a2", "#325f88", "#1e4468"]
+  sage: {
+    tactical: ["#0E0E0C", "#2A1710", "#4A2014", "#6B2A18", "#8C351C", "#AD4020", "#CE4B24", "#EF5629", "#FF6A3D"],
+    editorial: ["#E9EDE3", "#DCE4D9", "#C6D6C8", "#AFC8B6", "#97B9A3", "#7FAA91", "#679B7E", "#4F8C6B", "#2F6B4F"]
   }
 };
 
 function detectInitialAccent() {
   const saved = crmStore.getItem("panout-crime-accent");
   if (saved && ACCENT_PALETTES.some(p => p.id === saved)) return saved;
-  return "amber";
+  return "sage";
 }
 let currentAccent = (function () { try { return detectInitialAccent(); } catch (e) { return "amber"; } })();
 
@@ -324,16 +316,16 @@ const ICONS = {
 
 const VARIANTS = {
   editorial: {
-    nodata: "#e8e3d8",
-    nopop: "#eae6dc",
-    lineColor: "rgba(24, 22, 20, 0.18)",
-    selLine: "#181614"
+    nodata: "#DDE2D8",
+    nopop: "#E3E7DE",
+    lineColor: "rgba(23, 33, 26, 0.18)",
+    selLine: "#17211A"
   },
   tactical: {
-    nodata: "#201c19",
-    nopop: "#161312",
-    lineColor: "rgba(255, 244, 232, 0.08)",
-    selLine: "#f5f0e8"
+    nodata: "#1A1A17",
+    nopop: "#141412",
+    lineColor: "rgba(237, 235, 228, 0.12)",
+    selLine: "#EDEBE4"
   }
 };
 
@@ -655,7 +647,7 @@ function buildScales() {
     for (let i = 1; i < breaks.length; i++) {
       if (breaks[i] <= breaks[i - 1]) breaks[i] = breaks[i - 1] + 1e-6;
     }
-    const curRamp = (COLOR_RAMPS[currentAccent] || COLOR_RAMPS.amber)[currentVariant];
+    const curRamp = (COLOR_RAMPS[currentAccent] || COLOR_RAMPS.sage)[currentVariant];
     SCALES[m] = {
       breaks, hi, zero, vals,
       ramp: [...curRamp]
