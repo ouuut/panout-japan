@@ -29,10 +29,14 @@ OUTFIT_SRC = Path("F:/archive/20261014-omp-data-retire/dirs/tmp_fonts/outfit.ttf
 
 # name, source path or filename in cache_dir, weight, family
 CJK = [
+    ("noto-sans-jp-200", "NotoSansJP-VF.ttf", 200, "Noto Sans JP"),
+    ("noto-sans-jp-350", "NotoSansJP-VF.ttf", 350, "Noto Sans JP"),
+    ("noto-sans-jp-400", "NotoSansJP-VF.ttf", 400, "Noto Sans JP"),
+    ("noto-sans-sc-200", SC_CACHE / "NotoSansSC[wght].ttf", 200, "Noto Sans SC"),
+    ("noto-sans-sc-350", SC_CACHE / "NotoSansSC[wght].ttf", 350, "Noto Sans SC"),
+    ("noto-sans-sc-400", SC_CACHE / "NotoSansSC[wght].ttf", 400, "Noto Sans SC"),
     ("noto-serif-jp-700", "NotoSerifJP-VF.ttf", 700, "Noto Serif JP"),
-    ("noto-sans-jp-500", "NotoSansJP-VF.ttf", 500, "Noto Sans JP"),
     ("noto-serif-sc-700", SC_CACHE / "NotoSerifSC[wght].ttf", 700, "Noto Serif SC"),
-    ("noto-sans-sc-500", SC_CACHE / "NotoSansSC[wght].ttf", 500, "Noto Sans SC"),
 ]
 
 LATIN = [

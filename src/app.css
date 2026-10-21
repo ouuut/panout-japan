@@ -1392,4 +1392,67 @@ html[data-theme="sage"] .cab-panel .stat-box {
   vertical-align: middle !important;
 }
 
+/* ---- 全站排版体系统一收敛（极细无衬线规范） ---- */
+:root {
+  --font-sans: "Noto Sans JP", "Noto Sans SC", "MiSans VF", "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  --ja-sans: "Noto Sans JP", "MiSans VF", "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --zh-sans: "Noto Sans SC", "MiSans VF", "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --title-font: var(--font-sans);
+}
+
+/* 标题统一收敛：彻底消除粗黑，统一为 200~250 极细高阶质感 */
+h1, h2, h3, h4, .title, .card-title, .section-title, .hero-panel h1, .hero-panel h2 {
+  font-family: var(--font-sans) !important;
+  font-weight: 200 !important;
+  letter-spacing: -0.02em;
+}
+
+/* 按钮、药丸与时间轴标签：字号拉升至 13px，字重 350 细体 */
+.cab-zoom button, .eq-sq, .seg button, .theme-dot, .lang-nav button {
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 350 !important;
+}
+
+/* 地震页无死角排版加固：杜绝 10px-11px 与 600-800 粗体糊死 */
+#v-quake-viewport .eq-sq {
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 350 !important;
+  height: 28px !important;
+  min-height: 28px !important;
+}
+#v-quake-viewport .eq-pop-val {
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+}
+#v-quake-viewport .eq-pop-cap,
+#v-quake-viewport .eq-footer,
+#v-quake-viewport .eq-famous-drawer-hint,
+#v-quake-viewport .eq-famous-item-date {
+  font-family: var(--font-sans) !important;
+  font-size: 12px !important;
+  font-weight: 350 !important;
+}
+#v-quake-viewport .eq-famous-item-mag,
+#v-quake-viewport .eq-famous-item-name {
+  font-family: var(--font-sans) !important;
+  font-weight: 350 !important;
+}
+
+
+
+/* ---- 全站严格彻底消除粗体（大一圈字号的纯细体替代加粗） ---- */
+b, strong, th, h1, h2, h3, h4, h5, h6, dt, .card-title, .policy-title {
+  font-weight: 300 !important;
+}
+.stat-num, .eq-hover-mag {
+  font-weight: 200 !important;
+}
+/* 彻底清除所有控件和按钮内的加粗 */
+button, input, select, .cab-zoom button, .eq-sq, .seg button, .card-badge {
+  font-weight: 300 !important;
+}
+
 /*__FONT_FACES__*/

@@ -66,9 +66,9 @@ const CAB_CSS = `
   border-radius: 4px;
   background: transparent;
   color: var(--muted);
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  font-weight: 500;
+  font-family: var(--font-sans, system-ui);
+  font-size: 12px;
+  font-weight: 350;
   border: none;
   cursor: pointer;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -82,7 +82,7 @@ const CAB_CSS = `
 .cab-zoom button.on {
   background: var(--accent);
   color: #fff;
-  font-weight: 700;
+  font-weight: 350;
 }
 
 /* 右侧深度信息面板（类似犯罪率右侧面板） */
@@ -186,8 +186,8 @@ const CAB_CSS = `
   margin-bottom: 0;
 }
 .cab-panel .policy-title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14.5px;
+  font-weight: 300;
   color: var(--text-main, #141A15);
   margin-bottom: 2px;
 }
@@ -1068,22 +1068,22 @@ function renderPanel(targetCabId) {
 
       <!-- 卡片 2: 执政时长排行榜 -->
       <div class="panel-card">
-        <div style="font-size:13px;font-weight:600;color:var(--text-main);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <div style="font-size:15px;font-weight:250;letter-spacing:-0.2px;color:var(--text-main);margin-bottom:12px;display:flex;align-items:center;gap:6px">
           <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 13h12v1H2zm2-3h2v2H4zm3-4h2v6H7zm3-2h2v8h-2z"/></svg>
           ${langKey==='zh'?'政权稳定性与在任天数记录':langKey==='en'?'Tenure & Stability Records':'歴代内閣 在職日数記録'}
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">
             <span>${langKey==='zh'?'最长政权 · 安倍晋三 (2次)':langKey==='en'?'Longest: Shinzo Abe (2nd)':'最長政権：安倍晋三(2次)'}</span>
-            <span style="font-weight:600;color:var(--accent)">2,822 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (93${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
+            <span style="font-size:14px;font-weight:250;color:var(--accent)">2,822 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (93${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">
             <span>${langKey==='zh'?'结构改革 · 小泉纯一郎':langKey==='en'?'Structure: Junichiro Koizumi':'構造改革：小泉純一郎'}</span>
-            <span style="font-weight:600;color:var(--text-main)">1,980 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (65${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
+            <span style="font-size:14px;font-weight:250;color:var(--text-main)">1,980 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (65${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">
             <span>${langKey==='zh'?'最短短命 · 鸠山由纪夫':langKey==='en'?'Shortest: Yukio Hatoyama':'最短退任：鳩山由紀夫'}</span>
-            <span style="font-weight:600;color:#C84B31">266 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (9${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
+            <span style="font-size:14px;font-weight:250;color:#C84B31">266 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (9${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
           </div>
         </div>
       </div>
@@ -1168,11 +1168,11 @@ function renderPanel(targetCabId) {
 
     <!-- 卡片 2: 领导人生平档案与政治出身 -->
     <div class="panel-card">
-      <div style="font-size:12px;font-weight:600;color:var(--accent);letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+      <div style="font-size:13.5px;font-weight:300;letter-spacing:0.3px;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;gap:6px">
         <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm2 1H6a4 4 0 00-4 4v1h12v-1a4 4 0 00-4-4z"/></svg>
         ${langKey==='zh'?'生平档案与政治派阀':langKey==='en'?'BIOGRAPHY & BACKGROUND':'生平・政治的出自'}
       </div>
-      ${originTitle ? `<div style="font-size:12px;color:var(--text-main);font-weight:500;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">${originTitle}</div>` : ''}
+      ${originTitle ? `<div style="font-size:13px;color:var(--text-main);font-weight:300;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">${originTitle}</div>` : ''}
       <div style="font-size:13px;line-height:1.7;color:var(--text-main);font-weight:350">
         ${bioTitle}
       </div>
@@ -1181,7 +1181,7 @@ function renderPanel(targetCabId) {
     <!-- 卡片 3: 核心政策与关键历史战役 -->
     ${policies.length > 0 ? `
       <div class="panel-card">
-        <div style="font-size:12px;font-weight:600;color:var(--accent);letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <div style="font-size:13.5px;font-weight:300;letter-spacing:0.3px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:6px">
           <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M3 2h10v2H3zm0 4h10v2H3zm0 4h7v2H3z"/></svg>
           ${langKey==='zh'?'核心政策举措与重大战役':langKey==='en'?'SIGNATURE POLICIES':'主要政策と歴史的改革'}
         </div>
@@ -1199,7 +1199,7 @@ function renderPanel(targetCabId) {
     <!-- 卡片 4: 辞职转折危机与操作栏 -->
     <div class="panel-card" style="padding:14px 16px">
       ${crisisTitle ? `
-        <div style="font-size:12px;font-weight:600;color:#C84B31;margin-bottom:4px;display:flex;align-items:center;gap:6px">
+        <div style="font-size:13.5px;font-weight:300;color:#C84B31;margin-bottom:4px;display:flex;align-items:center;gap:6px">
           <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M8 2l6 12H2L8 2zm0 3.5a.75.75 0 00-.75.75v3.5a.75.75 0 001.5 0v-3.5A.75.75 0 008 5.5zm0 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/></svg>
           ${langKey==='zh'?'政权转折与辞任危机':langKey==='en'?'TURNING POINT & EXIT':'退陣・政権交代の契機'}
         </div>
@@ -1346,8 +1346,9 @@ function renderChart() {
                   distance: 12,
                   align: 'left',
                   formatter: String(c.pm),
-                  fontSize: isNarrow ? 14 : 20,
-                  fontWeight: 700,
+                  fontSize: isNarrow ? 17 : 24,
+                  fontWeight: 300,
+                  letterSpacing: 1.5,
                   color: color,
                   fontFamily: 'var(--ja-sans), system-ui, sans-serif',
                   padding: [3, 8],
@@ -1438,12 +1439,12 @@ function renderChart() {
     legend: { show: false },
     tooltip: {
       trigger: 'axis',
-      backgroundColor: T.tooltipBg,
-      borderColor: T.tooltipBorder,
+      backgroundColor: currentVariant === 'editorial' ? 'rgba(250, 252, 246, 0.96)' : 'rgba(20, 20, 18, 0.96)',
+      borderColor: currentVariant === 'editorial' ? 'rgba(20, 26, 21, 0.12)' : 'rgba(237, 235, 228, 0.14)',
       borderWidth: 1,
-      padding: [10, 14],
-      extraCssText: 'border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.18);backdrop-filter:blur(8px);',
-      textStyle: { color: T.tooltipText, fontSize: 12 },
+      padding: [12, 16],
+      extraCssText: 'border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);pointer-events:none;',
+      textStyle: { color: T.tooltipText, fontSize: 13, fontFamily: 'var(--font-sans, "MiSans VF", "MiSans", "PingFang SC", system-ui, sans-serif)' },
       formatter: function(params) {
         if (!params || params.length === 0) return '';
         const d = new Date(params[0].axisValue);
@@ -1455,23 +1456,34 @@ function renderChart() {
         const sources = p.data ? (p.data[3] || []) : [];
         const cabIdx = cab ? cabinets.findIndex(x => x.id === cab.id) : 0;
         const col = C[cabIdx % C.length] || '#FF6A3D';
-        let html = '<div style="min-width:180px;font-family:var(--font-sans),system-ui,sans-serif">';
-        html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">';
-        html += '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + col + ';box-shadow:0 0 6px ' + hexToRgba(col, 0.6) + '"></span>';
-        html += '<span style="font-weight:700;font-size:13px;color:' + T.tooltipText + '">' + (cab ? cab.pm : '') + '</span>';
-        html += '<span style="color:' + (currentVariant === 'editorial' ? '#56635A' : '#A09E96') + ';font-size:11px;margin-left:auto">' + ymStr + '</span>';
+        const pmName = cab ? cab.pm : '';
+        const fontSans = 'var(--font-sans, "MiSans VF", "MiSans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif)';
+
+        let html = '<div style="min-width:220px;font-family:' + fontSans + ';color:' + T.tooltipText + '">';
+        
+        // 顶栏：彩标 + 首相大名（优雅极细无衬线 16px）+ 发生年月
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px">';
+        html += '<div style="display:flex;align-items:center;gap:8px">';
+        html += '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + col + ';box-shadow:0 0 8px ' + hexToRgba(col, 0.6) + '"></span>';
+        html += '<span style="font-weight:300;font-size:16px;letter-spacing:-0.2px;color:' + T.tooltipText + '">' + pmName + '</span>';
         html += '</div>';
+        html += '<span style="color:' + (currentVariant === 'editorial' ? '#56635A' : '#A09E96') + ';font-size:12px;font-weight:350">' + ymStr + '</span>';
+        html += '</div>';
+
+        // 核心支持率：超大 28px 极细无衬线数字（绝非 monospace / Times 粗衬线）
         if (avg !== null) {
-          html += '<div style="display:flex;align-items:baseline;gap:6px;margin:4px 0 8px">';
-          html += '<span style="font-size:22px;font-weight:800;color:' + col + ';font-family:var(--font-mono,monospace)">' + avg.toFixed(1) + '%</span>';
-          html += '<span style="font-size:11px;color:' + (currentVariant === 'editorial' ? '#56635A' : '#A09E96') + '">' + n + '社平均</span>';
+          html += '<div style="display:flex;align-items:baseline;gap:6px;margin:6px 0 10px 0">';
+          html += '<span style="font-size:28px;font-weight:200;line-height:1;color:' + col + ';font-family:' + fontSans + ';letter-spacing:-0.5px">' + avg.toFixed(1) + '<span style="font-size:16px;font-weight:300">%</span></span>';
+          html += '<span style="font-size:12px;font-weight:350;color:' + (currentVariant === 'editorial' ? '#56635A' : '#A09E96') + '">' + n + (lang==='en'?' polls avg':'社平均') + '</span>';
           html += '</div>';
         }
+
+        // 各社明细数据：拉升至 12px 药丸胶囊，各社名字用 350 细体
         if (sources.length > 0) {
-          html += '<div style="display:flex;flex-wrap:wrap;gap:4px;border-top:1px solid ' + (currentVariant === 'editorial' ? 'rgba(20,26,21,0.1)' : 'rgba(237,235,228,0.12)') + ';padding-top:6px;margin-top:4px">';
+          html += '<div style="display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid ' + (currentVariant === 'editorial' ? 'rgba(20,26,21,0.08)' : 'rgba(237,235,228,0.1)') + ';padding-top:8px;margin-top:2px">';
           sources.forEach(function(s) {
-            html += '<span style="font-size:10.5px;padding:1px 6px;border-radius:3px;background:' + (currentVariant === 'editorial' ? 'rgba(20,26,21,0.06)' : 'rgba(237,235,228,0.08)') + ';color:' + (currentVariant === 'editorial' ? '#2b382d' : '#d2cfc4') + '">';
-            html += s.src + ' <b style="color:' + col + '">' + s.v.toFixed(1) + '%</b>';
+            html += '<span style="font-size:12px;font-weight:350;padding:2px 8px;border-radius:4px;background:' + (currentVariant === 'editorial' ? 'rgba(20,26,21,0.05)' : 'rgba(255,255,255,0.06)') + ';color:' + (currentVariant === 'editorial' ? '#2b382d' : '#d2cfc4') + '">';
+            html += s.src + ' <span style="font-size:13px;font-weight:250;color:' + col + ';margin-left:3px">' + s.v.toFixed(1) + '%</span>';
             html += '</span>';
           });
           html += '</div>';
