@@ -248,7 +248,7 @@ function mountQuake(root, opts) {
       const veil = document.createElement('div');
       veil.className = 'qk-veil';
       veil.textContent = '読み込み中 · Loading…';
-      veil.style.cssText = 'position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:#12100d;color:#8a8478;font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;pointer-events:none';
+      veil.style.cssText = 'position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font:350 11.5px/1.6 var(--mono,ui-monospace,monospace);letter-spacing:.1em;pointer-events:none';
       veil.dataset.t0 = String(Date.now());
       host.appendChild(veil);
       setTimeout(() => { try { if (veil.parentNode) veil.parentNode.removeChild(veil); } catch (e) {} }, 30000);
