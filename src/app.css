@@ -219,9 +219,23 @@ body.chapter-app { height: 100dvh; overflow: hidden; }
 .cab-host.cab-init-hidden {
   opacity: 0;
 }
-.cab-host > .cab-controls {
-  min-height: 44px;
-  flex-shrink: 0;
+.cab-host > .cab-viewport {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+}
+.cab-bottom-bar {
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 36px !important;
+  height: 32px !important;
+  min-height: 0 !important;
+  z-index: 8 !important;
+  display: flex !important;
+  align-items: center !important;
+  pointer-events: none !important;
 }
 .cab-host > #cab-chart {
   flex: 1 1 auto;

@@ -1,19 +1,11 @@
 /* japan.ouuut.com · Cabinet view (single-page mount)
- * Source: sites/cabinet/index.html (read-only rollback anchor, 895 lines).
- * Frozen verbatim: I18N dict + checkI18n block + helpers(fmtMonth/fmtLatest) +
- *   VARIANT_CHART palettes + RANGES + bucket/series/tooltip/markLine/dataZoom math.
- * Stripped shell chrome: topbar/site-nav/theme-dropdown/lang-group/foot meta writes.
- * Namespace: cab- prefix. Mount box contract: #v-cabinet-viewport > #cab-chart.
- * Theme map (ouuut shell -> chart variant): mono/sage -> editorial, dark -> tactical.
- * Data: ./app/cabinet/data.json on mount only (fallback ../ for preview/ dev).
- * ECharts: dynamic import (jsdelivr primary, unpkg fallback), no static script tag.
- * API: mountCabinet(root, {lang, theme}) / unmountCabinet() /
- *      setCabinetLang(l) / setCabinetTheme(t) / setCabinetRange(id) / getCabinetSummary()
+ * Source: sites/cabinet/index.html
+ * Redesigned layout: bottom merged zoom segment + right editorial profile panel + markLine inside labels.
  */
 'use strict';
 
 const DATA_CANDIDATES = ["./app/cabinet/data.json","../app/cabinet/data.json"];
-let cabForcedBase = null; // shell opts.base wins
+let cabForcedBase = null;
 const ECHARTS_URLS = [
   "/app/cabinet/vendor/echarts.min.js",
   "./app/cabinet/vendor/echarts.min.js",
@@ -21,184 +13,451 @@ const ECHARTS_URLS = [
   "https://unpkg.com/echarts@5.5.1/dist/echarts.min.js"
 ];
 const THEME_MAP = { mono: "editorial", sage: "editorial", dark: "tactical", tactical: "tactical", editorial: "editorial" };
-const CAB_CSS = "#v-cabinet-viewport,#cab-chart{width:100%}\n#cab-chart{height:100%;min-height:340px}\n.cab-host{display:flex;flex-direction:column;height:100%;min-height:0}\n.cab-host>#cab-chart{order:0;flex:1 1 auto;height:auto;min-height:0}\n.cab-host>.cab-controls{order:-1;flex:0 0 auto;height:auto;min-height:0;padding:8px 12px 0}\n.cab-host>.cab-meta{height:auto;top:8px;right:12px}\n.cab-viewport{position:relative}\n.cab-meta{position:absolute;top:10px;right:12px;z-index:5;display:flex;align-items:center;gap:8px;pointer-events:none;font-family:var(--font-mono,monospace);font-size:11px;letter-spacing:.06em}\n.cab-latest{display:none}\n.cab-range{color:var(--muted);white-space:nowrap}\n.cab-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px}\n.cab-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px;max-width:100%}\n.cab-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;line-height:1.4;font-family:inherit}\n.cab-pill:hover{color:var(--ink);background:var(--surface)}\n.cab-pill .cab-dot{width:6px;height:6px;border-radius:50%;background:var(--faint);flex-shrink:0}\n.cab-pill.cab-focused{background:var(--accent);color:#fff;font-weight:700}\n.cab-pill.cab-focused .cab-dot{background:#fff !important}\n.cab-pill.cab-exit-focus{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}\n.cab-pill.cab-exit-focus:hover{background:var(--accent);color:#fff}\n.cab-fail{display:flex;align-items:center;justify-content:center;min-height:240px;color:var(--muted);font-size:13px;padding:24px;text-align:center}\n@media(max-width:640px){.cab-meta{top:8px;right:8px;font-size:10px}#cab-chart{min-height:300px}}";
 
-function syncVariantAttr() {
-  try { if (refs.viewport) refs.viewport.dataset.cabVariant = currentVariant; } catch (e) {}
+const CAB_CSS = `
+#v-cabinet-viewport, .cab-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
+.cab-host {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#cab-chart {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+/* 底部标签条：左侧按钮组，右侧对齐 slider */
+.cab-bottom-bar {
+  position: absolute;
+  bottom: 8px;
+  left: 36px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.cab-bottom-bar > * {
+  pointer-events: auto;
+}
+.cab-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.cab-zoom button {
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.cab-zoom button:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  transform: translateY(-1px);
+}
+.cab-zoom button.on {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* 右侧深度信息面板（类似犯罪率右侧面板） */
+.cab-panel {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 310px;
+  max-height: calc(100% - 64px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+  scrollbar-width: none;
+}
+.cab-panel::-webkit-scrollbar { display: none; }
+
+.cab-panel-card {
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cab-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  gap: 8px;
+}
+.cab-card-pm {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.cab-card-gen {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--font-mono, monospace);
+  margin-top: 2px;
+}
+.cab-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.cab-card-dates {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+.cab-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.cab-stat-box {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  border-radius: 6px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--ink) 5%, transparent);
+}
+.cab-stat-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.cab-stat-val {
+  font-family: var(--font-mono, monospace);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.cab-stat-sub {
+  font-size: 9.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-family: var(--font-mono, monospace);
+}
+.cab-card-bio {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  padding-top: 10px;
+}
+.cab-card-unpin {
+  margin-top: 10px;
+  width: 100%;
+  padding: 6px 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.cab-card-unpin:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.cab-card-hint {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+@media (max-width: 960px) {
+  .cab-panel { display: none; }
+}
+`;
+
+const CAB_PROFILES = {
+  obuchi: {
+    generation: { ja: "第84代内閣総理大臣", zh: "第84任内阁总理大臣", en: "84th Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "自公連立の基礎を築き「凡人」「ブッチホン」と親しまれ積極財政を主導。任期途中で脳梗塞に倒れ急逝。",
+      zh: "奠定自公联合政权基础，倡导积极财政刺激经济，任内突发脑梗塞去世。",
+      en: "Established the LDP-Komeito coalition and pursued fiscal expansion before tragically passing away from a stroke."
+    }
+  },
+  mori: {
+    generation: { ja: "第85・86代内閣総理大臣", zh: "第85-86任内阁总理大臣", en: "85th–86th Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "密室の後継選定批判や度重なる失言、えひめ丸事故対応で支持率が歴代最低7%台まで急落し1年で退陣。",
+      zh: "密室推举上台，多次失言及宇和岛实习船事故应对受挫，支持率跌至历史最低7%台。",
+      en: "Shadowed by backroom succession, public gaffes and the Ehime Maru disaster, sinking approval to a historic 7% low."
+    }
+  },
+  koizumi: {
+    generation: { ja: "第87・88・89代内閣総理大臣", zh: "第87-89任内阁总理大臣", en: "87th–89th Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "「自民党をぶっ壊す」と叫び郵政民営化を断行。発足直後85%の最高支持率を記録し、5年5か月の長期政権。",
+      zh: "“砸烂自民党”力推邮政民营化。开局创历史最高85%支持率，执政长达5年5个月。",
+      en: "Reformer who privatized postal services, soaring to an all-time record 85% approval and serving over 5 years."
+    }
+  },
+  abe1: {
+    generation: { ja: "第90代内閣総理大臣", zh: "第90任内阁总理大臣", en: "90th Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "戦後最年少で就任。「美しい国」を掲げ教育基本法改正を成し遂げるも、閣僚不祥事と参院選大敗で辞任。",
+      zh: "战后最年轻首相。倡导“美丽国家”，后因内阁丑闻及参院选举大败，执政一年辞职。",
+      en: "Youngest postwar PM who revised the Fundamental Law of Education, resigning after one year of scandals and election defeat."
+    }
+  },
+  fukuda: {
+    generation: { ja: "第91代内閣総理大臣", zh: "第91任内阁总理大臣", en: "91st Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "ねじれ国会と対峙し日中関係の改善に尽力。「あなたとは違うんです」の言葉を残し突如退陣。",
+      zh: "面对扭曲国会推进中日关系回暖，后因施政受阻辞职，留下名言“我和你不一样”。",
+      en: "Managed a divided parliament and warmed ties with China, abruptly stepping down with famous parting words."
+    }
+  },
+  aso: {
+    generation: { ja: "第92代内閣総理大臣", zh: "第92任内阁总理大臣", en: "92nd Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "リーマン危機へ定額給付金など迅速に対処。度重なる舌禍が響き、2009年衆院選で歴史的政権交代を許す。",
+      zh: "应对雷曼危机发放全民定额补贴，但失言风波不断，最终在总选举中败北导致政权更迭。",
+      en: "Responded to the 2008 global crisis with cash stimuli, but missteps led to a landslide defeat to the opposition."
+    }
+  },
+  hatoyama: {
+    generation: { ja: "第93代内閣総理大臣", zh: "第93任内阁总理大臣", en: "93rd Prime Minister" },
+    party: { ja: "民主党", zh: "民主党", en: "Democratic Party of Japan" },
+    bio: {
+      ja: "歴史的政権交代を実現。「友愛」と脱官僚を唱えるも、米軍普天間基地移設問題の迷走で8か月で退陣。",
+      zh: "实现历史性政权更迭。倡导“友爱”与脱离官僚政治，后因美军普天间基地搬迁陷入混乱执政8个月辞职。",
+      en: "Led historic change of government, but faltered over relocating US Marine Base Futenma, resigning after 8 months."
+    }
+  },
+  kan: {
+    generation: { ja: "第94代内閣総理大臣", zh: "第94任内阁总理大臣", en: "94th Prime Minister" },
+    party: { ja: "民主党", zh: "民主党", en: "Democratic Party of Japan" },
+    bio: {
+      ja: "東日本大震災と福島第一原発事故の危機管理を指揮。再生可能エネルギー特措法を成立させ退陣。",
+      zh: "指挥应对东日本大地震与福岛核电站事故危机。力推可再生能源特别措施法通过后辞任。",
+      en: "Commanded response to the 3/11 earthquake and nuclear meltdown; stepped down after enacting renewable energy bills."
+    }
+  },
+  noda: {
+    generation: { ja: "第95代内閣総理大臣", zh: "第95任内阁总理大臣", en: "95th Prime Minister" },
+    party: { ja: "民主党", zh: "民主党", en: "Democratic Party of Japan" },
+    bio: {
+      ja: "「どじょう宰相」として消費増税の民自公三党合意とTPP交渉参加を主導。衆院解散で自民党に大敗。",
+      zh: "自称“泥鳅首相”，推进消费税增税三党协议与TPP谈判。党首辩论后毅然解散总选，政权交还自民党。",
+      en: "Passed consumption tax hike agreement and entered TPP talks; dissolved parliament leading to LDP's return."
+    }
+  },
+  abe2: {
+    generation: { ja: "第96・97・98代内閣総理大臣", zh: "第96-98任内阁总理大臣", en: "96th–98th Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "アベノミクス（三本の矢）と積極的平和主義を推進。連続在任2822日・憲政史上最長政権を樹立。",
+      zh: "推行安倍经济学三支箭与积极和平主义。连续在任2822天，创下宪政史上最长执政纪录。",
+      en: "Championed Abenomics and national security shifts; achieved the longest continuous premiership in Japanese history."
+    }
+  },
+  suga: {
+    generation: { ja: "第99代内閣総理大臣", zh: "第99任内阁总理大臣", en: "99th Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "携帯料金大幅値下げやデジタル庁創設を成し遂げ、コロナ禍下で東京五輪を開催。1年で総裁選不出馬。",
+      zh: "力推手机资费降价与创设数字厅，克服疫情举办东京奥运会。执政一年宣布不再连任。",
+      en: "Enacted mobile fee cuts and founded the Digital Agency; delivered the Tokyo Olympics during the pandemic."
+    }
+  },
+  kishida: {
+    generation: { ja: "第100・101代内閣総理大臣", zh: "第100-101任内阁总理大臣", en: "100th–101st Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "「新しい資本主義」や防衛費倍増、G7広島サミットを成功させるも、党内裏金問題を受け3年で退任。",
+      zh: "提出“新资本主义”、防卫费倍增并成功举办G7广岛峰会，后受党内政治资金风波冲击退任。",
+      en: "Spearheaded 'New Capitalism', doubled defense budget, hosted G7 Hiroshima, stepping down amidst party fund scrutiny."
+    }
+  },
+  ishiba: {
+    generation: { ja: "第102代内閣総理大臣", zh: "第102任内阁总理大臣", en: "102nd Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "地方創生と防災省創設を掲げ就任。衆院選で与党過半数割れの逆風に直面し少数与党政権を運営。",
+      zh: "倡导地方创生与防灾立国就任首相。解散总选后面对执政党未过半困局，稳步舵手少数派内阁。",
+      en: "Advocated regional revitalization and disaster ministry; navigated governing as a minority parliamentary coalition."
+    }
+  },
+  takaichi: {
+    generation: { ja: "第103代内閣総理大臣", zh: "第103任内阁总理大臣", en: "103rd Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "Liberal Democratic Party" },
+    bio: {
+      ja: "経済安全保障と戦略的危機管理投資を加速。「責任ある積極財政」を掲げ堅調な支持率でスタート。",
+      zh: "加速推进经济安全保障与战略危机管理投资。倡导积极进取的稳健国策，高支持率开局执政。",
+      en: "Drives economic security and strategic technology investments under an active fiscal and security framework."
+    }
+  }
+};
 
 const I18N = {
   ja: {
-    htmlLang: 'ja', ogLocale: 'ja_JP',
-    h1: '内閣支持率 2000→｜NHK 月次世論調査',
-    title: '内閣支持率 2000→｜NHK 月次世論調査',
-    metaDesc: '2000年から2026年までのNHK月次世論調査に基づく内閣支持率・不支持率の推移グラフ。NHK放送文化研究所・NHK選挙WEBを主軸に日経・朝日・時事・読売・JNN・共同通信各社調査を統合し、月平均でプロット。',
-    eyebrow: 'CABINET APPROVAL · NHK MONTHLY POLLS',
-    wmMain: '内閣支持率',
-    navAria: '姉妹サイト',
-    nav: { home: 'トップ', quake: '地震', crime: '犯罪率', cabinet: '内閣支持率' },
-    langAria: '言語切り替え',
-    themeLabel: 'テーマ',
-    variants: { tactical: '戦術·琥珀', editorial: '紙感·朱砂' },
-    srcLine: '2000 年 1 月以降の NHK 月次世論調査（放送文化研究所 + 選挙WEB）・多社平均。縦線 = 首相交代 / 同色 = 同一首相。',
+    htmlLang: 'ja',
     ranges: { '3m': '3ヶ月', '1y': '1年', '2y': '2年', '5y': '5年', '10y': '10年', 'all': '全期間' },
-    exitFocus: '✕ 全部表示', exitTitle: 'クリックで全首相の線を元に戻す',
-    pillTitle: 'クリックでこの首相の線にフォーカス',
-    yName: '支持率 (%)', avgWord: '平均', corpAvg: '社平均',
-    footRights: '© japan.ouuut.com',
-    footSources: 'データ：USGS · 警視庁 · NHK ｜ CC BY 公開統計',
-    footHome: '← トップへ戻る',
-    chartFail: 'グラフライブラリの読み込みに失敗しました。ネットワークと CDN フォールバックを確認してください。'
+    yName: '支持率 (%)',
+    months: 'か月',
+    polls: '回調査',
+    meanLabel: '平均支持率',
+    highLabel: '最高支持率',
+    lowLabel: '最低支持率',
+    pollsLabel: '世論調査回数',
+    overviewTitle: '14の内閣 · 331か月',
+    overviewDesc: '1998年から2026年までのNHK放送文化研究所、選挙WEB、各社世論調査を月平均で集計。',
+    overviewHint: '首相の区間や折線にマウスを合わせると、詳細な内閣データと経歴が表示されます。',
+    unpin: '✕ 全首相の表示に戻す',
+    chartFail: 'グラフライブラリの読み込みに失敗しました。'
   },
   zh: {
-    htmlLang: 'zh-CN', ogLocale: 'zh_CN',
-    h1: '日本内阁支持率 2000→｜NHK 月度舆论调查',
-    title: '日本内阁支持率 2000→｜NHK 月度舆论调查',
-    metaDesc: '基于2000年至2026年NHK月度舆论调查的日本内阁支持率/不支持率走势图。以NHK放送文化研究所与NHK选举WEB为主，整合日经、朝日、时事、读卖、JNN、共同社等各社调查，按月平均绘制。',
-    eyebrow: 'CABINET APPROVAL · NHK MONTHLY POLLS',
-    wmMain: '内阁支持率',
-    navAria: '姊妹站点',
-    nav: { home: '门面', quake: '地震', crime: '犯罪率', cabinet: '内阁支持率' },
-    langAria: '切换界面语言',
-    themeLabel: '主题',
-    variants: { tactical: '战术·琥珀', editorial: '纸感·朱砂' },
-    srcLine: '2000年1月以来的NHK月度舆论调查（放送文化研究所＋选举WEB）·多社平均。竖线＝首相交接／同色＝同一首相。',
-    exitFocus: '✕ 显示全部', exitTitle: '点击恢复全部首相曲线',
-    pillTitle: '点击聚焦该首相曲线',
+    htmlLang: 'zh-CN',
     ranges: { '3m': '3个月', '1y': '1年', '2y': '2年', '5y': '5年', '10y': '10年', 'all': '全期间' },
-    yName: '支持率 (%)', avgWord: '平均', corpAvg: '家媒体平均',
-    footRights: '© japan.ouuut.com',
-    footSources: '数据：USGS · 警视厅 · NHK ｜ CC BY 公开统计',
-    footHome: '← 返回门面',
-    chartFail: '图表库加载失败，请检查网络与 CDN 备用链路。'
+    yName: '支持率 (%)',
+    months: '个月',
+    polls: '次民调',
+    meanLabel: '平均支持率',
+    highLabel: '最高支持率',
+    lowLabel: '最低支持率',
+    pollsLabel: '民调统计数',
+    overviewTitle: '14届内阁 · 331个月',
+    overviewDesc: '1998年至2026年间NHK放送文化研究所、选举WEB及各主要媒体舆论调查月均汇总。',
+    overviewHint: '鼠标悬停于首相任期或折线上，可查看该内阁的完整数据指标与执政档案。',
+    unpin: '✕ 恢复全景概览',
+    chartFail: '图表库加载失败，请检查网络链路。'
   },
   en: {
-    htmlLang: 'en', ogLocale: 'en_US',
-    h1: 'Japan Cabinet Approval 2000→｜NHK Monthly Polls',
-    title: 'Japan Cabinet Approval 2000→｜NHK Monthly Polls',
-    metaDesc: 'Japan cabinet approval/disapproval trends from NHK monthly opinion polls, 2000–2026. Anchored on the NHK Broadcasting Culture Research Institute and NHK Election WEB, merged with Nikkei, Asahi, Jiji, Yomiuri, JNN and Kyodo polls as monthly averages.',
-    eyebrow: 'CABINET APPROVAL · NHK MONTHLY POLLS',
-    wmMain: 'Cabinet Approval',
-    navAria: 'Sister sites',
-    nav: { home: 'Home', quake: 'Quakes', crime: 'Crime', cabinet: 'Approval' },
-    langAria: 'Switch interface language',
-    themeLabel: 'Theme',
-    variants: { tactical: 'Tactical Amber', editorial: 'Paper Cinnabar' },
-    srcLine: 'NHK monthly opinion polls since Jan 2000 (Broadcasting Culture Research Institute + Election WEB), multi-poll average. Vertical line = PM change / same colour = same PM.',
-    ranges: { '3m': '3M', '1y': '1Y', '2y': '2Y', '5y': '5Y', '10y': '10Y', 'all': 'All' },
-    exitFocus: '✕ Show all', exitTitle: 'Click to restore all PM lines',
-    pillTitle: 'Click to focus this PM’s line',
-    yName: 'Approval (%)', avgWord: 'avg', corpAvg: 'poll avg',
-    footRights: '© japan.ouuut.com',
-    footSources: 'Data: USGS · MPD Tokyo · NHK ｜ CC BY open statistics',
-    footHome: '← Back to home',
-    chartFail: 'Failed to load the chart library. Check your network and the CDN fallback.'
+    htmlLang: 'en',
+    ranges: { '3m': '3M', '1y': '1Y', '2y': '2Y', '5y': '5Y', '10y': '10Y', 'all': 'ALL' },
+    yName: 'Approval (%)',
+    months: 'months',
+    polls: 'polls',
+    meanLabel: 'Mean Approval',
+    highLabel: 'Highest Approval',
+    lowLabel: 'Lowest Approval',
+    pollsLabel: 'Recorded Polls',
+    overviewTitle: '14 Cabinets · 331 Mos',
+    overviewDesc: 'Monthly aggregate of cabinet polls from NHK, Nikkei, Asahi, Yomiuri and Kyodo (1998–2026).',
+    overviewHint: 'Hover over any cabinet segment or curve to inspect historical data and editorial profile.',
+    unpin: '✕ Reset View',
+    chartFail: 'Failed to load chart library.'
   }
 };
 
-const EN_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function fmtMonth(lang, y, m) {
-  if (lang === 'en') return EN_MONTHS[m - 1] + ' ' + y;
-  return y + '年' + m + '月';
-}
-function fmtLatest(lang, y, m, avg, n) {
-  const t = I18N[lang];
-  if (lang === 'en') return 'Latest: ' + fmtMonth(lang, y, m) + ' · ' + avg + '% (' + n + '-' + t.corpAvg + ')';
-  if (lang === 'zh') return '最新 ' + fmtMonth(lang, y, m) + ' ' + avg + '%（' + n + t.corpAvg + '）';
-  return '最新 ' + fmtMonth(lang, y, m) + ' ' + avg + '%（' + n + t.corpAvg + '）';
-}
-/* 缺键阻断自查：以 ja 为基准，zh/en 逐键比对；缺键/类型不一致即阻断渲染 */
-function checkI18n() {
-  const problems = [];
-  const walk = (base, cand, path) => {
-    for (const k of Object.keys(base)) {
-      const p = path + '.' + k;
-      const bv = base[k];
-      const cv = cand ? cand[k] : undefined;
-      if (cv === undefined) { problems.push('missing ' + p); continue; }
-      if (bv && typeof bv === 'object' && !Array.isArray(bv)) {
-        if (!cv || typeof cv !== 'object' || Array.isArray(cv)) problems.push('type-mismatch ' + p);
-        else walk(bv, cv, p);
-      } else if (typeof bv !== typeof cv) {
-        problems.push('type-mismatch ' + p);
-      }
-    }
-  };
-  for (const lang of ['zh', 'en']) walk(I18N.ja, I18N[lang], lang);
-  return problems;
-}
-
-/* ============================================================
-   Variant（tactical 默认深色 / editorial 纸白可切）
-   ECharts 收敛到 tactical：曲线主色 accent，网格/文字按 token
-   ============================================================ */
-const VARIANTS = [
-  { id: 'tactical',   swatch: '#FF6A3D' },
-  { id: 'editorial',  swatch: '#2F6B4F' }
-];
-function hexToRgba(hex, alpha) {
-  let c = hex.replace('#', '');
-  if (c.length === 3) c = c.split('').map(x => x + x).join('');
-  const num = parseInt(c, 16);
-  return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
-}
 const VARIANT_CHART = {
   tactical: {
-    palette: [
-      '#E09F67', '#94A3B8', '#34D399', '#F87171', '#C084FC',
-      '#FBBF24', '#38BDF8', '#60A5FA', '#818CF8', '#FF6A3D',
-      '#4ADE80', '#FB923C', '#A78BFA', '#F472B6'
-    ],
     chart: {
-      gridBorder: 'transparent',
-      tooltipBg: 'rgba(16,14,12,0.95)', tooltipBorder: 'rgba(255,244,232,0.18)',
-      tooltipText: '#EDEBE4', tooltipMuted: '#A09E96', tooltipDim: '#6F6D66',
-      axisLine: 'rgba(237,235,228,0.18)', axisLabel: '#A09E96',
-      splitLine: 'rgba(237,235,228,0.08)', splitLineType: 'dashed',
-      zoomBorder: 'rgba(237,235,228,0.14)', zoomBg: '#141412', zoomFill: 'rgba(255,106,61,0.18)', zoomHandle: '#FF6A3D', zoomText: '#A09E96',
-      markLabelBg: 'rgba(20,20,18,0.92)', pointBorder: '#0E0E0C'
-    }
+      gridBorder: 'rgba(237,235,228,0.08)',
+      pointBorder: '#0E0E0C',
+      tooltipBg: 'rgba(20,20,18,0.94)',
+      tooltipBorder: 'rgba(237,235,228,0.16)',
+      tooltipText: '#EDEBE4',
+      markLabelBg: 'rgba(14,14,12,0.85)',
+      zoomBorder: 'rgba(237,235,228,0.14)',
+      zoomFill: 'rgba(255,106,61,0.22)',
+      zoomHandle: '#FF6A3D',
+      zoomText: '#A09E96'
+    },
+    palette: [
+      '#FF6A3D','#4E9B80','#E5A93C','#5B8FF9','#C27BA0',
+      '#D95F4E','#2CA02C','#F28E2B','#76B7B2','#EDC948',
+      '#B07AA1','#FF9DA7','#9C755F','#BAB0AC'
+    ]
   },
   editorial: {
-    palette: [
-      '#8A5A36', '#5E6B73', '#1E6B52', '#A34828', '#685B79',
-      '#9E7B34', '#2A6F97', '#3F88C5', '#1D4E89', '#C14953',
-      '#4B7F52', '#D06A2A', '#6C5B7B', '#B53471'
-    ],
     chart: {
-      gridBorder: 'transparent',
-      tooltipBg: 'rgba(250,252,248,0.97)', tooltipBorder: 'rgba(23,33,26,0.16)',
-      tooltipText: '#17211A', tooltipMuted: '#56635A', tooltipDim: '#88948B',
-      axisLine: 'rgba(23,33,26,0.22)', axisLabel: '#56635A',
-      splitLine: 'rgba(23,33,26,0.07)', splitLineType: 'dashed',
-      zoomBorder: 'rgba(23,33,26,0.14)', zoomBg: '#DFE5D8', zoomFill: 'rgba(47,107,79,0.16)', zoomHandle: '#2F6B4F', zoomText: '#56635A',
-      markLabelBg: 'rgba(255,255,255,0.95)', pointBorder: '#FFFFFF'
-    }
+      gridBorder: 'rgba(20,26,21,0.08)',
+      pointBorder: '#E9EDE3',
+      tooltipBg: 'rgba(242,245,238,0.96)',
+      tooltipBorder: 'rgba(20,26,21,0.14)',
+      tooltipText: '#141A15',
+      markLabelBg: 'rgba(233,237,227,0.88)',
+      zoomBorder: 'rgba(20,26,21,0.12)',
+      zoomFill: 'rgba(47,107,79,0.18)',
+      zoomHandle: '#2F6B4F',
+      zoomText: '#56635A'
+    },
+    palette: [
+      '#C84B31','#2F6B4F','#D48806','#1D39C4','#722ED1',
+      '#A8071A','#389E0D','#D46B08','#08979C','#096DD9',
+      '#531DAB','#C41D7F','#614700','#595959'
+    ]
   }
 };
-let chart = null;
-let rawData = null;
-let activeRange = "10y";
-let focusCabinet = null;
-let lastSummary = null;
-let mounted = false;
-let bootToken = 0;
-let refs = {};
-let hostEl = null;
-let controlsEl = null;
-let createdControls = false;
-let prevControlsHTML = "";
-let ro = null;
 
-/* ---------- 语言：?lang= > localStorage > navigator > 默认 ja ---------- */
+function hexToRgba(hex, alpha) {
+  hex = hex.replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+  const num = parseInt(hex, 16);
+  return 'rgba(' + [(num >> 16) & 255, (num >> 8) & 255, num & 255, alpha].join(',') + ')';
+}
+
+function fmtMonth(lang, y, m) {
+  const mm = (m < 10 ? '0' : '') + m;
+  if (lang === 'en') return y + '-' + mm;
+  return y + '年' + m + '月';
+}
+
 function detectInitialLang() {
   const q = new URLSearchParams(window.location.search).get('lang');
-  if (q) {
-    const s = q.toLowerCase();
-    if (s === 'ja' || s === 'ja-jp') return 'ja';
-    if (s === 'zh' || s === 'zh-cn' || s === 'zh-tw') return 'zh';
-    if (s === 'en' || s === 'en-us') return 'en';
-  }
+  if (q && I18N[q.toLowerCase()]) return q.toLowerCase();
   const saved = localStorage.getItem('cabinet-lang');
   if (saved && I18N[saved]) return saved;
   const navs = navigator.languages || [navigator.language || ''];
@@ -210,113 +469,36 @@ function detectInitialLang() {
   }
   return 'ja';
 }
-let currentLang = 'ja';
-try { currentLang = detectInitialLang(); } catch (e) {}
 
-/* ---------- 主题：?theme= > localStorage > 旧键迁移 > 默认 tactical ---------- */
 function detectInitialVariant() {
   const q = new URLSearchParams(window.location.search).get('theme');
-  const norm = (v) => {
-    if (v === 'tactical' || v === 'gruvbox-dark' || v === 'saaaai-mono') return 'tactical';
-    if (v === 'editorial' || v === 'paper-editorial' || v === 'claude-cream') return 'editorial';
-    return null;
-  };
-  if (q && norm(q)) return norm(q);
-  const saved = localStorage.getItem('cabinet-variant');
-  if (saved && VARIANTS.some(v => v.id === saved)) return saved;
-  const legacy = localStorage.getItem('cabinet-theme');
-  if (legacy && norm(legacy)) return norm(legacy);
+  if (q && THEME_MAP[q]) return THEME_MAP[q];
+  const dt = document.documentElement.dataset.theme;
+  if (dt && THEME_MAP[dt]) return THEME_MAP[dt];
   return 'tactical';
 }
+
+let currentLang = 'ja';
 let currentVariant = 'tactical';
-try { currentVariant = detectInitialVariant(); } catch (e) {}
-
-function variantName(id) {
-  const t = I18N[currentLang] || I18N.ja;
-  return t.variants[id] || id;
-}
-
-function setCabinetLang(lang) {
-  if (!I18N[lang]) return false;
-  currentLang = lang;
-  if (!rawData) return true;
-  renderZoomSeg();
-  buildLegend();
-  renderChart();
-  return true;
-}
-
-function setCabinetTheme(t) {
-  const id = THEME_MAP[t] || 'tactical';
-  currentVariant = id;
-  syncVariantAttr();
-  if (chart && rawData) renderChart();
-  return id;
-}
-
-function setCabinetRange(id) {
-  if (!RANGE_WINDOW_MONTHS.hasOwnProperty(id)) return false;
-  activeRange = id;
-  focusCabinet = null;
-  if (!rawData) return true;
-  renderZoomSeg();
-  buildLegend();
-  renderChart();
-  return true;
-}
-
-function getCabinetSummary() { return lastSummary; }
-
-function ensureEcharts() {
-  const g = (typeof window !== 'undefined') ? window : globalThis;
-  if (g.echarts) return Promise.resolve(g.echarts);
-  const viaImport = async () => {
-    for (const u of ECHARTS_URLS) {
-      try { await import(/* @vite-ignore */u); if (g.echarts) return g.echarts; } catch (e) {}
-    }
-    throw new Error('echarts import failed');
-  };
-  const viaScript = () => new Promise((resolve, reject) => {
-    if (typeof document === 'undefined') return reject(new Error('echarts: no dom'));
-    const libs = ECHARTS_URLS.slice();
-    const next = () => {
-      const u = libs.shift();
-      if (!u) return reject(new Error('echarts CDN failed'));
-      const s = document.createElement('script');
-      s.src = u; s.async = true;
-      s.onload = () => { if (g.echarts) resolve(g.echarts); else { try { s.remove(); } catch (e) {} next(); } };
-      s.onerror = () => { try { s.remove(); } catch (e) {} next(); };
-      document.head.appendChild(s);
-    };
-    next();
-  });
-  return viaImport().catch(viaScript);
-}
+let rawData = null;
+let chart = null;
+let hostEl = null;
+let panelEl = null;
+let zoomEl = null;
+let activeRange = '10y';
+let focusCabinet = null;
+let activeHoverCab = null;
+let cabStats = {};
+let bootToken = 0;
+let mounted = false;
+let isInitialAnimating = true;
+let resizeRaf = null;
 
 const RANGES = [
   { id: '3m' }, { id: '1y' }, { id: '2y' },
   { id: '5y' }, { id: '10y' }, { id: 'all' }
 ];
 const RANGE_WINDOW_MONTHS = { '3m': 3, '1y': 12, '2y': 24, '5y': 60, '10y': 120, 'all': 0 };
-
-function renderZoomSeg() {
-  const t = I18N[currentLang] || I18N.ja;
-  refs.zoom.innerHTML = '';
-  RANGES.forEach(r => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = t.ranges[r.id];
-    b.classList.toggle('on', r.id === activeRange);
-    b.addEventListener('click', () => {
-      activeRange = r.id;
-      focusCabinet = null;
-      renderZoomSeg();
-      buildLegend();
-      renderChart();
-    });
-    refs.zoom.appendChild(b);
-  });
-}
 
 function tchart() { return VARIANT_CHART[currentVariant].chart; }
 function cabColors() { return VARIANT_CHART[currentVariant].palette; }
@@ -330,8 +512,6 @@ function injectCss() {
   document.head.appendChild(st);
 }
 
-let isInitialAnimating = true;
-let resizeRaf = null;
 function onCabResize() {
   if (resizeRaf) cancelAnimationFrame(resizeRaf);
   resizeRaf = requestAnimationFrame(() => {
@@ -354,212 +534,192 @@ function dismissVeil() {
   } catch (e) {}
 }
 
-async function boot(token) {
-  const problems = checkI18n();
-  if (problems.length) {
-    console.error('i18n missing keys (render blocked):', problems);
-    refs.box.innerHTML = '<div class="cab-fail">i18n missing keys: ' + problems.join(', ') + '</div>';
-    return null;
-  }
-  try {
-    await ensureEcharts();
-  } catch (e) {
-    const t = I18N[currentLang] || I18N.ja;
-    console.error('echarts load failed', e);
-    refs.box.innerHTML = '<div class="cab-fail">' + t.chartFail + '</div>';
-    return null;
-  }
-  if (!rawData) {
-    let lastErr = null;
-    const dataList = cabForcedBase ? [cabForcedBase + 'app/cabinet/data.json'] : DATA_CANDIDATES;
-    for (const u of dataList) {
-      try {
-        const resp = await fetch(u);
-        if (!resp.ok) throw new Error('http ' + resp.status);
-        rawData = await resp.json();
-        lastErr = null;
-        break;
-      } catch (e) { lastErr = e; }
-    }
-    if (!rawData) {
-      console.error('data.json load failed', lastErr);
-      return null;
-    }
-  }
-  if (token !== bootToken || !mounted) return null;
-  renderZoomSeg();
-  buildLegend();
-  renderChart();
-  if (typeof requestAnimationFrame !== 'undefined') {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (hostEl) hostEl.classList.remove('cab-init-hidden');
-        dismissVeil();
-        setTimeout(() => {
-          isInitialAnimating = false;
-          if (chart) try { chart.resize(); } catch (e) {}
-        }, 1250);
-      });
-    });
-  } else {
-    if (hostEl) hostEl.classList.remove('cab-init-hidden');
-    dismissVeil();
-  }
-  return lastSummary;
-}
-
-function mountCabinet(root, opts) {
-  opts = opts || {};
-  if (opts.base) cabForcedBase = opts.base;
-  if (mounted) unmountCabinet();
-  const host = typeof root === 'string' ? document.querySelector(root) : root;
-  if (!host) throw new Error('cab: mount root missing');
-  hostEl = host;
-  host.classList.add('cab-host');
-  host.classList.add('cab-init-hidden');
-  isInitialAnimating = true;
-  injectCss();
-
-  const viewport = host.querySelector('#v-cabinet-viewport') || host.querySelector('.stage') || host;
-  if (!viewport.querySelector('#cab-chart')) viewport.innerHTML = '';
-  viewport.classList.add('cab-viewport');
-  refs.viewport = viewport;
-  const box = document.createElement('div');
-  box.id = 'cab-chart';
-  viewport.appendChild(box);
-  refs.box = box;
-  const meta = document.createElement('div');
-  meta.className = 'cab-meta';
-  const latest = document.createElement('span');
-  latest.className = 'cab-latest';
-  latest.id = 'cab-latest';
-  const range = document.createElement('span');
-  range.className = 'cab-range';
-  range.id = 'cab-range';
-  meta.appendChild(latest);
-  meta.appendChild(range);
-  viewport.appendChild(meta);
-  refs.latest = latest;
-  refs.range = range;
-
-  controlsEl = host.querySelector('.controls');
-  if (controlsEl) {
-    prevControlsHTML = controlsEl.innerHTML;
-    controlsEl.innerHTML = '';
-    createdControls = false;
-  } else {
-    controlsEl = document.createElement('div');
-    controlsEl.className = 'controls cab-controls';
-    host.appendChild(controlsEl);
-    prevControlsHTML = '';
-    createdControls = true;
-  }
-  const zoom = document.createElement('div');
-  zoom.className = 'seg cab-zoom';
-  zoom.id = 'cab-zoom';
-  const legend = document.createElement('div');
-  legend.className = 'cab-legend';
-  legend.id = 'cab-legend';
-  controlsEl.appendChild(zoom);
-  controlsEl.appendChild(legend);
-  refs.zoom = zoom;
-  refs.legend = legend;
-
-  currentLang = (opts.lang && I18N[opts.lang]) ? opts.lang : detectInitialLang();
-  currentVariant = (opts.theme && THEME_MAP[opts.theme]) ? THEME_MAP[opts.theme] : detectInitialVariant();
-  syncVariantAttr();
-
-  mounted = true;
-  const token = ++bootToken;
-  if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('resize', onCabResize);
-  if (typeof ResizeObserver !== 'undefined') {
-    ro = new ResizeObserver(() => onCabResize());
-    try { ro.observe(box); } catch (e) {}
-  }
-  if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(() => onCabResize());
-  return boot(token);
-}
-
-function unmountCabinet() {
-  bootToken++;
-  mounted = false;
-  if (typeof window !== 'undefined' && window.removeEventListener) window.removeEventListener('resize', onCabResize);
-  if (ro) { try { ro.disconnect(); } catch (e) {} ro = null; }
-  if (resizeRaf) { cancelAnimationFrame(resizeRaf); resizeRaf = null; }
-  isInitialAnimating = false;
-  if (chart) { try { chart.dispose(); } catch (e) {} chart = null; }
-  lastSummary = null;
-  if (refs.viewport) {
-    try {
-      if (refs.box && refs.box.parentNode) refs.box.parentNode.removeChild(refs.box);
-      const metaEl = refs.viewport.querySelector('.cab-meta');
-      if (metaEl && metaEl.parentNode) metaEl.parentNode.removeChild(metaEl);
-      if (refs.viewport.classList) refs.viewport.classList.remove('cab-viewport');
-    } catch (e) {}
-  }
-  if (controlsEl) {
-    try {
-      if (createdControls) {
-        if (controlsEl.parentNode) controlsEl.parentNode.removeChild(controlsEl);
-      } else {
-        controlsEl.innerHTML = prevControlsHTML;
-      }
-    } catch (e) {}
-  }
-  if (hostEl) { try { hostEl.classList.remove('cab-host'); } catch (e) {} }
-  refs = {};
-  hostEl = null;
-  controlsEl = null;
-  createdControls = false;
-  prevControlsHTML = '';
-}
-
-function buildLegend() {
+function computeStats() {
   if (!rawData) return;
-  const t = I18N[currentLang] || I18N.ja;
-  const el = refs.legend;
-  el.innerHTML = '';
+  const polls = rawData.polls;
+  const cabinets = rawData.cabinets;
+  const buckets = {};
+  polls.forEach(p => {
+    if (p.derived) return;
+    const cab = pmByDate(p.date);
+    const ym = p.date.slice(0, 7);
+    const key = cab.id + '|' + ym;
+    if (!buckets[key]) buckets[key] = { cab, ym, sums: 0, n: 0 };
+    buckets[key].sums += p.value;
+    buckets[key].n += 1;
+  });
 
-  if (focusCabinet) {
-    const exitBtn = document.createElement('button');
-    exitBtn.type = 'button';
-    exitBtn.className = 'cab-pill cab-exit-focus';
-    exitBtn.textContent = t.exitFocus;
-    exitBtn.title = t.exitTitle;
-    exitBtn.addEventListener('click', () => {
-      focusCabinet = null;
-      buildLegend();
-      renderChart();
-    });
-    el.appendChild(exitBtn);
-  }
-
-  rawData.cabinets.forEach((c, i) => {
-    const pill = document.createElement('button');
-    pill.type = 'button';
-    pill.className = 'cab-pill';
-    pill.title = t.pillTitle;
-    const color = cabColors()[i % cabColors().length];
-    /* chip = 6px 色点 + 名（14px 灰字 hover 变亮，focus 显示 accent 底+白字） */
-    const dot = document.createElement('span');
-    dot.className = 'cab-dot';
-    dot.style.background = color;
-    pill.appendChild(dot);
-    const name = document.createElement('span');
-    name.textContent = c.pm;
-    pill.appendChild(name);
-
-    if (focusCabinet === c.id) pill.classList.add('cab-focused');
-    pill.addEventListener('click', () => {
-      focusCabinet = (focusCabinet === c.id) ? null : c.id;
-      buildLegend();
-      renderChart();
-    });
-    el.appendChild(pill);
+  cabStats = {};
+  cabinets.forEach((c, idx) => {
+    const cBuckets = Object.keys(buckets).map(k => buckets[k]).filter(b => b.cab.id === c.id);
+    if (cBuckets.length > 0) {
+      let high = -1, highYM = '';
+      let low = 999, lowYM = '';
+      let sum = 0, totalPolls = 0;
+      cBuckets.forEach(b => {
+        const v = b.sums / b.n;
+        sum += v;
+        totalPolls += b.n;
+        if (v > high) { high = v; highYM = b.ym; }
+        if (v < low) { low = v; lowYM = b.ym; }
+      });
+      cabStats[c.id] = {
+        pm: c.pm,
+        idx,
+        color: cabColors()[idx % cabColors().length],
+        start: c.start,
+        end: c.end,
+        months: cBuckets.length,
+        mean: Math.round((sum / cBuckets.length) * 10) / 10,
+        high: Math.round(high * 10) / 10,
+        highYM,
+        low: Math.round(low * 10) / 10,
+        lowYM,
+        polls: totalPolls
+      };
+    }
   });
 }
 
+function renderZoomSeg() {
+  if (!zoomEl) return;
+  const t = I18N[currentLang] || I18N.ja;
+  zoomEl.innerHTML = '';
+  RANGES.forEach(r => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = t.ranges[r.id];
+    b.classList.toggle('on', r.id === activeRange);
+    b.addEventListener('click', () => {
+      activeRange = r.id;
+      focusCabinet = null;
+      renderZoomSeg();
+      renderPanel(null);
+      renderChart();
+    });
+    zoomEl.appendChild(b);
+  });
+}
+
+function renderPanel(targetCabId) {
+  if (!panelEl || !rawData) return;
+  const t = I18N[currentLang] || I18N.ja;
+  const langKey = currentLang;
+
+  const cabId = targetCabId || focusCabinet;
+  if (!cabId || !cabStats[cabId]) {
+    const totalPolls = rawData.polls.length;
+    const allMeans = Object.values(cabStats).map(s => s.mean);
+    const avgAll = allMeans.length ? (Math.round((allMeans.reduce((a, b) => a + b, 0) / allMeans.length) * 10) / 10) : 41.2;
+    panelEl.innerHTML = `
+      <div class="cab-panel-card">
+        <div class="cab-card-header">
+          <div>
+            <div class="cab-card-pm">${t.overviewTitle}</div>
+            <div class="cab-card-gen">1998.07 — 2026.10</div>
+          </div>
+          <span class="cab-card-badge" style="background:var(--accent);color:#fff">OVERVIEW</span>
+        </div>
+        <div class="cab-stats-grid">
+          <div class="cab-stat-box">
+            <div class="cab-stat-label">${t.meanLabel}</div>
+            <div class="cab-stat-val">${avgAll}%</div>
+            <div class="cab-stat-sub">14内閣全体平均</div>
+          </div>
+          <div class="cab-stat-box">
+            <div class="cab-stat-label">${t.pollsLabel}</div>
+            <div class="cab-stat-val">${totalPolls}</div>
+            <div class="cab-stat-sub">644回一次調査</div>
+          </div>
+          <div class="cab-stat-box">
+            <div class="cab-stat-label">${t.highLabel}</div>
+            <div class="cab-stat-val" style="color:#2F6B4F">85.2%</div>
+            <div class="cab-stat-sub">小泉純一郎 (2001)</div>
+          </div>
+          <div class="cab-stat-box">
+            <div class="cab-stat-label">${t.lowLabel}</div>
+            <div class="cab-stat-val" style="color:#C84B31">7.0%</div>
+            <div class="cab-stat-sub">森喜朗 (2001)</div>
+          </div>
+        </div>
+        <div class="cab-card-bio">${t.overviewDesc}</div>
+        <div class="cab-card-hint">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" style="flex-shrink:0"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>${t.overviewHint}</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const s = cabStats[cabId];
+  const p = CAB_PROFILES[cabId] || {
+    generation: { ja: "内閣総理大臣", zh: "内阁总理大臣", en: "Prime Minister" },
+    party: { ja: "自由民主党", zh: "自由民主党", en: "LDP" },
+    bio: { ja: "", zh: "", en: "" }
+  };
+  const color = s.color || '#FF6A3D';
+  const genStr = p.generation[langKey] || p.generation.ja;
+  const partyStr = p.party[langKey] || p.party.ja;
+  const bioStr = p.bio[langKey] || p.bio.ja;
+  const isPinned = focusCabinet === cabId;
+
+  panelEl.innerHTML = `
+    <div class="cab-panel-card">
+      <div class="cab-card-header">
+        <div>
+          <div class="cab-card-pm" style="color:${color}">${s.pm}</div>
+          <div class="cab-card-gen">${genStr} · ${partyStr}</div>
+        </div>
+        <span class="cab-card-badge" style="background:${hexToRgba(color, 0.15)};color:${color};border:1px solid ${hexToRgba(color, 0.35)}">
+          ${isPinned ? 'PINNED' : 'CABINET'}
+        </span>
+      </div>
+      <div class="cab-card-dates">
+        ${s.start.slice(0, 7)} — ${s.end.slice(0, 7)} (${s.months}${t.months})
+      </div>
+      <div class="cab-stats-grid">
+        <div class="cab-stat-box">
+          <div class="cab-stat-label">${t.meanLabel}</div>
+          <div class="cab-stat-val" style="color:${color}">${s.mean}%</div>
+          <div class="cab-stat-sub">${s.polls} ${t.polls}</div>
+        </div>
+        <div class="cab-stat-box">
+          <div class="cab-stat-label">${t.highLabel}</div>
+          <div class="cab-stat-val" style="color:#2F6B4F">${s.high}%</div>
+          <div class="cab-stat-sub">${s.highYM}</div>
+        </div>
+        <div class="cab-stat-box">
+          <div class="cab-stat-label">${t.lowLabel}</div>
+          <div class="cab-stat-val" style="color:#C84B31">${s.low}%</div>
+          <div class="cab-stat-sub">${s.lowYM}</div>
+        </div>
+        <div class="cab-stat-box">
+          <div class="cab-stat-label">${t.pollsLabel}</div>
+          <div class="cab-stat-val">${s.polls}</div>
+          <div class="cab-stat-sub">NHK/日経/朝日各社</div>
+        </div>
+      </div>
+      <div class="cab-card-bio">${bioStr}</div>
+      ${isPinned ? `<button type="button" class="cab-card-unpin" id="cab-unpin-btn">${t.unpin}</button>` : ''}
+    </div>
+  `;
+
+  if (isPinned) {
+    const unpinBtn = panelEl.querySelector('#cab-unpin-btn');
+    if (unpinBtn) {
+      unpinBtn.addEventListener('click', () => {
+        focusCabinet = null;
+        activeHoverCab = null;
+        renderPanel(null);
+        renderChart();
+      });
+    }
+  }
+}
+
 function pmByDate(dateStr) {
+  if (!rawData || !rawData.cabinets) return null;
   const d = new Date(dateStr);
   for (let i = rawData.cabinets.length - 1; i >= 0; i--) {
     if (d >= new Date(rawData.cabinets[i].start)) return rawData.cabinets[i];
@@ -570,15 +730,17 @@ function pmByDate(dateStr) {
 function renderChart() {
   if (!window.echarts || !rawData) return;
   const t = I18N[currentLang] || I18N.ja;
-  if (!chart) chart = echarts.init(refs.box, null, {renderer: 'canvas'});
+  const chartBox = hostEl ? hostEl.querySelector('#cab-chart') : document.getElementById('cab-chart');
+  if (!chartBox) return;
+  if (!chart) chart = echarts.init(chartBox, null, { renderer: 'canvas' });
 
   const polls = rawData.polls;
   const cabinets = rawData.cabinets;
   const C = cabColors();
   const T = tchart();
-  const isNarrow = window.innerWidth <= 880;
-  const gridL = isNarrow ? 44 : 64;
-  const gridR = isNarrow ? 12 : 64;
+  const isNarrow = window.innerWidth <= 960;
+  const gridL = isNarrow ? 36 : 48;
+  const gridR = isNarrow ? 20 : 344;
 
   const buckets = {};
   polls.forEach(p => {
@@ -595,7 +757,7 @@ function renderChart() {
   const markAreaData = cabinets.map((c, idx) => {
     const isEven = idx % 2 === 0;
     const bg = isEven
-      ? (currentVariant === 'editorial' ? 'rgba(0,0,0,0.028)' : 'rgba(255,255,255,0.028)')
+      ? (currentVariant === 'editorial' ? 'rgba(0,0,0,0.026)' : 'rgba(255,255,255,0.026)')
       : 'transparent';
     return [
       { xAxis: c.start, itemStyle: { color: bg } },
@@ -660,25 +822,36 @@ function renderChart() {
           lineStyle: {
             color: currentVariant === 'editorial' ? 'rgba(23,33,26,0.18)' : 'rgba(237,235,228,0.16)',
             type: 'dashed',
-            width: focused ? 2 : 1.2,
-            opacity: focusCabinet ? (focused ? 0.95 : 0.12) : 0.65
+            width: focused ? 2.5 : 1.2,
+            opacity: focusCabinet ? (focused ? 0.95 : 0.15) : 0.65
           },
-          label: {
-            position: 'end',
-            formatter: c.pm,
-            color: color,
-            fontSize: isNarrow ? 11 : 13,
-            fontWeight: 700,
-            fontFamily: 'var(--ja-sans), system-ui, sans-serif',
-            padding: isNarrow ? [2, 5] : [3, 8],
-            backgroundColor: T.markLabelBg,
-            borderColor: hexToRgba(color, 0.45),
-            borderWidth: 1.2,
-            borderRadius: 6,
-            distance: 8
-          },
-          labelLayout: { hideOverlap: true, moveOverlap: 'shiftX' },
-          data: [{ xAxis: c.start }]
+          data: [
+            [
+              { coord: [c.start, 0], symbol: 'none' },
+              {
+                coord: [c.start, 88],
+                symbol: 'none',
+                label: {
+                  show: true,
+                  position: 'end',
+                  distance: 10,
+                  align: 'left',
+                  formatter: String(c.pm),
+                  fontSize: isNarrow ? 11.5 : 14,
+                  fontWeight: 700,
+                  color: color,
+                  fontFamily: 'var(--ja-sans), system-ui, sans-serif',
+                  padding: [2, 6],
+                  backgroundColor: currentVariant === 'editorial' ? 'rgba(233,237,227,0.88)' : 'rgba(14,14,12,0.88)',
+                  borderRadius: 4
+                }
+              }
+            ],
+            [
+              { coord: [c.start, 88], symbol: 'none' },
+              { coord: [c.start, 100], symbol: 'none' }
+            ]
+          ]
         }
       });
     }
@@ -687,8 +860,6 @@ function renderChart() {
   const allDates = polls.map(p => p.date).sort();
   const startDate = allDates[0];
   const endDate = allDates[allDates.length - 1];
-  // 最新月 bucket 画在 ym-15（如 2026-09-15），raw 末点（如 2026-09-11）比它早：
-  // max 若用 raw 末点，9 月点会被裁在轴外。取两者较大者再向右垫 18 天，9 月点落在轴内。
   const bucketDates = Object.values(buckets).map(r => r.ym + '-15').sort();
   const lastBucket = bucketDates[bucketDates.length - 1];
   const axisMaxTime = Math.max(new Date(endDate).getTime(), new Date(lastBucket).getTime()) + 18 * 86400000;
@@ -718,11 +889,13 @@ function renderChart() {
     focusWindow = { startValue: new Date(ws), endValue: new Date(we) };
   }
 
+  // 底部长条 slider：左侧留出标签按钮空间 (366px)，右侧留出面板空间 (344px)！
   const sliderDZ = {
     type: 'slider', xAxisIndex: 0,
-    left: gridL, right: gridR,
-    height: 24, bottom: 18,
-    borderRadius: 8,
+    left: isNarrow ? 36 : 366,
+    right: gridR,
+    height: 24, bottom: 8,
+    borderRadius: 6,
     borderColor: T.zoomBorder,
     backgroundColor: T.zoomFill,
     fillerColor: T.zoomFill,
@@ -750,7 +923,7 @@ function renderChart() {
   const lang = currentLang;
   const option = {
     backgroundColor: 'transparent',
-    grid: { left: gridL, right: gridR, top: 48, bottom: 100, borderColor: T.gridBorder },
+    grid: { left: gridL, right: gridR, top: 28, bottom: 54, borderColor: T.gridBorder },
     legend: { show: false },
     tooltip: {
       trigger: 'axis',
@@ -774,36 +947,54 @@ function renderChart() {
         let html = '<div style="min-width:180px;font-family:var(--font-sans),system-ui,sans-serif">';
         html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">';
         html += '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + col + ';box-shadow:0 0 6px ' + hexToRgba(col, 0.6) + '"></span>';
-        html += '<span style="font-weight:700;font-size:13.5px;color:' + T.tooltipText + '">' + (cab ? cab.pm : '') + ' 内阁</span>';
+        html += '<span style="font-weight:700;font-size:13px;color:' + T.tooltipText + '">' + (cab ? cab.pm : '') + '</span>';
+        html += '<span style="color:' + (currentVariant === 'editorial' ? '#56635A' : '#A09E96') + ';font-size:11px;margin-left:auto">' + ymStr + '</span>';
         html += '</div>';
-        html += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid ' + T.splitLine + '">';
-        html += '<span style="color:' + T.tooltipMuted + ';font-size:11.5px;letter-spacing:.02em">' + ymStr + '</span>';
-        html += '<span style="font-size:22px;font-weight:800;color:' + col + ';font-family:var(--mono),monospace;line-height:1">' + avg + '<small style="font-size:11px;font-weight:500">%</small></span>';
-        html += '</div>';
-        html += '<div style="color:' + T.tooltipMuted + ';font-size:10.5px;margin-bottom:6px;letter-spacing:.02em">' + n + ' ' + t.corpAvg + ' · ' + t.avgWord + '</div>';
-        sources.forEach(s => {
-          html += '<div style="display:flex;justify-content:space-between;font-size:11.5px;line-height:1.6;color:' + T.tooltipText + '">';
-          html += '<span style="color:' + T.tooltipMuted + '">' + s.src + (s.kind ? ' (' + s.kind + ')' : '') + '</span>';
-          html += '<span style="font-weight:600;font-family:var(--mono),monospace">' + s.v + '%</span>';
+        if (avg !== null) {
+          html += '<div style="display:flex;align-items:baseline;gap:6px;margin:4px 0 8px">';
+          html += '<span style="font-size:22px;font-weight:800;color:' + col + ';font-family:var(--font-mono,monospace)">' + avg.toFixed(1) + '%</span>';
+          html += '<span style="font-size:11px;color:' + (currentVariant === 'editorial' ? '#56635A' : '#A09E96') + '">' + n + '社平均</span>';
           html += '</div>';
-        });
+        }
+        if (sources.length > 0) {
+          html += '<div style="display:flex;flex-wrap:wrap;gap:4px;border-top:1px solid ' + (currentVariant === 'editorial' ? 'rgba(20,26,21,0.1)' : 'rgba(237,235,228,0.12)') + ';padding-top:6px;margin-top:4px">';
+          sources.forEach(function(s) {
+            html += '<span style="font-size:10.5px;padding:1px 6px;border-radius:3px;background:' + (currentVariant === 'editorial' ? 'rgba(20,26,21,0.06)' : 'rgba(237,235,228,0.08)') + ';color:' + (currentVariant === 'editorial' ? '#2b382d' : '#d2cfc4') + '">';
+            html += s.src + ' <b style="color:' + col + '">' + s.v.toFixed(1) + '%</b>';
+            html += '</span>';
+          });
+          html += '</div>';
+        }
         html += '</div>';
         return html;
       }
     },
     xAxis: {
       type: 'time', min: startDate, max: axisMaxISO,
-      axisLine: { lineStyle: { color: T.axisLine } },
-      axisLabel: { color: T.axisLabel, fontSize: 11, hideOverlap: true },
-      splitLine: { show: true, lineStyle: { color: T.splitLine, type: T.splitLineType } }
+      axisLine: { lineStyle: { color: T.gridBorder } },
+      axisTick: { show: false },
+      splitLine: { show: false },
+      axisLabel: {
+        color: currentVariant === 'editorial' ? '#56635A' : '#A09E96',
+        fontSize: 10.5,
+        formatter: function(val) {
+          const d = new Date(val);
+          return String(d.getFullYear());
+        }
+      }
     },
     yAxis: {
-      type: 'value', min: 0, max: 100, interval: 10,
+      type: 'value', min: 0, max: 100, interval: 20,
       name: t.yName,
-      nameTextStyle: { color: T.axisLabel, fontSize: 11 },
+      nameTextStyle: { color: currentVariant === 'editorial' ? '#56635A' : '#A09E96', fontSize: 10.5, padding: [0, 0, 4, 0] },
       axisLine: { show: false },
-      axisLabel: { color: T.axisLabel, formatter: '{value}%' },
-      splitLine: { show: true, lineStyle: { color: T.splitLine, type: T.splitLineType } }
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: T.gridBorder, type: 'dashed' } },
+      axisLabel: {
+        color: currentVariant === 'editorial' ? '#56635A' : '#A09E96',
+        fontSize: 10.5,
+        formatter: function(val) { return val + '%'; }
+      }
     },
     dataZoom: [
       sliderDZ,
@@ -824,32 +1015,220 @@ function renderChart() {
     series: series
   };
 
-  /* 最新月徽标：取 buckets 里最大 ym 的月平均，直接写"最新 2026年9月 57.8%"，不插值不手写 */
-  const latestYM = Object.values(buckets).map(r => r.ym).sort().pop();
-  const latestRecs = Object.values(buckets).filter(r => r.ym === latestYM);
-  const latestSum = latestRecs.reduce((a, r) => a + r.sums, 0);
-  const latestN = latestRecs.reduce((a, r) => a + r.n, 0);
-  const latestAvg = Math.round((latestSum / latestN) * 10) / 10;
-  const latestBadge = refs.latest;
-  if (latestBadge && latestYM) {
-    const [ly, lm] = latestYM.split('-');
-    latestBadge.textContent = fmtLatest(lang, Number(ly), Number(lm), latestAvg, latestN);
-  }
-
   chart.setOption(option, true);
-  lastSummary = { ym: latestYM, avg: latestAvg, n: latestN, series: series.length,
-    points: series.reduce((a, s) => a + (s.data ? s.data.length : 0), 0) };
 
-  /* 同步副标题右侧"当前范围"提示 */
-  const rn = refs.range;
-  if (rn) {
-    const rlabel = t.ranges[activeRange] || '';
-    if (focusCabinet) {
-      const fc = rawData.cabinets.find(c => c.id === focusCabinet);
-      rn.textContent = (fc ? fc.pm + ' · ' : '') + rlabel;
-    } else {
-      rn.textContent = rlabel;
+  // 鼠标交互：更新右侧深度面板
+  chart.off('updateAxisPointer');
+  chart.on('updateAxisPointer', (event) => {
+    if (!event.axesInfo || !event.axesInfo[0]) return;
+    const val = event.axesInfo[0].value;
+    const cab = pmByDate(val);
+    if (cab && cab.id !== activeHoverCab) {
+      activeHoverCab = cab.id;
+      renderPanel(cab.id);
+    }
+  });
+
+  chart.getZr().off('globalout');
+  chart.getZr().on('globalout', () => {
+    activeHoverCab = null;
+    renderPanel(focusCabinet || null);
+  });
+
+  chart.off('click');
+  chart.on('click', (params) => {
+    if (params.seriesName) {
+      const cab = rawData.cabinets.find(c => c.pm === params.seriesName);
+      if (cab) {
+        focusCabinet = (focusCabinet === cab.id) ? null : cab.id;
+        renderPanel(focusCabinet);
+        renderChart();
+      }
+    }
+  });
+}
+
+async function boot(token) {
+  try {
+    await ensureEcharts();
+  } catch (e) {
+    const t = I18N[currentLang] || I18N.ja;
+    console.error('echarts load failed', e);
+    return null;
+  }
+  if (!rawData) {
+    let lastErr = null;
+    const dataList = cabForcedBase ? [cabForcedBase + 'app/cabinet/data.json'] : DATA_CANDIDATES;
+    for (const u of dataList) {
+      try {
+        const resp = await fetch(u);
+        if (!resp.ok) throw new Error('http ' + resp.status);
+        rawData = await resp.json();
+        lastErr = null;
+        break;
+      } catch (e) { lastErr = e; }
+    }
+    if (!rawData) {
+      console.error('data.json load failed', lastErr);
+      return null;
     }
   }
+  if (token !== bootToken || !mounted) return null;
+  computeStats();
+  renderZoomSeg();
+  renderPanel(focusCabinet || null);
+  renderChart();
+
+  if (typeof requestAnimationFrame !== 'undefined') {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (hostEl) hostEl.classList.remove('cab-init-hidden');
+        dismissVeil();
+        setTimeout(() => {
+          isInitialAnimating = false;
+          if (chart) try { chart.resize(); } catch (e) {}
+        }, 1250);
+      });
+    });
+  } else {
+    if (hostEl) hostEl.classList.remove('cab-init-hidden');
+    dismissVeil();
+  }
+  return true;
 }
+
+function ensureEcharts() {
+  const g = (typeof window !== 'undefined') ? window : globalThis;
+  if (g.echarts) return Promise.resolve(g.echarts);
+  const viaImport = async () => {
+    for (const u of ECHARTS_URLS) {
+      try { await import(/* @vite-ignore */u); if (g.echarts) return g.echarts; } catch (e) {}
+    }
+    throw new Error('echarts import failed');
+  };
+  const viaScript = () => new Promise((resolve, reject) => {
+    if (typeof document === 'undefined') return reject(new Error('echarts: no dom'));
+    const libs = ECHARTS_URLS.slice();
+    const next = () => {
+      const u = libs.shift();
+      if (!u) return reject(new Error('echarts CDN failed'));
+      const s = document.createElement('script');
+      s.src = u; s.async = true;
+      s.onload = () => { if (g.echarts) resolve(g.echarts); else { try { s.remove(); } catch (e) {} next(); } };
+      s.onerror = () => { try { s.remove(); } catch (e) {} next(); };
+      document.head.appendChild(s);
+    };
+    next();
+  });
+  return viaImport().catch(viaScript);
+}
+
+function mountCabinet(root, opts) {
+  opts = opts || {};
+  if (opts.base) cabForcedBase = opts.base;
+  if (mounted) unmountCabinet();
+  const host = typeof root === 'string' ? document.querySelector(root) : root;
+  if (!host) throw new Error('cab: mount root missing');
+  hostEl = host;
+  host.classList.add('cab-host');
+  host.classList.add('cab-init-hidden');
+  isInitialAnimating = true;
+  injectCss();
+
+  const viewport = host.querySelector('#v-cabinet-viewport') || host.querySelector('.stage') || host;
+  viewport.innerHTML = '';
+  viewport.classList.add('cab-viewport');
+
+  // 1. 图表容器
+  const box = document.createElement('div');
+  box.id = 'cab-chart';
+  viewport.appendChild(box);
+
+  // 2. 右侧深度信息面板（类似犯罪率右侧面板）
+  const panel = document.createElement('div');
+  panel.className = 'cab-panel';
+  panel.id = 'cab-panel';
+  viewport.appendChild(panel);
+  panelEl = panel;
+
+  // 3. 底部工具栏（左侧标签按钮，右侧 ECharts slider 自然贴合）
+  const bottomBar = document.createElement('div');
+  bottomBar.className = 'cab-bottom-bar';
+  const zoom = document.createElement('div');
+  zoom.className = 'cab-zoom';
+  zoom.id = 'cab-zoom';
+  bottomBar.appendChild(zoom);
+  viewport.appendChild(bottomBar);
+  zoomEl = zoom;
+
+  currentLang = (opts.lang && I18N[opts.lang]) ? opts.lang : detectInitialLang();
+  currentVariant = (opts.theme && THEME_MAP[opts.theme]) ? THEME_MAP[opts.theme] : detectInitialVariant();
+
+  mounted = true;
+  const token = ++bootToken;
+  if (typeof window !== 'undefined' && window.addEventListener) window.addEventListener('resize', onCabResize);
+  if (typeof ResizeObserver !== 'undefined') {
+    ro = new ResizeObserver(() => onCabResize());
+    try { ro.observe(box); } catch (e) {}
+  }
+  if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(() => onCabResize());
+  return boot(token);
+}
+
+let ro = null;
+
+function unmountCabinet() {
+  bootToken++;
+  mounted = false;
+  if (typeof window !== 'undefined' && window.removeEventListener) window.removeEventListener('resize', onCabResize);
+  if (ro) { try { ro.disconnect(); } catch (e) {} ro = null; }
+  if (resizeRaf) { cancelAnimationFrame(resizeRaf); resizeRaf = null; }
+  isInitialAnimating = false;
+  if (chart) { try { chart.dispose(); } catch (e) {} chart = null; }
+  if (hostEl) {
+    try {
+      const vp = hostEl.querySelector('.cab-viewport');
+      if (vp) vp.innerHTML = '';
+    } catch (e) {}
+  }
+  panelEl = null;
+  zoomEl = null;
+}
+
+function setCabinetLang(lang) {
+  if (!I18N[lang]) return false;
+  currentLang = lang;
+  if (!rawData) return true;
+  renderZoomSeg();
+  renderPanel(focusCabinet || null);
+  renderChart();
+  return true;
+}
+
+function setCabinetTheme(t) {
+  const id = THEME_MAP[t] || 'tactical';
+  currentVariant = id;
+  if (chart && rawData) {
+    computeStats();
+    renderPanel(focusCabinet || null);
+    renderChart();
+  }
+  return id;
+}
+
+function setCabinetRange(id) {
+  if (!RANGE_WINDOW_MONTHS.hasOwnProperty(id)) return false;
+  activeRange = id;
+  focusCabinet = null;
+  if (!rawData) return true;
+  renderZoomSeg();
+  renderPanel(null);
+  renderChart();
+  return true;
+}
+
+function getCabinetSummary() {
+  return rawData ? { cabinets: rawData.cabinets.length, polls: rawData.polls.length } : null;
+}
+
 export { mountCabinet, unmountCabinet, setCabinetLang, setCabinetTheme, setCabinetRange, getCabinetSummary };

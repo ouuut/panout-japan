@@ -2,11 +2,11 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4.11 地震 3D 地球仪大圆球细描边实装**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.12 内阁支持率布局全面重构：底栏合并、分割线右侧标注与桌面端深度档案面板**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
-> 交互动效与视觉打磨：全站四页入场过渡与主题流转齐备；地震 3D 地球仪实装 360 段高精度相切地平线大圆细描边（Limb Outline），支持深浅主题自适应与任意视角旋转自适应，彻底解决球体与背景分界不清的问题。
+> 布局交互重构：内阁支持率页面彻底废除顶部 controls，时间范围按钮合并到底部与拖动条同行对齐（省出一整行空间）；首相标签按附图红字精准移至竖分割线右侧上方（88% 高度）；电脑端右侧实装类似犯罪率的高质感首相深度数据与执政档案面板，支持鼠标 hover 实时联动与点击 PINNED 锁定。
 
 ## 架构
 
