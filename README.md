@@ -2,11 +2,11 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4.10 内阁支持率页面入场卡顿彻底根治与高质感过渡重做**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.11 地震 3D 地球仪大圆球细描边实装**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
-> 交互动效：总页面与三章分页面全部配备丝滑入场过渡；内阁支持率实装专属动态脉冲波遮罩（`.cab-veil`）、0 网络延迟本地化 ECharts 与预加载、消除全部布局跳变（Layout Shift: 0）与长任务（Long Tasks: 0），实现 60 FPS 电影级平滑展开。
+> 交互动效与视觉打磨：全站四页入场过渡与主题流转齐备；地震 3D 地球仪实装 360 段高精度相切地平线大圆细描边（Limb Outline），支持深浅主题自适应与任意视角旋转自适应，彻底解决球体与背景分界不清的问题。
 
 ## 架构
 
