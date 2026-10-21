@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""build.py — render the four-page japan.ouuut.com site into site/.
+"""build.py — render the japan.ouuut.com site into site/.
 
 Single source of truth:
   app/quake/data/*      USGS hypocentres + coastline
   app/crime/data/*      Tokyo chome counts + polygons + population
   app/cabinet/data.json polls + cabinets
+  app/housing/data/*   Tokyo 23-ward used-flat medians (MLIT) + ward polygons
   src/*.css, src/shell.js
 
-Output: 104 pre-rendered pages + assets + CSV + sitemap + headers.
+Output: pre-rendered pages + assets + CSV + sitemap + headers.
 """
 import csv
 import hashlib
@@ -32,7 +33,7 @@ SRC = ROOT / "src"
 SITE_URL = "https://japan.ouuut.com"
 BRAND = "japan.ouuut.com"
 WM = '<span class="wm-main">japan</span><span class="wm-tld">.ouuut.com</span>'
-BUILD_DATE = "2026-10-19"
+BUILD_DATE = "2026-10-22"
 BUILD_STAMP = datetime.now().strftime("%Y-%m-%d %H:%M")
 
 # ---------------------------------------------------------------- data
@@ -43,6 +44,10 @@ MUNI = json.loads((ROOT / "app/crime/data/muni.json").read_text(encoding="utf-8"
 POINTS = json.loads((ROOT / "app/crime/data/points.json").read_text(encoding="utf-8"))
 CHOME = json.loads((ROOT / "app/crime/data/chome_poly.json").read_text(encoding="utf-8"))
 MUNI_POLY = json.loads((ROOT / "app/crime/data/muni_poly.json").read_text(encoding="utf-8"))
+HOUSE = json.loads((ROOT / "app/housing/data/wards.json").read_text(encoding="utf-8"))
+HOUSE_WARDS = HOUSE["wards"]
+HOUSE_TOP = max(HOUSE_WARDS, key=lambda w: w["band"]["p70"])
+HOUSE_BOTTOM = min(HOUSE_WARDS, key=lambda w: w["band"]["p70"])
 
 MUNI_BY = {m["ward"]: m for m in MUNI}
 CAB_BY = {c["pm"]: c for c in CAB["cabinets"]}
@@ -384,6 +389,7 @@ COPY = {
     "nav.quake": ("地震", "地震", "Quakes"),
     "nav.crime": ("犯罪", "犯罪", "Crime"),
     "nav.cabinet": ("内閣", "内阁", "Cabinet"),
+    "nav.housing": ("住宅", "住宅", "Housing"),
     "nav.method": ("方法", "方法", "Method"),
     "ui.theme": ("配色を変える", "切换配色", "Change palette"),
     "ui.lang": ("言語", "语言", "Language"),
@@ -395,23 +401,24 @@ COPY = {
     "crumb.home": ("表紙", "封面", "Cover"),
 
     "cover.kicker": ("JAPAN.OUUUT.COM · 2000—2026", "JAPAN.OUUUT.COM · 2000—2026", "JAPAN.OUUUT.COM · 2000—2026"),
-    "cover.title": ("日本を、<br><em>三つの尺度</em>で見る。", "用<em>三种尺度</em>，<br>看日本。", "Japan, at<br><em>three scales</em>."),
-    "cover.lede": ("引いて見る地震、寄って見る犯罪、通して見る内閣。同じ国土を、別々の時間で測る。",
-                   "拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。",
-                   "Pull back for earthquakes, zoom in for crime, stretch out for cabinets. One land, three kinds of time."),
-    "cover.cta": ("三つの章へ", "进入三个章节", "Enter the chapters"),
+    "cover.title": ("日本を、<br><em>四つの尺度</em>で見る。", "用<em>四种尺度</em>，<br>看日本。", "Japan, at<br><em>four scales</em>."),
+    "cover.lede": ("引いて見る地震、寄って見る犯罪、通して見る内閣、並べて見る住宅。同じ国土を、四つの時間で測る。",
+                   "拉远看地震，凑近看犯罪，拉长看内阁，比着看住宅。同一片国土，四种时间。",
+                   "Pull back for earthquakes, zoom in for crime, stretch out for cabinets, compare housing. One land, four kinds of time."),
+    "cover.cta": ("四つの章へ", "进入四个章节", "Enter the chapters"),
     "cover.method": ("方法と出典", "方法与来源", "Method & sources"),
-    "cover.section.eyebrow": ("THREE SCALES / 三つの章", "THREE SCALES / 三个章节", "THREE SCALES / THREE CHAPTERS"),
-    "cover.section.h": ("同じ国土を、三つの時間で。", "同一片国土，三种时间。", "One land, three kinds of time."),
-    "cover.section.sub": ("数字はすべて一次資料から静的に生成。年を切り、町丁に寄り、内閣を並べる。",
-                          "所有数字由一次资料静态生成。切年、入町丁、排内阁。",
-                          "Every number is statically generated from primary sources. Cut by year, zoom into districts, line up cabinets."),
+    "cover.section.eyebrow": ("FOUR SCALES / 四つの章", "FOUR SCALES / 四个章节", "FOUR SCALES / FOUR CHAPTERS"),
+    "cover.section.h": ("同じ国土を、四つの時間で。", "同一片国土，四种时间。", "One land, four kinds of time."),
+    "cover.section.sub": ("数字はすべて一次資料から静的に生成。年を切り、町丁に寄り、内閣を並べ、区の値を比べる。",
+                          "所有数字由一次资料静态生成。切年、入町丁、排内阁、比各区。",
+                          "Every number is statically generated from primary sources. Cut by year, zoom into districts, line up cabinets, compare wards."),
     "ui.theme.sage": ("Sage", "浅色", "Sage"),
     "ui.theme.dark": ("Dark", "深色", "Dark"),
     "prod.open": ("開く", "打开", "Open"),
     "cover.scale.quake": ("列島 · 27年", "列岛 · 27年", "Archipelago · 27 yrs"),
     "cover.scale.crime": ("東京 · 62区市町村", "东京 · 62区市町村", "Tokyo · 62 wards"),
     "cover.scale.cabinet": ("内閣 · 14", "内阁 · 14", "Cabinets · 14"),
+    "cover.scale.housing": ("住宅 · 23区", "住宅 · 23区", "Housing · 23 wards"),
     "card.quake.unit": ("M4+ 震源 / 27年", "M4+ 震源 / 27年", "M4+ events / 27 yrs"),
     "card.quake.title": ("引いて見る", "拉远看", "Pull back"),
     "card.quake.claim": ("2011年は回数で14.6%、エネルギーで86.7%。",
@@ -427,6 +434,11 @@ COPY = {
     "card.cabinet.claim": ("14内閣、331か月。最大の月変動は+20.5。",
                            "14届内阁、331个月。最大单月变动+20.5。",
                            "14 cabinets, 331 months. Largest monthly swing +20.5."),
+    "card.housing.unit": ("中古マンション / 4四半期", "二手公寓 / 4 个季度", "Used flats / 4 quarters"),
+    "card.housing.title": ("並べて見る", "比着看", "Compare"),
+    "card.housing.claim": (f"70㎡換算の中央値は、{HOUSE_TOP['ward']} {HOUSE_TOP['band']['p70']:,}万円、{HOUSE_BOTTOM['ward']} {HOUSE_BOTTOM['band']['p70']:,}万円。",
+                           f"70㎡换算中位价：{HOUSE_TOP['ward']} {HOUSE_TOP['band']['p70']:,}万日元，{HOUSE_BOTTOM['ward']} {HOUSE_BOTTOM['band']['p70']:,}万日元。",
+                           f"Median 70 m² equivalent: {HOUSE_TOP['band']['p70']:,} ×10k yen in {HOUSE_TOP['ward']} vs {HOUSE_BOTTOM['band']['p70']:,} ×10k in {HOUSE_BOTTOM['ward']}."),
 
     "q.eyebrow": ("01 / 引いて見る", "01 / 拉远看", "01 / Pull back"),
     "q.h1": ("地震 — <em>40,079</em>の震源", "地震 — <em>40,079</em>个震源", "Earthquakes — <em>40,079</em> hypocentres"),
@@ -484,6 +496,11 @@ COPY = {
     "b.lede": ("1998年から2026年まで、月ごとの支持率。内閣をまたいで、一本の線にする。",
                "1998年至2026年，逐月支持率。跨过内阁，连成一条线。",
                "Monthly approval from 1998 to 2026, joined across cabinets into one line."),
+    "h.eyebrow": ("04 / 並べて見る", "04 / 比着看", "04 / Compare"),
+    "h.h1": ("住宅 — <em>23</em>区の価格", "住宅 — <em>23</em>区价格", "Housing — <em>23</em> ward prices"),
+    "h.lede": ("中古マンションの成約価格。60–80㎡に揃え、㎡単価の中央値を23区で比べる。",
+               "二手公寓成约价格。统一到 60–80㎡，比较 23 区的㎡单价中位数。",
+               "Closed prices for used flats, held to 60–80 m², compared across the 23 wards by median price per m²."),
     "b.stat.polls": ("調査", "调查", "Polls"),
     "b.stat.months": ("月", "月", "Months"),
     "b.stat.cabinets": ("内閣", "内阁", "Cabinets"),
@@ -600,14 +617,14 @@ COPY = {
 
     "nf.code": ("404", "404", "404"),
     "nf.h1": ("この頁は、ない。", "这一页不存在。", "This page is not here."),
-    "nf.p": ("URLが変わったか、まだ作っていない頁。三つの章から辿り直せる。",
-             "网址变了，或这一页还没做。可以从三个章节重新找。",
-             "The URL changed, or the page was never built. Start again from the three chapters."),
+    "nf.p": ("URLが変わったか、まだ作っていない頁。四つの章から辿り直せる。",
+             "网址变了，或这一页还没做。可以从四个章节重新找。",
+             "The URL changed, or the page was never built. Start again from the four chapters."),
     "nf.home": ("表紙へ戻る", "回到封面", "Back to the cover"),
 
-    "foot.tag": ("引いて見る・寄って見る・通して見る",
-                 "拉远看 · 凑近看 · 拉长看",
-                 "Pull back · zoom in · stretch out"),
+    "foot.tag": ("引いて見る・寄って見る・通して見る・並べて見る",
+                 "拉远看 · 凑近看 · 拉长看 · 比着看",
+                 "Pull back · zoom in · stretch out · compare"),
     "foot.method": ("方法と出典", "方法与出处", "Method & sources"),
     "foot.built": ("静的生成", "静态生成", "Statically generated"),
 }
@@ -696,6 +713,7 @@ def mast(active=""):
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
+{link('/housing/', 'nav.housing', 'housing')}
 </nav>
 <div class="tools">
 {THEME_DOTS}
@@ -708,6 +726,7 @@ def mast(active=""):
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
+{link('/housing/', 'nav.housing', 'housing')}
 </nav>
 <div class="mobile-foot">
 {LANG_NAV}
@@ -730,6 +749,7 @@ def foot():
 <a href="/quake/"{tattr('nav.quake')}>{ja('nav.quake')}</a>
 <a href="/crime/"{tattr('nav.crime')}>{ja('nav.crime')}</a>
 <a href="/cabinet/"{tattr('nav.cabinet')}>{ja('nav.cabinet')}</a>
+<a href="/housing/"{tattr('nav.housing')}>{ja('nav.housing')}</a>
 </div>
 <div class="foot-bottom">
 <span>{BRAND} — <span{tattr('foot.tag')}>{ja('foot.tag')}</span></span>
@@ -781,6 +801,9 @@ def build_home_preview():
         ("cabinet", "03", "/cabinet/", "card.cabinet.title", "nav.cabinet", "331",
          "card.cabinet.unit", "card.cabinet.claim", "NHK / Nikkei / Kyodo · 1998—2026",
          HP.cabinet_svg(ALL_MONTHS, MONTH_MEAN, CAB)),
+        ("housing", "04", "/housing/", "card.housing.title", "nav.housing", f"{HOUSE['totals']['trades']:,}",
+         "card.housing.unit", "card.housing.claim", "国土交通省 · 2025Q2—2026Q1",
+         HP.housing_svg(HOUSE_WARDS, MUNI_POLY)),
     ]
 
     entries = []
@@ -803,7 +826,7 @@ def build_home_preview():
 <p class="hp-lede" data-t="cover.lede">{ja('cover.lede')}</p>
 </div>
 </section>
-<section class="wrap hp-band" aria-label="Three scales">
+<section class="wrap hp-band" aria-label="Four scales">
 {''.join(entries)}
 </section>
 <section class="wrap hp-method">
@@ -812,8 +835,8 @@ def build_home_preview():
 </section>
 </main>"""
 
-    return page("/", f"{BRAND} — 日本を、三つの尺度で見る",
-                "40,079の震源、5,234の町丁、331か月の内閣支持率。三つの入口から直接起動する。",
+    return page("/", f"{BRAND} — 日本を、四つの尺度で見る",
+                "40,079の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格。四つの入口から直接起動する。",
                 body, "", None, register=True,
                 head_extra='<style>\n' + css + '\n</style>')
 
@@ -928,6 +951,31 @@ def build_cabinet():
                 body, "cabinet", jsonld, head_extra=head_extra, fullscreen=True)
 
 
+def build_housing():
+    body = f"""<main id="main" class="chapter-app-page">
+<h1 class="sr-only"{tattr('h.h1')}>{ja('h.h1')}</h1>
+<p class="sr-only"{tattr('h.lede')}>{ja('h.lede')}</p>
+<div class="stage stage-housing" data-live="0" data-stage-auto="housing" data-view="housing">
+<div class="stage-poster">{HP.housing_svg(HOUSE_WARDS, MUNI_POLY, 1000, 620)}</div>
+<p class="stage-caption">中古マンション · 成約 {HOUSE['totals']['trades']:,}件 · 60–80㎡ · {HOUSE['basis']} · 国土交通省</p>
+<div class="stage-live"></div>
+</div>
+</main>"""
+    jsonld = {
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": f"Tokyo 23 wards — used apartment median prices, {HOUSE['basis']}",
+        "description": "Median price per square metre and 70 m² equivalent for used apartments (60–80 m²) in Tokyo's 23 wards, derived from MLIT Real Estate Information Library transaction and closed-price records.",
+        "temporalCoverage": "2025-04-01/2026-03-31",
+        "spatialCoverage": "Tokyo 23 wards",
+        "license": "https://www.digital.go.jp/resources/open_data/public_data_license_v1.0",
+        "creator": {"@type": "Organization", "name": "国土交通省 不動産情報ライブラリ"},
+        "url": SITE_URL + "/housing/",
+    }
+    return page("/housing/", f"住宅 — 23区の価格 | {BRAND}",
+                "東京23区の中古マンション成約価格。60–80㎡に揃えた㎡単価の中央値と70㎡換算で区を比べる。国交省データを加工。",
+                body, "housing", jsonld, fullscreen=True)
+
+
 def fill_copy(s):
     return s.replace("{{B}}", str(N_BUCKETS)).replace("{{S}}", str(N_SINGLE))
 
@@ -937,13 +985,14 @@ def main():
     global CSS_VER, JS_VER, FONT_VER
     files = {}
 
-    # Exactly four content pages: /, /quake/, /crime/, /cabinet/.
+    # Exactly four chapters: /quake/, /crime/, /cabinet/, /housing/ (plus the cover).
     # /preview/ remains a tiny redirect for the old preview URL.
     files["/"] = build_home_preview()
     files["/preview/"] = build_preview_redirect()
     files["/quake/"] = build_quake()
     files["/crime/"] = build_crime()
     files["/cabinet/"] = build_cabinet()
+    files["/housing/"] = build_housing()
 
     # i18n dictionary (only the three languages; ja already in HTML)
     dic = {k: {"ja": fill_copy(v[0]), "zh": fill_copy(v[1]), "en": fill_copy(v[2])}
@@ -1073,7 +1122,7 @@ def write_site(files):
             pass
 
     # app runtime (views + vendor + data) — copied verbatim
-    for ch in ("quake", "crime", "cabinet"):
+    for ch in ("quake", "crime", "cabinet", "housing"):
         src = ROOT / "app" / ch
         dst = SITE / "app" / ch
         if src.exists():
@@ -1154,16 +1203,17 @@ def write_meta(font_meta):
         "  Cache-Control: public, max-age=86400\n", encoding="utf-8")
 
     (SITE / "_redirects").write_text(
-        "/quake /quake/ 301\n/crime /crime/ 301\n/cabinet /cabinet/ 301\n"
+        "/quake /quake/ 301\n/crime /crime/ 301\n/cabinet /cabinet/ 301\n/housing /housing/ 301\n"
         "/preview / 301\n/preview/ / 301\n", encoding="utf-8")
 
     (SITE / "llms.txt").write_text(f"""# {BRAND}
 
-> 日本を三つの尺度で見る静的データサイト。地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）。
+> 日本を四つの尺度で見る静的データサイト。地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）、住宅（並べて見る）。
 
 - [地震](/quake/): 2000–2026.07、M4以上の震源40,079点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。
 - [内閣](/cabinet/): 1998–2026、644調査、331か月、14内閣。
+- [住宅](/housing/): 2025Q2–2026Q1、東京23区、中古マンション成約21,848件の㎡単価中央値。
 
 Build: {BUILD_STAMP}. Sources: USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
 """, encoding="utf-8")

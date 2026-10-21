@@ -58,12 +58,16 @@ html[lang="zh"] .hp-intro h1 {
 }
 html[lang="ja"] .hp-lede, html[lang="zh"] .hp-lede { font-size: 15px; line-height: 1.8; }
 
-/* One continuous triptych, not three cards. */
+/* One continuous band of four chapters, not four cards. */
 .hp-band {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   background: transparent;
+}
+
+@media (max-width: 1199px) {
+  .hp-band { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .hp-entry {

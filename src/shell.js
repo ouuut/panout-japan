@@ -127,13 +127,15 @@
       var opts = { base: '/', lang: lang(), theme: doc.dataset.theme || 'sage' };
       if (ch === 'quake') mod.mountQuake(live, opts);
       else if (ch === 'crime') mod.mountCrime(live, opts);
-      else mod.mountCabinet(live, opts);
+      else if (ch === 'cabinet') mod.mountCabinet(live, opts);
+      else if (ch === 'housing') mod.mountHousing(live, opts);
 
       live._setVendorLang = function (l) {
         try {
           if (ch === 'quake' && mod.setQuakeLang) mod.setQuakeLang(l);
           else if (ch === 'crime' && mod.setCrimeLang) mod.setCrimeLang(l);
           else if (ch === 'cabinet' && mod.setCabinetLang) mod.setCabinetLang(l);
+          else if (ch === 'housing' && mod.setHousingLang) mod.setHousingLang(l);
         } catch (e) {}
       };
       live._setVendorTheme = function (t) {
@@ -141,6 +143,7 @@
           if (ch === 'quake' && mod.setQuakeTheme) mod.setQuakeTheme(t);
           else if (ch === 'crime' && mod.setCrimeTheme) mod.setCrimeTheme(t);
           else if (ch === 'cabinet' && mod.setCabinetTheme) mod.setCabinetTheme(t);
+          else if (ch === 'housing' && mod.setHousingTheme) mod.setHousingTheme(t);
         } catch (e) {}
       };
       live._setVendorLang(opts.lang);
@@ -186,9 +189,9 @@
 
   function legacyHash() {
     var h = location.hash || '';
-    var m = /^#\/?(quake|crime|cabinet)\/?$/.exec(h);
+    var m = /^#\/?(quake|crime|cabinet|housing)\/?$/.exec(h);
     if (m) location.replace('/' + m[1] + '/');
-    else if (/^#\/(quake|crime|cabinet)\/(.+)$/.test(h)) {
+    else if (/^#\/(quake|crime|cabinet|housing)\/(.+)$/.test(h)) {
       location.replace('/' + h.slice(1).replace(/\/?$/, '/'));
     }
   }

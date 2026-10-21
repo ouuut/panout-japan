@@ -1,6 +1,6 @@
 {
   "project": "panout-japan",
-  "updated": "2026-10-21",
+  "updated": "2026-10-22",
   "source_of_truth": "ouuut-v2 design-lock + live computed styles at 1440px, 2026-10-21. japan.ouuut.com must read as the same publication as ouuut.com.",
   "style": "Tokyo Expedition Magazine Editorial / ouuut family. Two themes only: sage (day) and dark (night). Zero structural lines.",
   "themes": ["sage", "dark"],
@@ -134,7 +134,7 @@
     }
   ],
   "notes": [
-    "Homepage uses three prod-style rows, not three cards.",
+    "Homepage uses four prod-style plates (one per chapter: quake, crime, cabinet, housing), each plate itself a link.",
     "Charts use one signal hue per theme; no rainbow categorical palette.",
     "Motion: grain, scroll progress, header scrolled, .rv reveal, theme view-transition. No custom cursor/particles."
   ]

@@ -1,22 +1,22 @@
 # japan.ouuut.com · 日本本土信息汇聚
 
-`japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
+`japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁，并排看住宅。同一片国土，四种尺度。
 
-> 状态：**M4.15 深色模式文本配色根治修复与双主题真机实测留证**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.19 第四章「住宅」上线——东京23区中古マンション成約価格**（2026-10-22）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
-> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4.18 commit `bd65c98`）。
+> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4.19 commit `__COMMIT__`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
-> 主题对比度与真机验收：根治内阁面板在深色模式下回退到 #141A15 导致大面积黑字“隐身”的致命 Bug。全面归一化为权威真相源 --ink（象牙白 #EDEBE4），配合 app.css 双层强制保底规则；真机实测抽检 18 处关键节点计算样式，并在 Sage 与 Dark 两种模式下完整截图留证。
+> 第四章：`/housing/` 用国土交通省不动产情报图书馆（PDL 1.0）2025Q2–2026Q1 成約数据，把 60–80㎡ 的㎡単価中位数换算成 70㎡ 总价，23 区一张 Leaflet 地图 + 排行面板；千代田 16,928 万円（n=86，标参考）到足立 3,900 万円。首页第四块数据板同步上屏。
 
 ## 架构
 
-**一仓一构建一部署**：`python src/build.py` 从 `src/` + `app/{quake,crime,cabinet}/data` 生成整个 `site/`（**4 个内容页**），
+**一仓一构建一部署**：`python src/build.py` 从 `src/` + `app/{quake,crime,cabinet,housing}/data` 生成整个 `site/`（**5 个内容页**），
 `site/` 原样部署到 Cloudflare Pages。没有运行时拼页、没有 hash 路由、没有客户端数据渲染。
 
 ```
 src/
   build.py      # 唯一构建入口：三语字典、页面模板、静态图表 SVG、CSV/i18n/sitemap/headers
-  home_plates.py# 总入口预览的三张构建期数据板（地震/犯罪/内阁）
+  home_plates.py# 总入口预览的四张构建期数据板（地震/犯罪/内阁/住宅）
   home-preview.css # 总入口三入口同屏原型（/）
   svgkit.py     # Web Mercator、海岸线裁剪、SVG path
   fonts.py      # Outfit 800 + Noto Serif/Sans JP/SC 700/500 子集化 → site/assets/fonts (11 文件 ~1.1MB)
@@ -28,10 +28,11 @@ app/
   quake/        # 3D 地球（WebGL）+ 瓦片数据，章节页全屏自动挂载
   crime/        # Leaflet 町丁目地图，同一全屏挂载机制
   cabinet/      # ECharts 支持率长轴，同一全屏挂载机制
+  housing/      # 23 区房价 Leaflet 地图（canvas 多边形）+ 排行面板，同一全屏挂载机制
 site/           # 构建产物，gitignore
 ```
 
-页面只有 **4 个内容页**：`/`（总入口）、`/quake/`、`/crime/`、`/cabinet/`。
+页面只有 **5 个内容页**：`/`（总入口）、`/quake/`、`/crime/`、`/cabinet/`、`/housing/`。
 年份、区市町村、内阁任期不再生成独立详情页；数据保留在章节页表格与图表内。`/preview/` 只是旧链接的跳转别名。
 
 ### 当前改版预览
@@ -58,6 +59,7 @@ npx wrangler pages deploy site --project-name=panout-site --branch=main
 | 地震 | 27 年（2000–2026.07），M4+，40,079 次；2011 年按次数 14.6% / 按能量 86.7% | USGS ComCat |
 | 犯罪 | 2025 全年，5,234 町丁，中位 4.4‰，最高 1,332‰ | 警視庁 町丁目別犯罪統計 |
 | 内阁 | 14 任 331 个月，644 次调查；最大单月变动 +20.5 | 各社世论调查汇总（NHK/日经/共同/时事/朝日/读卖） |
+| 住宅 | 2025Q2–2026Q1，23 区中古マンション成約 21,848 件；60–80㎡ ㎡単価中位数 → 70㎡ 换算 | 国土交通省 不动产情报图书馆（PDL 1.0） |
 
 修正记录见 `src/fix_cabinet.py` 与 `app/cabinet/data.json` 的 `_meta`。
 

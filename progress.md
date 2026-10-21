@@ -326,3 +326,16 @@
 
 - 线上回评修正：犯罪页筛选工具条原本 `top:84px`（相对已在地图舞台内的 `#crm-root`）→ 悬空在地图中部；改为 `top:12px`（窄屏 8px），贴地图左上角。部署 `a90e2c84.panout-site.pages.dev`，主域实测 `ctl.y - map.y = 12`、`app.css?v=52e920da`。
 - 线上回评修正 2：犯罪页工具条与下拉/搜索框原为 `999px` 胶囊，与全站 2px 按钮 / 4px 卡片圆角语言不一致；工具条 4px、子控件 2px（窄屏抽屉 4px），线上实测 host=4px、sel/q/seg/toggle=2px、面板卡 4px。部署 `a4d2b7fa`（`app.css?v=f651bd7c`）。
+
+## 2026-10-22 · M4.19 第四章「住宅」上线（四つの尺度闭环）
+
+- 立项依据 `docs/housing-feasibility.md`（e0b9500）：口径定为「中古マンション・成約価格・60–80㎡・㎡単価中位数 → 70㎡ 换算」，23 区、不画逐笔散点。
+- 数据管线 `tools/build_housing_data.py`：`--csv` 读国交省「不動産取引価格情報」CSV（2025Q2–2026Q1，21,848 条成約）→ `app/housing/data/wards.json`（23 区统计，4.7KB）；几何从 `muni_poly.json` 抽 23 区 → `wards_poly.json`（492KB，br 76KB）。许可 PDL 1.0：页面固定出典 + 「加工して作成」+ 非政府出品声明。
+- 第四章 `app/housing/view.js`（~560 行）：Leaflet + canvas 多边形（`preferCanvas`），log 分位 6 档单色梯度、排行面板、点选/列表联动、窄屏底部抽屉、三语、双主题。颜色在 canvas 里读不到 CSS 变量，改 `getComputedStyle(--accent)` 取色后 `hexToRgba`。
+- 口径统一（本轮返工点）：地图填色、图例、排行、首页文案原本混用「全サイズ㎡単価」与「60–80㎡ p70」两套指标 → 全部收敛到 band p70；rank 在 JS 里按同一指标重算并重排数组（否则列表序号与顺序错位）；band n<100 的区（千代田 n=86）在排名旁标「参考」。
+- 首屏崩溃根因：`renderHeadAll()` 里写了 `$("#hsg-source")`（`$` 内部已拼 `#`）→ `querySelector("##hsg-source")` 抛 InvalidSelector，mount 抛错、stage-failed。修掉后 23 区、6 档图例、卡片全部出数。
+- 版式返工：出典原文压住图例 → 移进标题卡；标题裸浮在瓦片地名上 → 加 86% 底 + 毛玻璃卡片；窄屏卡片被 Leaflet 缩放按钮切掉 → 面板 54vh + 内部滚动、窄屏隐藏缩放；桌面缩放按钮挤在面板右边缝 → `.leaflet-bottom.leaflet-right` 右移 392px；attribution 白底突兀 → 主题化。
+- 首页：第四块数据板 `housing_svg()`（23 区 fill-opacity 梯度 + 价签落在最高区质心），`hp-band` 改 4 列（≥1200 四列 / 1000–1199 两列 / <1000 单列），导航与页脚补第四条。
+- 构建：`pages: 5`，`app.css` 54KB / `shell.js` 10KB，字体子集 13 文件 2.07MB（charset 2,157 字，已含新文案）。页面首屏 ≈136KB br（HTML 10 + view.js 8 + leaflet 41 + 几何 76 + 统计 1）。
+- 验收：本地 1413 / 1130 / 390 三档 + sage/dark 双主题 + ja/en/zh 三语截图留证（`.review/shots/r21-*`）；点选足立区出 3,900 万円、列表自动滚到第 23 行；5 个页面 0 console error、无横向溢出。
+- 发布：`wrangler pages deploy site --project-name=panout-site --branch=main` → `96a1d762.panout-site.pages.dev`；主域实测 `stage-housing` live=1、23 行排行、图例 6 档、attribution 主题化。

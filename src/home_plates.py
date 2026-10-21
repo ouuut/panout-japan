@@ -245,3 +245,62 @@ def cabinet_svg(months, month_mean, cabinet_data, w=1000, h=760):
     out.append(f'<text x="{x0}" y="{top - 8}" class="micro">APPROVAL / %</text>')
 
     return _svg(w, h, "1998年から2026年までの内閣支持率、331か月", "".join(out))
+
+
+def housing_svg(wards, muni_poly, w=1000, h=760):
+    """23 wards filled by the median price per m² (log scale, single accent)."""
+    from shapely.geometry import shape
+    from shapely.validation import make_valid
+
+    bbox = (139.51, 35.52, 139.95, 35.87)
+    proj = S.Proj(bbox, w, h, 10)
+    out = []
+
+    features = [f for f in muni_poly["features"]
+                if f.get("geometry") and f["properties"].get("area_ja") == "都区部"]
+    by_ward = {x["ward"]: x for x in wards}
+    units = [x["unit"] for x in wards if x.get("unit")]
+    lo, hi = math.log10(min(units)), math.log10(max(units))
+    span = (hi - lo) or 1.0
+
+    for f in features:
+        name = f["properties"]["ward_ja"]
+        rec = by_ward.get(name) or {}
+        unit = rec.get("unit") or 0
+        t = (math.log10(unit) - lo) / span if unit else 0.0
+        opacity = 0.05 + 0.44 * max(0.0, min(1.0, t))
+        g = make_valid(shape(f["geometry"]))
+        d = S.rings_path(g, proj, 0.0004)
+        if d:
+            out.append(f'<path d="{d}" fill="var(--accent)" fill-opacity="{opacity:.3f}" '
+                       f'stroke="var(--accent)" stroke-width="0.8" stroke-opacity="0.30"/>')
+
+    labels = [
+        ("千代田", 139.7536, 35.6938, 10, -6, "start"),
+        ("世田谷", 139.6463, 35.6461, -10, 20, "end"),
+        ("足立", 139.8048, 35.7750, 10, -6, "start"),
+    ]
+    for name, lon, lat, dx, dy, anchor in labels:
+        x, y = proj.xy(lon, lat)
+        out.append(f'<text x="{x + dx:.1f}" y="{y + dy:.1f}" text-anchor="{anchor}" '
+                   f'class="ward halo ink">{name}</text>')
+
+    top = max(wards, key=lambda x: x["band"]["p70"])
+    top_feat = next((f for f in features if f["properties"]["ward_ja"] == top["ward"]), None)
+    if top_feat is not None:
+        c = make_valid(shape(top_feat["geometry"])).centroid
+        tx, ty = proj.xy(c.x, c.y)
+    else:
+        tx, ty = proj.xy(139.735, 35.660)
+    out.append(f'<text x="{tx:.1f}" y="{ty:.1f}" text-anchor="middle" class="note halo ink">'
+               f'{top["band"]["p70"]:,} 万円 / 70㎡</text>')
+
+    ky = h - 56
+    out.append(f'<text x="54" y="{ky}" class="legend">MEDIAN / 万円 per ㎡</text>')
+    for i, op in enumerate((0.10, 0.22, 0.34, 0.46)):
+        out.append(f'<rect x="{54 + i * 24}" y="{ky + 14}" width="16" height="16" '
+                   f'fill="var(--accent)" opacity="{op}"/>')
+    out.append(f'<text x="{54 + 4 * 24 + 8}" y="{ky + 27}" class="legend">LOW → HIGH</text>')
+    out.append(f'<text x="{w - 54}" y="{ky}" text-anchor="end" class="legend">23 WARDS / 2025Q2–2026Q1</text>')
+
+    return _svg(w, h, "東京23区の中古マンション価格、2025年第2四半期から2026年第1四半期", "".join(out))
