@@ -25,11 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "app" / "housing" / "data"
 CHOME = ROOT / "app" / "crime" / "data" / "chome_poly.json"
 
-WARDS = {
-    "千代田区", "中央区", "港区", "新宿区", "文京区", "台東区", "墨田区", "江東区",
-    "品川区", "目黒区", "大田区", "世田谷区", "渋谷区", "中野区", "杉並区", "豊島区",
-    "北区", "荒川区", "板橋区", "練馬区", "足立区", "葛飾区", "江戸川区",
-}
+# 東京都全域（23区 + 多摩・島しょ）。官方 CSV 的定位单位是「市区町村 + 地区名」。
 TYPES = "中古マンション等"
 CATEGORY = "成約価格情報"
 
@@ -39,7 +35,7 @@ def norm(s: str) -> str:
 
 
 def town_of(name: str):
-    m = re.match(r"^(.+?区)(.+?)(\d+丁目)?$", name)
+    m = re.match(r"^(.+(?:区|市|町|村))(.+?)(\d+丁目)?$", name)
     if not m:
         return None
     return m.group(1), norm(re.sub(r"\d+丁目$", "", m.group(2)))
@@ -85,7 +81,7 @@ def main():
     chome = json.loads(CHOME.read_text(encoding="utf-8"))["features"]
     for f in chome:
         p = f.get("properties", {})
-        if p.get("ward") not in WARDS or not f.get("geometry"):
+        if not f.get("geometry"):
             continue
         t = town_of(p.get("name", ""))
         if t:
@@ -97,7 +93,7 @@ def main():
         if r.get("種類") != TYPES or r.get("価格情報区分") != CATEGORY:
             continue
         ward = r.get("市区町村名", "").strip()
-        if ward not in WARDS:
+        if not ward:
             continue
         key = (ward, norm(r.get("地区名", "")))
         price = num(r.get("取引価格（総額）"))
@@ -137,7 +133,7 @@ def main():
         "basis": "2025Q2–2026Q1",
         "type": TYPES,
         "category": CATEGORY,
-        "wards": 23,
+        "municipalities": len({t["ward"] for t in towns}),
         "n": sum(t["n"] for t in towns),
         "towns": towns,
         "geo": {"type": "FeatureCollection", "features": feats},

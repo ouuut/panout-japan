@@ -964,7 +964,7 @@ def build_housing():
 </main>"""
     jsonld = {
         "@context": "https://schema.org", "@type": "Dataset",
-        "name": f"Tokyo 23 wards — used flat mean prices by town, {HOUSE['basis']}",
+        "name": f"Tokyo — used flat mean prices by town, {HOUSE['basis']}",
         "description": "Mean closed price per town for used flats in Tokyo's 23 wards, derived from the MLIT Real Estate Information Library.",
         "temporalCoverage": "2025-04-01/2026-03-31",
         "spatialCoverage": "Tokyo 23 wards",
@@ -973,7 +973,7 @@ def build_housing():
         "url": SITE_URL + "/housing/",
     }
     return page("/housing/", f"住宅 — 町名の価格 | {BRAND}",
-                "東京23区の中古マンション成約価格。町名（地区名）ごとの平均㎡単価を塗った地図。国交省データを加工。",
+                "東京の中古マンション成約価格。町名（地区名）ごとの平均㎡単価を塗った地図。国交省データを加工。",
                 body, "housing", jsonld, fullscreen=True)
 
 
@@ -1216,7 +1216,7 @@ def write_meta(font_meta):
 - [地震](/quake/): 2000–2026.07、M4以上の震源40,079点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。
 - [内閣](/cabinet/): 1998–2026、644調査、331か月、14内閣。
-- [住宅](/housing/): 2025Q2–2026Q1、東京23区、中古マンション成約21,848件を町名（828町）ごとに平均した㎡単価の地図。
+- [住宅](/housing/): 2025Q2–2026Q1、東京、中古マンション成約26,416件を町名（1,237町）ごとに平均した㎡単価の地図。
 
 Build: {BUILD_STAMP}. Sources: USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
 """, encoding="utf-8")
