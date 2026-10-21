@@ -174,7 +174,17 @@ async function boot(token) {
       const t0 = Number(v.dataset.t0 || Date.now());
       const cv = viewportEl && viewportEl.querySelector('#eq-canvas');
       let tries = 0;
-      const done = () => { try { if (v.parentNode) v.parentNode.removeChild(v); } catch (e) {} };
+      const done = () => {
+        try {
+          if (v) {
+            v.style.transition = 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
+            v.style.opacity = '0';
+            setTimeout(() => {
+              try { if (v.parentNode) v.parentNode.removeChild(v); } catch (e) {}
+            }, 650);
+          }
+        } catch (e) {}
+      };
       const tick = () => {
         tries++;
         let dotsOk = false;
@@ -366,11 +376,15 @@ function setQuakeLang(l) {
 }
 
 function setQuakeTheme(t) {
-  const id = THEME_MAP[t];
-  if (!id) return null;
+  const id = THEME_MAP[t] || 'sage';
   currentTheme = t;
   try {
     if (viewportEl) viewportEl.setAttribute('data-quake-theme', id);
+  } catch (e) {}
+  try {
+    if (typeof window !== 'undefined' && typeof window.__setQuakeTheme === 'function') {
+      window.__setQuakeTheme(id);
+    }
   } catch (e) {}
   return id;
 }

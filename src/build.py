@@ -985,7 +985,16 @@ def collect_chars(files, i18n_json):
     for c in CAB["cabinets"]:
         chars.update(c["pm"])
     for p in POINTS:
-        chars.update(p.get("name") or "")
+        chars.update(p.get("n") or p.get("name") or "")
+        chars.update(p.get("w") or "")
+    try:
+        c_poly = json.loads((ROOT / "app/crime/data/chome_poly.json").read_text(encoding="utf-8"))
+        for f in c_poly.get("features", []):
+            for val in f.get("properties", {}).values():
+                if isinstance(val, str):
+                    chars.update(val)
+    except Exception:
+        pass
     for y in YEARS:
         chars.update(y)
     # Interactive views carry their own Japanese/Chinese UI strings. Strip JS

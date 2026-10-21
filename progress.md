@@ -166,3 +166,23 @@
 - crime 应用会给 `.stage-live` 写 inline `min-height:70vh`，全屏时地图只占 70%。全屏页用 `.chapter-app-page .stage-live` 的 `!important` 覆盖为 `inset:0 / height:100%`，`#crm-root`、`#crm-map` 同步 100%，实测 1053px 全填。
 - quake 震点在数据加载后不会自动重绘，手动 `resize` 后才出现。`mountStage` 增加 2.4s / 5s / 8s / 12s 的延迟 resize，保证数据到位后点云上屏。
 - 验：1440 与移动端三章均 header + 全屏 stage，`scrollHeight == innerHeight`；crime map / cabinet chart 填满；quake 延迟后显示点云；无章节正文/footer/关闭按钮。
+
+## 2026-10-21 · M4.8 三章深度视觉打磨与字形修复
+
+- 用户指出三章细节问题：① 地震图浅色模式仍为黑底，缺少浅色设计，底部渐变黑遮罩遮挡地图，缺少入场淡入；② 犯罪率地图小标签中的“雷門”等字符日文/中文显示异常（与右侧面板不一致）；③ 内阁支持率折线图两种配色均单调难看，无法区分不同首相，需要完全重构外观，参考获奖级作品。
+- 地震图浅色模式与入场动效：
+  - `patch_vendor.py` 给 `quake-core.js` 打入真实的 `sage` 浅色配置（15330787 温润浅米绿纸底、1713436 深墨黑海岸线），解除只返回 `tactical` 的硬编码限制；
+  - `app.css` 注入 `html[data-theme="sage"] #v-quake-viewport` 全套浅色 CSS 变量；
+  - 彻底移除 `#v-quake-viewport .eq-bottom` 的底部渐变遮罩，西南诸岛与冲绳全貌清晰可见；
+  - `view.js` 遮罩撤除改用 0.65s 平滑透明度渐变淡入，支持 `window.__setQuakeTheme` 实时重绘 WebGL 场景。
+- 犯罪率地图小标签字形根治：
+  - 定位根因：`src/build.py` 的 `collect_chars` 之前提取属性误写为 `p.get("name")`（实际为 `p.get("n")`），导致 5,234 个町丁中的 605 个汉字（包含“雷”、“門”等专属地名汉字）完全未打包进 Noto 子集字体，触发 Windows 劣质日文字体回退。
+  - 修复 `collect_chars`，全量提取町丁名汉字（子集字符数从 1066 增至 1397）；
+  - `app.css` 为 `#crm-lx-capsule .lx-name` 明确指定 `font-family: var(--title-font) !important; font-weight: 700 !important;`，与右侧面板彻底对齐。
+- 内阁支持率折线图获奖级重构：
+  - 彻底抛弃单色线条：为 14 位首相分别定制浅色模式（报刊醇厚墨色系）与深色模式（黑曜石高对比霓虹色系）两套独立调色盘，一眼区分不同首相；
+  - 增加交替任期底色带（`markArea`），政权跨度与更迭一览无余；
+  - 增加折线下垂面积渐变（`areaStyle`），山峦形态丰富，纵深立体；
+  - 升级富文本 Tooltip：展示首相专属色标、首相名、大字支持率、调查机构明细；
+  - 优化顶部区间切换器与首相名牌胶囊（带色点与高亮焦点）。
+- 验：截图亲测 quake 浅色温润、深色璀璨，无底部黑遮罩，淡入平滑；crime 雷门2丁目小标签与右侧面板完全一致（纯正 Noto Serif）；cabinet 浅色/深色/移动端各首相色彩鲜明、底色带与面积渐变丰满、Tooltip 精美。

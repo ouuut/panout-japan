@@ -134,29 +134,43 @@ const VARIANTS = [
   { id: 'tactical',   swatch: '#FF6A3D' },
   { id: 'editorial',  swatch: '#2F6B4F' }
 ];
+function hexToRgba(hex, alpha) {
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  const num = parseInt(c, 16);
+  return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+}
 const VARIANT_CHART = {
   tactical: {
-    palette: ['#ba3a21', '#c54121', '#cf4921', '#da5121', '#df5c26', '#e2682e', '#e57336', '#e77f3e', '#ea8a46', '#ec944f', '#ee9f57', '#f0a960', '#f2b269', '#f4bb71'],
+    palette: [
+      '#E09F67', '#94A3B8', '#34D399', '#F87171', '#C084FC',
+      '#FBBF24', '#38BDF8', '#60A5FA', '#818CF8', '#FF6A3D',
+      '#4ADE80', '#FB923C', '#A78BFA', '#F472B6'
+    ],
     chart: {
       gridBorder: 'transparent',
-      tooltipBg: 'rgba(20,18,16,0.96)', tooltipBorder: 'rgba(255,244,232,0.14)',
-      tooltipText: '#EDEBE4', tooltipMuted: '#A09E96', tooltipDim: '#A09E96',
-      axisLine: 'rgba(237,235,228,0.16)', axisLabel: '#A09E96',
-      splitLine: 'rgba(237,235,228,0.10)', splitLineType: 'dashed',
-      zoomBorder: 'rgba(237,235,228,0.14)', zoomBg: '#0E0E0C', zoomFill: 'rgba(255,106,61,0.16)', zoomHandle: '#FF6A3D', zoomText: '#A09E96',
-      markLabelBg: 'rgba(20,18,16,0.92)', pointBorder: '#0E0E0C'
+      tooltipBg: 'rgba(16,14,12,0.95)', tooltipBorder: 'rgba(255,244,232,0.18)',
+      tooltipText: '#EDEBE4', tooltipMuted: '#A09E96', tooltipDim: '#6F6D66',
+      axisLine: 'rgba(237,235,228,0.18)', axisLabel: '#A09E96',
+      splitLine: 'rgba(237,235,228,0.08)', splitLineType: 'dashed',
+      zoomBorder: 'rgba(237,235,228,0.14)', zoomBg: '#141412', zoomFill: 'rgba(255,106,61,0.18)', zoomHandle: '#FF6A3D', zoomText: '#A09E96',
+      markLabelBg: 'rgba(20,20,18,0.92)', pointBorder: '#0E0E0C'
     }
   },
   editorial: {
-    palette: ['#2d533d', '#305c44', '#34654c', '#386e53', '#3b775b', '#3e8063', '#41896c', '#449375', '#479d7e', '#4aa687', '#4db091', '#54b69a', '#5bbba2', '#63bfaa'],
+    palette: [
+      '#8A5A36', '#5E6B73', '#1E6B52', '#A34828', '#685B79',
+      '#9E7B34', '#2A6F97', '#3F88C5', '#1D4E89', '#C14953',
+      '#4B7F52', '#D06A2A', '#6C5B7B', '#B53471'
+    ],
     chart: {
       gridBorder: 'transparent',
-      tooltipBg: 'rgba(233,237,227,0.97)', tooltipBorder: 'rgba(23,33,26,0.12)',
-      tooltipText: '#17211A', tooltipMuted: '#56635A', tooltipDim: '#56635A',
-      axisLine: 'rgba(23,33,26,0.20)', axisLabel: '#56635A',
-      splitLine: 'rgba(23,33,26,0.08)', splitLineType: 'dashed',
-      zoomBorder: 'rgba(23,33,26,0.12)', zoomBg: '#E9EDE3', zoomFill: 'rgba(47,107,79,0.12)', zoomHandle: '#2F6B4F', zoomText: '#56635A',
-      markLabelBg: 'rgba(233,237,227,0.93)', pointBorder: '#E9EDE3'
+      tooltipBg: 'rgba(250,252,248,0.97)', tooltipBorder: 'rgba(23,33,26,0.16)',
+      tooltipText: '#17211A', tooltipMuted: '#56635A', tooltipDim: '#88948B',
+      axisLine: 'rgba(23,33,26,0.22)', axisLabel: '#56635A',
+      splitLine: 'rgba(23,33,26,0.07)', splitLineType: 'dashed',
+      zoomBorder: 'rgba(23,33,26,0.14)', zoomBg: '#DFE5D8', zoomFill: 'rgba(47,107,79,0.16)', zoomHandle: '#2F6B4F', zoomText: '#56635A',
+      markLabelBg: 'rgba(255,255,255,0.95)', pointBorder: '#FFFFFF'
     }
   }
 };
@@ -535,6 +549,17 @@ function renderChart() {
     buckets[key].sources.push({ src: p.source, v: p.value, kind: p.kind || '' });
   });
 
+  const markAreaData = cabinets.map((c, idx) => {
+    const isEven = idx % 2 === 0;
+    const bg = isEven
+      ? (currentVariant === 'editorial' ? 'rgba(0,0,0,0.028)' : 'rgba(255,255,255,0.028)')
+      : 'transparent';
+    return [
+      { xAxis: c.start, itemStyle: { color: bg } },
+      { xAxis: c.end }
+    ];
+  });
+
   const series = [];
   cabinets.forEach((c, i) => {
     const color = C[i % C.length];
@@ -555,28 +580,61 @@ function renderChart() {
         data: points,
         showSymbol: true,
         symbol: 'circle',
-        symbolSize: focused ? 7 : 5,
-        smooth: false,
+        symbolSize: focused ? 8 : 5,
+        smooth: 0.15,
         connectNulls: false,
-        lineStyle: { color: color, width: focused ? 4 : 2, type: 'solid', opacity: focusCabinet ? (focused ? 1 : 0.22) : 1 },
-        itemStyle: { color: color, borderColor: T.pointBorder, borderWidth: 1, opacity: focusCabinet ? (focused ? 1 : 0.22) : 1 },
-        emphasis: { focus: 'series', scale: 1.4 },
-        z: focused ? 5 : 2,
+        lineStyle: {
+          color: color,
+          width: focused ? 3.5 : 2.2,
+          type: 'solid',
+          opacity: focusCabinet ? (focused ? 1 : 0.18) : 0.95,
+          shadowBlur: currentVariant === 'tactical' ? (focused ? 10 : 4) : 0,
+          shadowColor: currentVariant === 'tactical' ? hexToRgba(color, 0.45) : 'transparent'
+        },
+        itemStyle: {
+          color: color,
+          borderColor: T.pointBorder,
+          borderWidth: 1.5,
+          opacity: focusCabinet ? (focused ? 1 : 0.18) : 1
+        },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: hexToRgba(color, currentVariant === 'editorial' ? 0.20 : 0.24) },
+            { offset: 0.85, color: hexToRgba(color, 0.02) },
+            { offset: 1, color: hexToRgba(color, 0.0) }
+          ]),
+          opacity: focusCabinet ? (focused ? 1 : 0.04) : 0.85
+        },
+        emphasis: { focus: 'series', scale: 1.5 },
+        z: focused ? 6 : 3,
+        markArea: i === 0 ? {
+          silent: true,
+          data: markAreaData
+        } : undefined,
         markLine: {
           silent: true,
-          symbol: ['none','none'],
-          lineStyle: { color: color, type: 'solid', width: focused ? 2 : 1.2, opacity: focusCabinet ? (focused ? 0.9 : 0.15) : 0.55 },
+          symbol: ['none', 'none'],
+          lineStyle: {
+            color: currentVariant === 'editorial' ? 'rgba(23,33,26,0.18)' : 'rgba(237,235,228,0.16)',
+            type: 'dashed',
+            width: focused ? 2 : 1.2,
+            opacity: focusCabinet ? (focused ? 0.95 : 0.12) : 0.65
+          },
           label: {
             position: 'end',
             formatter: c.pm,
-            color: color, fontSize: isNarrow ? 11 : 14, fontWeight: 700,
-            padding: isNarrow ? [1,4] : [3,8],
+            color: color,
+            fontSize: isNarrow ? 11 : 13,
+            fontWeight: 700,
+            fontFamily: 'var(--ja-sans), system-ui, sans-serif',
+            padding: isNarrow ? [2, 5] : [3, 8],
             backgroundColor: T.markLabelBg,
-            borderColor: color, borderWidth: 1, borderRadius: 4,
-            distance: 6
+            borderColor: hexToRgba(color, 0.45),
+            borderWidth: 1.2,
+            borderRadius: 6,
+            distance: 8
           },
-          // 窄屏首相交代线密集：重叠标签自动隐藏其一，免"菅義偉/岸田文雄"糊成一团
-          labelLayout: isNarrow ? { hideOverlap: true } : undefined,
+          labelLayout: { hideOverlap: true, moveOverlap: 'shiftX' },
           data: [{ xAxis: c.start }]
         }
       });
@@ -655,21 +713,38 @@ function renderChart() {
       trigger: 'axis',
       backgroundColor: T.tooltipBg,
       borderColor: T.tooltipBorder,
+      borderWidth: 1,
+      padding: [10, 14],
+      extraCssText: 'border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.18);backdrop-filter:blur(8px);',
       textStyle: { color: T.tooltipText, fontSize: 12 },
       formatter: function(params) {
         if (!params || params.length === 0) return '';
         const d = new Date(params[0].axisValue);
+        const cab = pmByDate(params[0].axisValue);
         const ymStr = fmtMonth(lang, d.getFullYear(), d.getMonth() + 1);
         const p = params[0];
         const avg = p.data ? p.data[1] : null;
         const n = p.data ? p.data[2] : 0;
         const sources = p.data ? (p.data[3] || []) : [];
-        let html = '<div style="font-weight:700;margin-bottom:4px;font-size:13px">' + ymStr + ' ' + t.avgWord + ' <b>' + avg + '%</b></div>';
-        html += '<div style="color:' + T.tooltipMuted + ';font-size:11px;margin-bottom:6px">' + n + t.corpAvg + '</div>';
+        const cabIdx = cab ? cabinets.findIndex(x => x.id === cab.id) : 0;
+        const col = C[cabIdx % C.length] || '#FF6A3D';
+        let html = '<div style="min-width:180px;font-family:var(--font-sans),system-ui,sans-serif">';
+        html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">';
+        html += '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + col + ';box-shadow:0 0 6px ' + hexToRgba(col, 0.6) + '"></span>';
+        html += '<span style="font-weight:700;font-size:13.5px;color:' + T.tooltipText + '">' + (cab ? cab.pm : '') + ' 内阁</span>';
+        html += '</div>';
+        html += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid ' + T.splitLine + '">';
+        html += '<span style="color:' + T.tooltipMuted + ';font-size:11.5px;letter-spacing:.02em">' + ymStr + '</span>';
+        html += '<span style="font-size:22px;font-weight:800;color:' + col + ';font-family:var(--mono),monospace;line-height:1">' + avg + '<small style="font-size:11px;font-weight:500">%</small></span>';
+        html += '</div>';
+        html += '<div style="color:' + T.tooltipMuted + ';font-size:10.5px;margin-bottom:6px;letter-spacing:.02em">' + n + ' ' + t.corpAvg + ' · ' + t.avgWord + '</div>';
         sources.forEach(s => {
-          html += '<span style="color:' + T.tooltipDim + '">▪</span> ' + s.src + ': <b>' + s.v + '%</b>'
-                + (s.kind ? ' <span style="color:' + T.tooltipDim + ';font-size:10px">(' + s.kind + ')</span>' : '') + '<br>';
+          html += '<div style="display:flex;justify-content:space-between;font-size:11.5px;line-height:1.6;color:' + T.tooltipText + '">';
+          html += '<span style="color:' + T.tooltipMuted + '">' + s.src + (s.kind ? ' (' + s.kind + ')' : '') + '</span>';
+          html += '<span style="font-weight:600;font-family:var(--mono),monospace">' + s.v + '%</span>';
+          html += '</div>';
         });
+        html += '</div>';
         return html;
       }
     },

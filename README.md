@@ -2,11 +2,11 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4.7 四页独立 + 全屏应用**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.8 三章深度视觉打磨与字形修复**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
-> 页面模式：三章是独立页面，吸顶 header 下直接是全屏应用；没有章节导语、统计块、beats、数据表、footer、弹层或关闭按钮。SEO/GEO 保留 title/description/JSON-LD 与 `sr-only` H1。
+> 页面模式：吸顶 header + 全屏应用；地震支持真浅色模式与淡入入场；犯罪率全量打包町丁目字符消除异体字；内阁支持率重构为 14 首相独立色谱、任期底色带与微渐变。
 
 ## 架构
 

@@ -14,6 +14,16 @@ REPLACEMENTS = [
     ("quake.japan.ouuut.com", "japan.ouuut.com", 2),
     ("数据来源", "出典", 1),
     ("刷新网页重新开始", "ページを再読み込み", 1),
+    (
+        "F_={tactical:{bg:1315344,coast:16117992,gridA:3814188,gridB:2762015},gruvbox:{bg:1315344,coast:16117992,gridA:3814188,gridB:2762015}};function I_(e){return`tactical`}",
+        "F_={tactical:{bg:921100,coast:15592420,gridA:2236958,gridB:1710614},gruvbox:{bg:921100,coast:15592420,gridA:2236958,gridB:1710614},sage:{bg:15330787,coast:1713436,gridA:13686472,gridB:12108462}};function I_(e){return(e==='sage'||e==='light'||e==='editorial')?'sage':'tactical'}",
+        1,
+    ),
+    (
+        "gv=I_((()=>{try{return localStorage.getItem(`eq-theme`)}catch{return`tactical`}})());",
+        "gv=I_((()=>{try{return document.documentElement.getAttribute('data-theme')||localStorage.getItem('eq-theme')}catch{return'sage'}})());try{window.__setQuakeTheme=function(t){ax(t)}}catch(e){};",
+        1,
+    ),
 ]
 
 

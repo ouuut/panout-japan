@@ -87,6 +87,36 @@ body.chapter-app { height: 100dvh; overflow: hidden; }
 .chapter-app-page .stage-live .leaflet-container {
   height: 100% !important;
 }
+/* 地震视口 Sage 浅色模式全套配色覆盖与底部渐变遮罩移除 */
+html[data-theme="sage"] #v-quake-viewport {
+  --bg0: #E9EDE3 !important;
+  --bg0-h: #DEE3D7 !important;
+  --bg1: #D8DEC0 !important;
+  --fg: #141a15 !important;
+  --fg1: #2F6B4F !important;
+  --gray: #6b776c !important;
+  --accent: #2F6B4F !important;
+  --accent-soft: rgba(47, 107, 79, 0.16) !important;
+  --bg-page: #E9EDE3 !important;
+  --bg-map: #E9EDE3 !important;
+  --text-main: #141a15 !important;
+  --text-muted: #56635A !important;
+  --text-faint: #7d8a80 !important;
+  --line-main: rgba(20, 26, 21, 0.14) !important;
+  --panel-bg: rgba(233, 237, 227, 0.88) !important;
+  --panel-bg-soft: rgba(233, 237, 227, 0.72) !important;
+  --panel-shadow: rgba(0, 0, 0, 0.08) !important;
+  --bottom-grad: transparent !important;
+  --eq-coast: #1A251C !important;
+}
+
+/* 彻底去掉地图下方的渐变遮罩 */
+#v-quake-viewport .eq-bottom {
+  background: none !important;
+}
+#v-quake-viewport {
+  --bottom-grad: transparent !important;
+}
 
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -1020,6 +1050,14 @@ html body #crm-root[data-crm-variant="tactical"] {
 }
 html body #crm-root { --font-sans: var(--ja-sans); --font-num: var(--mono); --title-font: var(--ja-serif); --radius-ui: 2px; --radius-inner: 2px; --radius-card: 4px; }
 html[lang="zh"] body #crm-root { --font-sans: var(--zh-sans); --title-font: var(--zh-serif); }
+html body #crm-root #crm-lx-capsule .lx-name {
+  font-family: var(--title-font) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+}
+html body #crm-root #crm-lx-capsule {
+  font-feature-settings: "palt" 1;
+}
 html body #crm-root .panel-card,
 html body #crm-root .crime-row,
 html body #crm-root .top-item,
@@ -1032,35 +1070,40 @@ html body #crm-root .panel-card { border-radius: 4px !important; }
 #crm-app-loader .loader-radar { border-color: var(--accent-soft) !important; box-shadow: none !important; }
 #v-quake-viewport [style*="background:#12100d"] { background: var(--bg) !important; color: var(--muted) !important; }
 
-.cab-controls { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+.cab-controls { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; padding: 0 18px; }
 .seg { display: inline-flex; flex-wrap: wrap; gap: 6px; }
 .seg button {
-  height: 36px;
-  padding: 0 14px;
+  height: 32px;
+  padding: 0 13px;
   border-radius: var(--btn-radius);
   background: var(--surface);
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 11.5px;
   letter-spacing: .04em;
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  transition: all 0.2s ease;
 }
 .seg button:hover { background: color-mix(in srgb, var(--surface) 70%, var(--bg)); color: var(--ink); }
-.seg button.on { background: var(--accent); color: var(--bg); }
-.cab-legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button.on { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+.cab-legend { display: flex; flex-wrap: wrap; gap: 6px; }
 .cab-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 11px;
+  padding: 3px 9px;
   border-radius: 999px;
-  background: transparent;
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.cab-pill:hover { background: var(--surface); color: var(--ink); }
-.cab-pill.on { background: var(--ink); color: var(--bg); }
-.cab-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.cab-pill:hover { background: var(--surface); color: var(--ink); border-color: color-mix(in srgb, var(--ink) 18%, transparent); }
+.cab-pill.cab-focused { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 700; }
+.cab-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 .cab-meta { position: absolute; top: 10px; right: 12px; z-index: 5; display: flex; align-items: center; gap: 8px; pointer-events: none; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; }
 .cab-range { display: none; }
 
