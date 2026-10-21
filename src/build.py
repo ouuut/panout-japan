@@ -417,12 +417,12 @@ COPY = {
     "card.quake.claim": ("2011年は回数で14.6%、エネルギーで86.7%。",
                          "2011年按次数占14.6%，按能量占86.7%。",
                          "In 2011: 14.6% of events, 86.7% of energy."),
-    "card.crime.unit": ("町丁 / 1年", "町丁 / 1年", "Neighbourhoods / 1 yr"),
+    "card.crime.unit": ("町丁 / 1年（都内）", "町丁 / 1年（都内）", "Neighbourhoods / 1 yr (Tokyo)"),
     "card.crime.title": ("寄って見る", "凑近看", "Zoom in"),
-    "card.crime.claim": ("5,234の町丁。中央値4.4‰、最大1,332‰。",
-                         "5,234个町丁。中位数4.4‰，最高1,332‰。",
-                         "5,234 neighbourhoods. Median 4.4‰, max 1,332‰."),
-    "card.cabinet.unit": ("内閣 / 28年", "内阁 / 28年", "Cabinets / 28 yrs"),
+    "card.crime.claim": ("都内5,234町丁。中央値4.4‰、最大1,332‰。",
+                         "都内5,234个町丁。中位数4.4‰，最高1,332‰。",
+                         "5,234 neighbourhoods citywide. Median 4.4‰, max 1,332‰."),
+    "card.cabinet.unit": ("ヶ月 / 28年", "个月 / 28年", "Months / 28 yrs"),
     "card.cabinet.title": ("通して見る", "拉长看", "Stretch out"),
     "card.cabinet.claim": ("14内閣、331か月。最大の月変動は+20.5。",
                            "14届内阁、331个月。最大单月变动+20.5。",
@@ -640,7 +640,9 @@ def head(title, desc, path, jsonld=None, extra_head="", body_class=""):
             "var t=null;try{t=localStorage.getItem('pj-theme')}catch(e){}"
             "if(t!=='sage'&&t!=='dark'){var h=new Date().getHours();t=(h>=6&&h<18)?'sage':'dark';}"
             "d.dataset.theme=t;"
-            "var l=localStorage.getItem('pj-lang');if(l)d.lang=l;"
+            "var l=null;try{l=(new URLSearchParams(location.search)).get('lang')}catch(e){}"
+            "if(l!=='ja'&&l!=='zh'&&l!=='en'){try{l=localStorage.getItem('pj-lang')}catch(e){l=null}}"
+            "if(l==='ja'||l==='zh'||l==='en')d.lang=l;"
             "}catch(e){}</script>")
     return f"""<!doctype html>
 <html lang="ja" data-theme="sage">
@@ -660,7 +662,6 @@ def head(title, desc, path, jsonld=None, extra_head="", body_class=""):
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#E9EDE3">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/assets/fonts/noto-serif-jp-700.woff2?v=__FONT_VER__" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/outfit-800.woff2?v=__FONT_VER__" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/app.css?v=__CSS_VER__">
 {boot}

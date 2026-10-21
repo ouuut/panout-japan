@@ -45,7 +45,14 @@
   --lh-en: 1.65;
   --lh-cjk: 1.8;
 
-  --ease: cubic-bezier(.22, .7, .28, 1);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur-fast: .2s;
+  --dur-base: .45s;
+  --dur-enter: .68s;
+  /* Argon 规格别名：微交互 / 主题切换 / 入场 */
+  --motion-fast: var(--dur-fast);
+  --motion-theme: .4s;
+  --motion-enter: var(--dur-enter);
 }
 
 /* ≥900px: hero becomes two columns; text column is ~48% of viewport,

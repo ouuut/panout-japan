@@ -35,8 +35,6 @@ CJK = [
     ("noto-sans-sc-200", SC_CACHE / "NotoSansSC[wght].ttf", 200, "Noto Sans SC"),
     ("noto-sans-sc-350", SC_CACHE / "NotoSansSC[wght].ttf", 350, "Noto Sans SC"),
     ("noto-sans-sc-400", SC_CACHE / "NotoSansSC[wght].ttf", 400, "Noto Sans SC"),
-    ("noto-serif-jp-700", "NotoSerifJP-VF.ttf", 700, "Noto Serif JP"),
-    ("noto-serif-sc-700", SC_CACHE / "NotoSerifSC[wght].ttf", 700, "Noto Serif SC"),
 ]
 
 LATIN = [

@@ -27,17 +27,17 @@
   text-wrap: balance;
 }
 html[lang="ja"] .hp-intro h1 {
-  font-family: var(--ja-serif);
+  font-family: var(--ja-sans);
   font-size: clamp(2.1rem, 4.35vw, 4rem);
-  font-weight: 700;
+  font-weight: 200;
   line-height: 1.24;
   letter-spacing: 0;
   max-width: 12em;
 }
 html[lang="zh"] .hp-intro h1 {
-  font-family: var(--zh-serif);
+  font-family: var(--zh-sans);
   font-size: clamp(2.1rem, 4.35vw, 4rem);
-  font-weight: 700;
+  font-weight: 200;
   line-height: 1.22;
   letter-spacing: 0;
   max-width: 12em;
@@ -62,32 +62,32 @@ html[lang="ja"] .hp-lede, html[lang="zh"] .hp-lede { font-size: 15px; line-heigh
 .hp-band {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  overflow: hidden;
-  border-radius: var(--radius);
-  background: var(--surface);
+  gap: 16px;
+  background: transparent;
 }
 
 .hp-entry {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
+  border-radius: var(--radius);
+  background: var(--surface);
   gap: clamp(10px, 1.3vw, 16px);
   min-width: 0;
   padding: clamp(18px, 2vw, 26px);
   color: var(--ink);
-  transition: background-color 0.55s ease,
-              color 0.55s ease,
-              transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.55s ease;
+  transition: background-color var(--dur-fast) ease,
+              color var(--dur-fast) ease,
+              transform var(--dur-fast) ease;
 }
 .hp-entry:hover {
   background: var(--accent-soft);
   color: var(--ink);
-  transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  box-shadow: none;
 }
 .hp-entry:active {
   transform: translateY(-1px);
-  transition-duration: 0.15s;
+  transition-duration: .15s;
 }
 .hp-entry:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
 
@@ -110,8 +110,8 @@ html[lang="ja"] .hp-lede, html[lang="zh"] .hp-lede { font-size: 15px; line-heigh
   line-height: 1.1;
   color: var(--ink);
 }
-html[lang="ja"] .hp-verb { font-family: var(--ja-serif); font-weight: 700; }
-html[lang="zh"] .hp-verb { font-family: var(--zh-serif); font-weight: 700; }
+html[lang="ja"] .hp-verb { font-family: var(--ja-sans); font-weight: 250; letter-spacing: -0.01em; }
+html[lang="zh"] .hp-verb { font-family: var(--zh-sans); font-weight: 250; letter-spacing: -0.01em; }
 .hp-topic {
   font-family: var(--mono);
   font-size: 11px;
@@ -150,9 +150,9 @@ html[lang="zh"] .hp-topic { font-family: var(--zh-sans); }
   min-width: 0;
 }
 .hp-count b {
-  font-family: var(--mono);
-  font-size: clamp(40px, 4vw, 58px);
-  font-weight: 400;
+  font-family: var(--sans);
+  font-size: clamp(44px, 4.2vw, 56px);
+  font-weight: 200;
   line-height: .9;
   letter-spacing: -.055em;
   color: var(--ink);
@@ -220,7 +220,7 @@ html[lang="zh"] .hp-source { font-family: var(--zh-sans); }
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  transition: transform 0.48s cubic-bezier(0.16, 1, 0.3, 1), color 0.48s ease;
+  transition: transform var(--dur-fast) ease, color var(--dur-fast) ease;
 }
 .hp-entry:hover .hp-enter {
   transform: translate(4px, -2px);

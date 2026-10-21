@@ -15,10 +15,12 @@
   function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
   function lang() {
-    var l = get('pj-lang');
-    if (LANGS.indexOf(l) >= 0) return l;
+    // ?lang= 优先级最高：分享链接的语言参数必须压过本机记忆，
+    // 否则老访客点 zh/en 链接会永远停在旧语言。
     var q = new URLSearchParams(location.search).get('lang');
     if (q && LANGS.indexOf(q) >= 0) return q;
+    var l = get('pj-lang');
+    if (LANGS.indexOf(l) >= 0) return l;
     return 'ja';
   }
 
