@@ -247,7 +247,7 @@ def cabinet_svg(months, month_mean, cabinet_data, w=1000, h=760):
     return _svg(w, h, "1998年から2026年までの内閣支持率、331か月", "".join(out))
 
 
-def housing_svg(wards, muni_poly, w=1000, h=760):
+def housing_svg(wards, muni_poly, w=1000, h=760, deals=None, towns=None):
     """23 wards filled by the median price per m² (log scale, single accent)."""
     from shapely.geometry import shape
     from shapely.validation import make_valid
@@ -285,18 +285,14 @@ def housing_svg(wards, muni_poly, w=1000, h=760):
         out.append(f'<text x="{x + dx:.1f}" y="{y + dy:.1f}" text-anchor="{anchor}" '
                    f'class="ward halo ink">{name}</text>')
 
-    top = max(wards, key=lambda x: x["band"]["p70_mean"])
-    top_feat = next((f for f in features if f["properties"]["ward_ja"] == top["ward"]), None)
-    if top_feat is not None:
-        c = make_valid(shape(top_feat["geometry"])).centroid
-        tx, ty = proj.xy(c.x, c.y)
-    else:
+    if deals:
         tx, ty = proj.xy(139.735, 35.660)
-    out.append(f'<text x="{tx:.1f}" y="{ty:.1f}" text-anchor="middle" class="note halo ink">'
-               f'{top["band"]["p70_mean"]:,} 万円 / 70㎡</text>')
+        label = f'{towns:,} 町 / {deals:,} 件' if towns else f'{deals:,} 件'
+        out.append(f'<text x="{tx:.1f}" y="{ty:.1f}" text-anchor="middle" class="note halo ink">'
+                   f'{label}</text>')
 
     ky = h - 56
-    out.append(f'<text x="54" y="{ky}" class="legend">MEDIAN / 万円 per ㎡</text>')
+    out.append(f'<text x="54" y="{ky}" class="legend">WARD MEDIAN / 万円 per ㎡</text>')
     for i, op in enumerate((0.10, 0.22, 0.34, 0.46)):
         out.append(f'<rect x="{54 + i * 24}" y="{ky + 14}" width="16" height="16" '
                    f'fill="var(--accent)" opacity="{op}"/>')

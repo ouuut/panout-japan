@@ -46,8 +46,9 @@ CHOME = json.loads((ROOT / "app/crime/data/chome_poly.json").read_text(encoding=
 MUNI_POLY = json.loads((ROOT / "app/crime/data/muni_poly.json").read_text(encoding="utf-8"))
 HOUSE = json.loads((ROOT / "app/housing/data/wards.json").read_text(encoding="utf-8"))
 HOUSE_WARDS = HOUSE["wards"]
-HOUSE_TOP = max(HOUSE_WARDS, key=lambda w: w["band"]["p70_mean"])
-HOUSE_BOTTOM = min(HOUSE_WARDS, key=lambda w: w["band"]["p70_mean"])
+HOUSE_TOWNS_DOC = json.loads((ROOT / "app" / "housing" / "data" / "towns.json").read_text(encoding="utf-8"))
+HOUSE_N = HOUSE_TOWNS_DOC["n"]
+HOUSE_TOWNS = sum(1 for x in HOUSE_TOWNS_DOC["towns"] if x["n"])
 
 MUNI_BY = {m["ward"]: m for m in MUNI}
 CAB_BY = {c["pm"]: c for c in CAB["cabinets"]}
@@ -436,9 +437,9 @@ COPY = {
                            "14 cabinets, 331 months. Largest monthly swing +20.5."),
     "card.housing.unit": ("中古マンション / 4四半期", "二手公寓 / 4 个季度", "Used flats / 4 quarters"),
     "card.housing.title": ("並べて見る", "比着看", "Compare"),
-    "card.housing.claim": (f"70㎡換算の平均は、{HOUSE_TOP['ward']} {HOUSE_TOP['band']['p70_mean']:,}万円、{HOUSE_BOTTOM['ward']} {HOUSE_BOTTOM['band']['p70_mean']:,}万円。",
-                           f"70㎡换算平均价：{HOUSE_TOP['ward']} {HOUSE_TOP['band']['p70_mean']:,}万日元，{HOUSE_BOTTOM['ward']} {HOUSE_BOTTOM['band']['p70_mean']:,}万日元。",
-                           f"Mean 70 m² equivalent: {HOUSE_TOP['band']['p70_mean']:,} ×10k yen in {HOUSE_TOP['ward']} vs {HOUSE_BOTTOM['band']['p70_mean']:,} ×10k in {HOUSE_BOTTOM['ward']}."),
+    "card.housing.claim": (f"町名ごとの平均㎡単価で塗る。{HOUSE_TOWNS:,}町・{HOUSE_N:,}件。",
+                           f"按町名平均㎡单价上色。{HOUSE_TOWNS:,} 个町、{HOUSE_N:,} 笔成交。",
+                           f"Mean price per m² by town: {HOUSE_TOWNS:,} towns, {HOUSE_N:,} deals."),
 
     "q.eyebrow": ("01 / 引いて見る", "01 / 拉远看", "01 / Pull back"),
     "q.h1": ("地震 — <em>40,079</em>の震源", "地震 — <em>40,079</em>个震源", "Earthquakes — <em>40,079</em> hypocentres"),
@@ -497,10 +498,10 @@ COPY = {
                "1998年至2026年，逐月支持率。跨过内阁，连成一条线。",
                "Monthly approval from 1998 to 2026, joined across cabinets into one line."),
     "h.eyebrow": ("04 / 並べて見る", "04 / 比着看", "04 / Compare"),
-    "h.h1": ("住宅 — <em>23</em>区の価格", "住宅 — <em>23</em>区价格", "Housing — <em>23</em> ward prices"),
-    "h.lede": ("中古マンションの成約価格。60–80㎡に揃え、㎡単価の平均を23区で比べる。",
-               "二手公寓成约价格。统一到 60–80㎡，比较 23 区的㎡单价平均值。",
-               "Closed prices for used flats, held to 60–80 m², compared across the 23 wards by mean price per m²."),
+    "h.h1": ("住宅 — <em>23</em>区の成約", "住宅 — <em>23</em>区成交", "Housing — <em>23</em> wards"),
+    "h.lede": ("中古マンションの成約価格。町名（地区名）ごとの平均㎡単価で塗る。",
+               "二手公寓成交价。按町名（地区名）的平均㎡单价上色。",
+               "Used-flat closed prices, shaded by the mean price per m² of each town."),
     "b.stat.polls": ("調査", "调查", "Polls"),
     "b.stat.months": ("月", "月", "Months"),
     "b.stat.cabinets": ("内閣", "内阁", "Cabinets"),
@@ -803,7 +804,7 @@ def build_home_preview():
          HP.cabinet_svg(ALL_MONTHS, MONTH_MEAN, CAB)),
         ("housing", "04", "/housing/", "card.housing.title", "nav.housing", f"{HOUSE['totals']['trades']:,}",
          "card.housing.unit", "card.housing.claim", "国土交通省 · 2025Q2—2026Q1",
-         HP.housing_svg(HOUSE_WARDS, MUNI_POLY)),
+         HP.housing_svg(HOUSE_WARDS, MUNI_POLY, deals=HOUSE_N, towns=HOUSE_TOWNS)),
     ]
 
     entries = []
@@ -956,23 +957,23 @@ def build_housing():
 <h1 class="sr-only"{tattr('h.h1')}>{ja('h.h1')}</h1>
 <p class="sr-only"{tattr('h.lede')}>{ja('h.lede')}</p>
 <div class="stage stage-housing" data-live="0" data-stage-auto="housing" data-view="housing">
-<div class="stage-poster">{HP.housing_svg(HOUSE_WARDS, MUNI_POLY, 1000, 620)}</div>
+<div class="stage-poster">{HP.housing_svg(HOUSE_WARDS, MUNI_POLY, 1000, 620, deals=HOUSE_N, towns=HOUSE_TOWNS)}</div>
 <p class="stage-caption">中古マンション · 成約 {HOUSE['totals']['trades']:,}件 · 60–80㎡ · {HOUSE['basis']} · 国土交通省</p>
 <div class="stage-live"></div>
 </div>
 </main>"""
     jsonld = {
         "@context": "https://schema.org", "@type": "Dataset",
-        "name": f"Tokyo 23 wards — used apartment mean prices, {HOUSE['basis']}",
-        "description": "Mean price per square metre and 70 m² equivalent for used apartments (60–80 m²) in Tokyo's 23 wards, derived from MLIT Real Estate Information Library transaction and closed-price records.",
+        "name": f"Tokyo 23 wards — used flat mean prices by town, {HOUSE['basis']}",
+        "description": "Mean closed price per town for used flats in Tokyo's 23 wards, derived from the MLIT Real Estate Information Library.",
         "temporalCoverage": "2025-04-01/2026-03-31",
         "spatialCoverage": "Tokyo 23 wards",
         "license": "https://www.digital.go.jp/resources/open_data/public_data_license_v1.0",
         "creator": {"@type": "Organization", "name": "国土交通省 不動産情報ライブラリ"},
         "url": SITE_URL + "/housing/",
     }
-    return page("/housing/", f"住宅 — 23区の価格 | {BRAND}",
-                "東京23区の中古マンション成約価格。60–80㎡に揃えた㎡単価の平均と70㎡換算で区を比べる。国交省データを加工。",
+    return page("/housing/", f"住宅 — 町名の価格 | {BRAND}",
+                "東京23区の中古マンション成約価格。町名（地区名）ごとの平均㎡単価を塗った地図。国交省データを加工。",
                 body, "housing", jsonld, fullscreen=True)
 
 
@@ -1126,7 +1127,9 @@ def write_site(files):
         src = ROOT / "app" / ch
         dst = SITE / "app" / ch
         if src.exists():
-            shutil.copytree(src, dst, dirs_exist_ok=True,
+            if dst.exists():
+                shutil.rmtree(dst)
+            shutil.copytree(src, dst,
                             ignore=shutil.ignore_patterns("__pycache__", "*.map"))
 
     # favicon
@@ -1213,7 +1216,7 @@ def write_meta(font_meta):
 - [地震](/quake/): 2000–2026.07、M4以上の震源40,079点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。
 - [内閣](/cabinet/): 1998–2026、644調査、331か月、14内閣。
-- [住宅](/housing/): 2025Q2–2026Q1、東京23区、中古マンション成約21,848件の㎡単価平均。
+- [住宅](/housing/): 2025Q2–2026Q1、東京23区、中古マンション成約21,848件を町名（828町）ごとに平均した㎡単価の地図。
 
 Build: {BUILD_STAMP}. Sources: USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
 """, encoding="utf-8")

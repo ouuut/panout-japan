@@ -170,18 +170,8 @@ def summarise(q, periods):
 
 
 def write_geo():
-    src = ROOT / "app" / "crime" / "data" / "muni_poly.json"
-    if not src.exists():
-        print("geo: muni_poly.json missing, skipped")
-        return None
-    g = json.loads(src.read_text(encoding="utf-8"))
-    feats = [f for f in g["features"] if f.get("properties", {}).get("area_ja") == "都区部"]
-    feats.sort(key=lambda f: f["properties"]["ward_ja"])
-    out = {"type": "FeatureCollection", "features": feats}
-    OUT.mkdir(parents=True, exist_ok=True)
-    p = OUT / "wards_poly.json"
-    p.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    return len(feats), p.stat().st_size
+    # 区界几何已由 tools/build_housing_towns.py 的町名多边形取代，这里不再产出。
+    return None
 
 
 def main(argv=None):
