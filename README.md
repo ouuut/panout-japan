@@ -2,11 +2,11 @@
 
 `japan.ouuut.com` —— 拉远看地震，凑近看犯罪，拉长看内阁。同一片国土，三种时间。
 
-> 状态：**M4.14 全站去粗体重构：大一圈字号纯细体替代加粗、解决 Tooltip 衬线回退**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**M4.15 深色模式文本配色根治修复与双主题真机实测留证**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
 > 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4 commit `fff7e76`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
-> 排版哲学升级：贯彻“彻底杜绝小粗体、用大一圈字号纯细体（200/250/300）建立层级”的极简规范。fonts.py 导出 200/350/400 极细子集；内阁面板标题/数字/政策项彻底消除小粗黑块；分割线名字升至 24px 大字号纯细体；Tooltip 彻底消除老旧 monospace 衬线爪爪回退；地震页所有控件与按钮拉升至 13px+ 纯细体，字字清晰。
+> 主题对比度与真机验收：根治内阁面板在深色模式下回退到 #141A15 导致大面积黑字“隐身”的致命 Bug。全面归一化为权威真相源 --ink（象牙白 #EDEBE4），配合 app.css 双层强制保底规则；真机实测抽检 18 处关键节点计算样式，并在 Sage 与 Dark 两种模式下完整截图留证。
 
 ## 架构
 

@@ -116,7 +116,7 @@ const CAB_CSS = `
   border-radius: 8px;
   padding: 16px 18px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  color: var(--text-main, #141A15);
+  color: var(--ink);
   transition: all 0.2s ease;
 }
 .cab-panel .card-head {
@@ -131,13 +131,13 @@ const CAB_CSS = `
   font-size: 22px;
   font-weight: 250;
   line-height: 1.25;
-  color: var(--text-main, #141A15);
+  color: var(--ink);
   letter-spacing: -0.3px;
   font-family: var(--font-sans, "MiSans VF", "MiSans", system-ui, sans-serif);
 }
 .cab-panel .card-subtitle {
   font-size: 12.5px;
-  color: var(--muted, #56635A);
+  color: var(--muted);
   font-weight: 350;
   margin-top: 4px;
   line-height: 1.45;
@@ -168,12 +168,12 @@ const CAB_CSS = `
   font-weight: 200;
   line-height: 1.05;
   letter-spacing: -0.8px;
-  color: var(--text-main, #141A15);
+  color: var(--ink);
   font-family: var(--font-sans, "MiSans VF", "MiSans", system-ui, sans-serif);
 }
 .cab-panel .stat-label {
   font-size: 11px;
-  color: var(--muted, #56635A);
+  color: var(--muted);
   margin-top: 5px;
   font-weight: 350;
 }
@@ -188,12 +188,12 @@ const CAB_CSS = `
 .cab-panel .policy-title {
   font-size: 14.5px;
   font-weight: 300;
-  color: var(--text-main, #141A15);
+  color: var(--ink);
   margin-bottom: 2px;
 }
 .cab-panel .policy-desc {
   font-size: 12px;
-  color: var(--muted, #56635A);
+  color: var(--muted);
   line-height: 1.6;
   font-weight: 350;
 }
@@ -206,7 +206,7 @@ const CAB_CSS = `
   border-radius: 4px;
   border: 1px solid var(--line-main, rgba(20, 26, 21, 0.15));
   background: transparent;
-  color: var(--text-main, #141A15);
+  color: var(--ink);
   cursor: pointer;
   transition: all 0.2s ease;
   width: fit-content;
@@ -1068,7 +1068,7 @@ function renderPanel(targetCabId) {
 
       <!-- 卡片 2: 执政时长排行榜 -->
       <div class="panel-card">
-        <div style="font-size:15px;font-weight:250;letter-spacing:-0.2px;color:var(--text-main);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+        <div style="font-size:15px;font-weight:250;letter-spacing:-0.2px;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:6px">
           <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 13h12v1H2zm2-3h2v2H4zm3-4h2v6H7zm3-2h2v8h-2z"/></svg>
           ${langKey==='zh'?'政权稳定性与在任天数记录':langKey==='en'?'Tenure & Stability Records':'歴代内閣 在職日数記録'}
         </div>
@@ -1079,7 +1079,7 @@ function renderPanel(targetCabId) {
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">
             <span>${langKey==='zh'?'结构改革 · 小泉纯一郎':langKey==='en'?'Structure: Junichiro Koizumi':'構造改革：小泉純一郎'}</span>
-            <span style="font-size:14px;font-weight:250;color:var(--text-main)">1,980 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (65${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
+            <span style="font-size:14px;font-weight:250;color:var(--ink)">1,980 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (65${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">
             <span>${langKey==='zh'?'最短短命 · 鸠山由纪夫':langKey==='en'?'Shortest: Yukio Hatoyama':'最短退任：鳩山由紀夫'}</span>
@@ -1172,8 +1172,8 @@ function renderPanel(targetCabId) {
         <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm2 1H6a4 4 0 00-4 4v1h12v-1a4 4 0 00-4-4z"/></svg>
         ${langKey==='zh'?'生平档案与政治派阀':langKey==='en'?'BIOGRAPHY & BACKGROUND':'生平・政治的出自'}
       </div>
-      ${originTitle ? `<div style="font-size:13px;color:var(--text-main);font-weight:300;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">${originTitle}</div>` : ''}
-      <div style="font-size:13px;line-height:1.7;color:var(--text-main);font-weight:350">
+      ${originTitle ? `<div style="font-size:13px;color:var(--ink);font-weight:300;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">${originTitle}</div>` : ''}
+      <div style="font-size:13px;line-height:1.7;color:var(--ink);font-weight:350">
         ${bioTitle}
       </div>
     </div>
