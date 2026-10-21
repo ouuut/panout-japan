@@ -300,3 +300,16 @@
   - 分两轮喂：第一轮 BRIEF + 8 张桌面截图（视觉/信息架构），第二轮 4 个源码包 + 2 张移动端（实现/可访问性）。回执存 `.review/gemini-round1.md`、`gemini-round2.md`。
 - 已知坑：Gemini 网页版单条消息附件上限约 10 个，故分两轮；`tab.run` 里的裸 `page.evaluate(fn)` 在 relay 下会丢闭包，传字符串或用 host `tab.evaluate` 才稳。
 - 一手核验：Gemini 第二轮 P1 第 4 条称「home-preview.css 全部内容在 app.css 中重复了一遍」——实测 app.css 只有 1 处 `.hp-band/.hp-entry` 出现在选择器列表，dot-rule 76 条全在 home-preview.css，**该条为幻觉，不予采纳**。其余条目待逐条核实后再动。
+
+## 2026-10-21 · M4.17 评审换号重跑：Gemini 4 Argon（Pro 账号）
+
+- 上一轮投喂走错账号（nkmtsai@gmail.com，非 Pro），作废。改投 `krillkathryn467@gmail.com`（Google One Pro）+ 模型「Argon 高」，会话 `/u/2/app/aea15435229ebc10`。
+- 通道修正：新版 Gemini 的「上传和工具」按钮对 JS `.click()` 不响应（无用户手势 → 浏览器直接吞掉文件选择请求）。必须 **鼠标 down/up 真实点击** 菜单项，`Page.setInterceptFileChooserDialog` 才会收到 `mode: selectMultiple` 事件，再 `DOM.setFileInputFiles` 灌文件。发送用编辑器 focus + Enter。
+- 产出：`gemini-argon-round1.md`（视觉/IA 17 条）、`gemini-argon-round2.md`（实现层 R2-01～R2-18）、`VERIFICATION.md`（一手核验账）。
+- 已核实为真的硬 Bug（待修）：
+  - `app/crime/view.js:876` 模板残留 `data-crm-chome="${pr.name}', true)"` → 犯罪页所有下钻/返回点击失效；
+  - `mountCrimeControls()` 全仓无人调用 → /crime/ 罪种下拉、R7/R8、搜索框整组缺失；
+  - `app/cabinet/view.js:219` `@media (max-width:960px){ .cab-panel{display:none} }` → 手机端看不到首相档案；
+  - `src/shell.js:17` `lang()` 先读 localStorage 再读 `?lang=` → 分享链接语言参数对老访客失效；
+  - 犯罪页中位数显示 3.8‰ 与站点 4.4‰ 矛盾；仅用町丁级复算得 4.49‰，`buildScales()` 混入了 MUNI 行。
+- 已证伪：Argon 称犯罪页 TOP5 把 ‰ 写成 % —— 源码两处均为 ‰，属截图小字号误读。
