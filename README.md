@@ -4,7 +4,7 @@
 
 > 状态：**M4.15 深色模式文本配色根治修复与双主题真机实测留证**（2026-10-21）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
-> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4.18 commit `cdc83b5`）。
+> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4.18 commit `bd65c98`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
 > 主题对比度与真机验收：根治内阁面板在深色模式下回退到 #141A15 导致大面积黑字“隐身”的致命 Bug。全面归一化为权威真相源 --ink（象牙白 #EDEBE4），配合 app.css 双层强制保底规则；真机实测抽检 18 处关键节点计算样式，并在 Sage 与 Dark 两种模式下完整截图留证。
 

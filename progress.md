@@ -325,3 +325,4 @@
 - 发布：`wrangler pages deploy site --project-name=panout-site --branch=main`（ouuut 账号 `cf9d7a…`，token 取 `custom.ouuut_cf_api_token`），部署域 `https://7e596ded.panout-site.pages.dev`；自定义域 `japan.ouuut.com` 已回新字节（`app.css?v=d71b3356` 与本地构建一致）。线上验收：内阁全期間 14 个名签单行、高市在线右侧；拖动 65→45 换窗口且名签跟随；犯罪页瓦片 18 张、下钻面板出数；三页 0 console error。
 
 - 线上回评修正：犯罪页筛选工具条原本 `top:84px`（相对已在地图舞台内的 `#crm-root`）→ 悬空在地图中部；改为 `top:12px`（窄屏 8px），贴地图左上角。部署 `a90e2c84.panout-site.pages.dev`，主域实测 `ctl.y - map.y = 12`、`app.css?v=52e920da`。
+- 线上回评修正 2：犯罪页工具条与下拉/搜索框原为 `999px` 胶囊，与全站 2px 按钮 / 4px 卡片圆角语言不一致；工具条 4px、子控件 2px（窄屏抽屉 4px），线上实测 host=4px、sel/q/seg/toggle=2px、面板卡 4px。部署 `a4d2b7fa`（`app.css?v=f651bd7c`）。
