@@ -1236,7 +1236,8 @@ html body #crm-root { --font-sans: var(--ja-sans); --font-num: var(--mono); --ti
 html body #crm-root #crm-ctl-host {
   position: absolute;
   left: 20px;
-  top: 84px;
+  /* #crm-root 已经在地图舞台内部（舞台起点在页头之下），这里只留贴角余量 */
+  top: 12px;
   z-index: 1200;
   max-width: calc(100% - 40px);
   padding: 6px 8px;
@@ -1264,7 +1265,7 @@ html body #crm-root #crm-ctl-host .crm-ctl-toggle {
 }
 @media (max-width: 760px) {
   html body #crm-root #crm-ctl-host {
-    left: 12px; right: 12px; max-width: none; top: 72px;
+    left: 12px; right: 12px; max-width: none; top: 8px;
     padding: 4px; border-radius: 18px;
   }
   html body #crm-root #crm-ctl-host .crm-ctl-toggle { display: inline-flex; }
