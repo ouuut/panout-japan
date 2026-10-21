@@ -4,7 +4,7 @@
 
 > 状态：**M4.19 第四章「住宅」上线——东京23区中古マンション成約価格**（2026-10-22）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
-> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4.19 commit `1473b96`）。
+> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4.19 commit `7edb975`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
 > 第四章：`/housing/` 用国土交通省不动产情报图书馆（PDL 1.0）2025Q2–2026Q1 的成約明细，按官方最小定位单位「市区町村 + 町名（地区名）」汇总平均㎡単価：東京全域 1,237 个町上色（1,614 个町多边形，无成交的留白）。界面与犯罪率章同一套模板（工具栏 / 右侧卡片 / 左下分布仪 / 竖向缩放条）。不筛面积、不算中位数、不做 70㎡ 换算。首页第四块数据板同步上屏。
 
