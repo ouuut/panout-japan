@@ -1241,7 +1241,8 @@ html body #crm-root #crm-ctl-host {
   z-index: 1200;
   max-width: calc(100% - 40px);
   padding: 6px 8px;
-  border-radius: 999px;
+  /* 全站是 2px 按钮 / 4px 卡片的小圆角，工具条不能是胶囊 */
+  border-radius: 4px;
   background: color-mix(in srgb, var(--bg) 84%, transparent);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
   backdrop-filter: blur(14px) saturate(1.4);
@@ -1255,7 +1256,7 @@ html body #crm-root #crm-ctl-host .crm-ctl-toggle {
   height: 30px;
   padding: 0 12px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--surface);
   color: var(--ink);
   font-family: var(--font-sans);
@@ -1266,7 +1267,7 @@ html body #crm-root #crm-ctl-host .crm-ctl-toggle {
 @media (max-width: 760px) {
   html body #crm-root #crm-ctl-host {
     left: 12px; right: 12px; max-width: none; top: 8px;
-    padding: 4px; border-radius: 18px;
+    padding: 4px; border-radius: 4px;
   }
   html body #crm-root #crm-ctl-host .crm-ctl-toggle { display: inline-flex; }
   html body #crm-root #crm-ctl-host .crm-ctl { display: none; }
@@ -1274,9 +1275,11 @@ html body #crm-root #crm-ctl-host .crm-ctl-toggle {
     display: flex; flex-wrap: wrap; gap: 8px;
     padding: 8px 6px 4px;
   }
-  html body #crm-root #crm-ctl-host.is-open { border-radius: 16px; }
+  html body #crm-root #crm-ctl-host.is-open { border-radius: 4px; }
   html body #crm-root #crm-ctl-host .crm-q { width: 100%; }
 }
+html body #crm-root #crm-ctl-host .crm-sel,
+html body #crm-root #crm-ctl-host .crm-q { border-radius: var(--btn-radius, 2px); }
 html[lang="zh"] body #crm-root { --font-sans: var(--zh-sans); --title-font: var(--zh-sans); }
 html body #crm-root #crm-lx-capsule .lx-name {
   font-family: var(--title-font) !important;
