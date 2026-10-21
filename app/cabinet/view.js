@@ -14,6 +14,16 @@ const ECHARTS_URLS = [
 ];
 const THEME_MAP = { mono: "editorial", sage: "editorial", dark: "tactical", tactical: "tactical", editorial: "editorial" };
 
+
+// ECharts 画在 canvas 上，不认识 CSS 变量：直接塞 'var(--ja-sans)' 会静默回落到浏览器默认衬线。
+// 这里把计算值取出来再交给 ECharts。
+function cssFont(varName, fallback) {
+  try {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    return v || fallback;
+  } catch (e) { return fallback; }
+}
+
 const CAB_CSS = `
 #v-cabinet-viewport, .cab-viewport {
   position: relative;
@@ -52,18 +62,18 @@ const CAB_CSS = `
 .cab-zoom {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  gap: 2px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
   padding: 2px;
-  border-radius: 6px;
-  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  border-radius: var(--radius, 4px);
+  border: 0;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 .cab-zoom button {
-  height: 24px;
-  padding: 0 9px;
-  border-radius: 4px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--btn-radius, 2px);
   background: transparent;
   color: var(--muted);
   font-family: var(--font-sans, system-ui);
@@ -88,11 +98,11 @@ const CAB_CSS = `
 /* 右侧深度信息面板（类似犯罪率右侧面板） */
 .cab-panel {
   position: absolute;
-  top: 14px;
-  right: 18px;
-  width: 360px;
-  height: calc(100% - 56px);
-  max-height: calc(100% - 56px);
+  top: 16px;
+  right: 16px;
+  width: 352px;
+  height: calc(100% - 44px);
+  max-height: calc(100% - 44px);
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 1000;
@@ -103,7 +113,7 @@ const CAB_CSS = `
   pointer-events: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  font-family: var(--font-sans, "MiSans VF", "MiSans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif);
+  font-family: var(--font-sans, system-ui, sans-serif);
 }
 .cab-panel::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
@@ -112,8 +122,8 @@ const CAB_CSS = `
   background: var(--bg-card, rgba(233, 237, 227, 0.88));
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  border: 1px solid var(--line-main, rgba(20, 26, 21, 0.12));
-  border-radius: 8px;
+  border: 0;
+  border-radius: var(--radius, 4px);
   padding: 16px 18px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   color: var(--ink);
@@ -133,7 +143,7 @@ const CAB_CSS = `
   line-height: 1.25;
   color: var(--ink);
   letter-spacing: -0.3px;
-  font-family: var(--font-sans, "MiSans VF", "MiSans", system-ui, sans-serif);
+  font-family: var(--font-sans, system-ui, sans-serif);
 }
 .cab-panel .card-subtitle {
   font-size: 12.5px;
@@ -160,16 +170,17 @@ const CAB_CSS = `
 .cab-panel .stat-box {
   background: var(--bg-subcard, rgba(0, 0, 0, 0.035));
   padding: 12px 14px;
-  border-radius: 6px;
-  border: 1px solid var(--line-subcard, rgba(0, 0, 0, 0.04));
+  border-radius: var(--btn-radius, 2px);
+  border: 0;
 }
 .cab-panel .stat-num {
   font-size: 32px;
   font-weight: 200;
   line-height: 1.05;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
   color: var(--ink);
-  font-family: var(--font-sans, "MiSans VF", "MiSans", system-ui, sans-serif);
+  font-family: var(--font-sans, system-ui, sans-serif);
 }
 .cab-panel .stat-label {
   font-size: 11px;
@@ -217,7 +228,27 @@ const CAB_CSS = `
   border-color: var(--accent, #FF6A3D);
 }
 @media (max-width: 960px) {
-  .cab-panel { display: none; }
+  /* 竖屏：图表 58% / 档案面板 42% 上下分栏，面板不再被 display:none 整块砍掉 */
+  .cab-viewport { display: flex; flex-direction: column; }
+  #cab-chart { flex: 0 0 56%; height: 56% !important; }
+  .cab-panel {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: 100%;
+    height: 44%;
+    max-height: 44%;
+    padding: 8px 12px 16px;
+    border-radius: 0;
+  }
+  .cab-panel .panel-card { border-radius: 6px; padding: 12px 14px; }
+  .cab-bottom-bar {
+    top: calc(56% - 34px) !important;
+    bottom: auto !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
 }
 `;
 
@@ -259,7 +290,37 @@ const CAB_PROFILES = {
         "desc": "通过金融再生两法，成立金融再生委员会，全力处置泡沫破裂后的巨额不良债权；实施超10万亿日元规模的减税与公共事业投入。"
       }
     ],
-    "crisisZh": "2000年4月2日凌晨，因连日繁重政务在首相官邸突发脑梗塞紧急送医，陷入昏迷。4月5日内阁总辞职，同年5月14日逝世，享年62岁。"
+    "crisisZh": "2000年4月2日凌晨，因连日繁重政务在首相官邸突发脑梗塞紧急送医，陷入昏迷。4月5日内阁总辞职，同年5月14日逝世，享年62岁。",
+    "policiesJa": [
+      {
+        "title": "自自公連立政権",
+        "desc": "参議院のねじれを打開するため、自由党、続いて公明党と連立を組み、安定的な連立政権の枠組みを構築した。その後の自公連立が数十年続く基礎を築いた。"
+      },
+      {
+        "title": "地域振興券を発行",
+        "desc": "アジア通貨危機とデフレ圧力を受け、全国の特定世帯に1人2万円分の地域振興券を交付して内需を刺激した。日本の消費券による景気刺激策の先駆けとなった。"
+      },
+      {
+        "title": "金融再生と減税策",
+        "desc": "金融再生2法を成立させ金融再生委員会を設置し、バブル崩壊後の巨額不良債権の処理に全力を挙げた。10兆円超規模の減税と公共事業投入も実施した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Three-Party Coalition",
+        "desc": "Broke the deadlock in the House of Councillors by forming coalitions first with the Liberal Party and then with Komeito, building a stable governing framework that laid the foundation for the LDP-Komeito alliance lasting decades."
+      },
+      {
+        "title": "Regional Stimulus Vouchers",
+        "desc": "Faced with the Asian financial crisis and deflationary pressure, distributed 20,000-yen consumption vouchers per person to designated households nationwide to stimulate domestic demand, pioneering consumption-voucher stimulus in Japan."
+      },
+      {
+        "title": "Bank Cleanup and Tax Cuts",
+        "desc": "Enacted the two financial revitalization laws and established the Financial Reconstruction Commission to clear the massive bad loans left by the bubble's collapse, and implemented more than 10 trillion yen in tax cuts and public works spending."
+      }
+    ],
+    "crisisJa": "2000年4月2日未明、連日の激務により首相官邸で脳梗塞を発症して緊急搬送され、昏睡状態に陥った。4月5日に内閣は総辞職、同年5月14日に死去。享年62。",
+    "crisisEn": "In the early hours of April 2, 2000, he suffered a cerebral infarction at the Prime Minister's Office after days of heavy official duties and was rushed to hospital in a coma. The cabinet resigned on April 5, and he died on May 14 that year at the age of 62."
   },
   "mori": {
     "id": "mori",
@@ -298,7 +359,37 @@ const CAB_PROFILES = {
         "desc": "顺利举行2000年九州·冲绳 G8 首脑峰会，并在日本发行面值两千日元的纪念纸币。"
       }
     ],
-    "crisisZh": "2001年2月美军核潜艇撞沉爱媛县立水产高中练习船“爱媛丸号”，森喜朗接报后仍继续打高尔夫球，招致全国愤怒舆论，党内“倒森”声浪汹涌，被迫宣布提前举行总裁大选引咎退职。"
+    "crisisZh": "2001年2月美军核潜艇撞沉爱媛县立水产高中练习船“爱媛丸号”，森喜朗接报后仍继续打高尔夫球，招致全国愤怒舆论，党内“倒森”声浪汹涌，被迫宣布提前举行总裁大选引咎退职。",
+    "policiesJa": [
+      {
+        "title": "中央省庁の再編",
+        "desc": "戦後最大規模の中央行政機構改革を完遂し、1府22省庁を1府12省庁に統合・整理した。2001年1月に新体制を発足させた。"
+      },
+      {
+        "title": "IT基本法の制定",
+        "desc": "「高度情報通信ネットワーク社会形成基本法」（IT基本法）の制定を主導し、IT戦略本部を設置した。光ファイバーの普及と高速ブロードバンド網の飛躍的な整備を推進した。"
+      },
+      {
+        "title": "九州・沖縄サミット",
+        "desc": "2000年の九州・沖縄G8首脳会議を成功裏に開催し、あわせて2,000円の記念紙幣を発行した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Central Ministry Restructuring",
+        "desc": "Completed the largest post-war reform of central government, consolidating 1 cabinet office and 22 ministries and agencies into today's 1 cabinet office and 12 ministries, which began operating in January 2001."
+      },
+      {
+        "title": "IT Basic Act",
+        "desc": "Led enactment of the Basic Act on the Formation of an Advanced Information and Telecommunications Network Society (IT Basic Act), set up an IT Strategy Headquarters, and drove fiber-optic rollout and the rapid build-out of high-speed broadband."
+      },
+      {
+        "title": "Kyushu-Okinawa G8 Summit",
+        "desc": "Hosted the 2000 Kyushu-Okinawa G8 summit successfully and issued a commemorative 2,000-yen banknote in Japan."
+      }
+    ],
+    "crisisJa": "2001年2月、米原子力潜水艦が愛媛県立水産高校の練習船「えひめ丸」を沈没させた事故で、森喜朗は一報を受けた後もゴルフを続け、全国的な怒りを招いた。党内で「森降ろし」の声が高まり、総裁選の前倒しを余儀なくされ引責辞任した。",
+    "crisisEn": "In February 2001 a US nuclear submarine sank the Ehime Maru, a training vessel of a prefectural fisheries high school; Mori kept playing golf after being told, provoking nationwide outrage. With party calls to oust him swelling, he was forced to call an early leadership election and resigned to take responsibility."
   },
   "koizumi": {
     "id": "koizumi",
@@ -337,7 +428,37 @@ const CAB_PROFILES = {
         "desc": "参议院否决邮政法案后毅然解散众院，取消反对法案党内议员的公认资格并派遣“刺客候选人”，率自民党赢得296席历史性压倒性狂胜。"
       }
     ],
-    "crisisZh": "靖国神社参拜引发邻国外交僵局，改革带来的城乡贫富差距扩大受到在野党抨击，但他坚守自民党总裁任期上限规定，2006年9月光荣引退。"
+    "crisisZh": "靖国神社参拜引发邻国外交僵局，改革带来的城乡贫富差距扩大受到在野党抨击，但他坚守自民党总裁任期上限规定，2006年9月光荣引退。",
+    "policiesJa": [
+      {
+        "title": "不良債権の最終処理",
+        "desc": "竹中平蔵を登用して金融再生プログラムを推進し、都市銀行に巨額の不良債権処理を強く促した。平成金融危機の核心となる時限爆弾を完全に取り除いた。"
+      },
+      {
+        "title": "郵政・道路公団改革",
+        "desc": "巨額の郵便貯金・簡易保険資金を国の手から市場へ移し、道路公団を解散・再編して、地方の無秩序なインフラ投資による財政赤字を抑制した。"
+      },
+      {
+        "title": "2005年郵政解散",
+        "desc": "参議院が郵政法案を否決した後、衆議院を解散した。造反議員の公認を取り消して「刺客候補」を擁立し、自民党を296議席の歴史的圧勝に導いた。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Final Bad-Loan Cleanup",
+        "desc": "Appointed Heizo Takenaka to push the Financial Revival Program, pressing major city banks to dispose of huge volumes of non-performing loans and defusing the core time bomb of Japan's Heisei financial crisis."
+      },
+      {
+        "title": "Postal and Road Reform",
+        "desc": "Moved the vast postal savings and life insurance funds from state control into the market, and dissolved and reorganized the road public corporations to curb runaway local infrastructure spending and deficits."
+      },
+      {
+        "title": "2005 Postal Snap Election",
+        "desc": "After the Upper House rejected the postal bills, he dissolved the Lower House, stripped rebel LDP members of endorsement and fielded 'assassin' candidates, leading the LDP to a historic landslide of 296 seats."
+      }
+    ],
+    "crisisJa": "靖国神社参拝が近隣諸国との外交停滞を招き、改革に伴う都市と地方の格差拡大が野党の批判を浴びた。しかし自民党総裁の任期上限を守り、2006年9月に花道を飾って退陣した。",
+    "crisisEn": "His visits to Yasukuni Shrine froze diplomacy with neighboring countries, and the urban-rural wealth gap widened by his reforms drew opposition criticism, but he honored the LDP's term limit for its president and retired in glory in September 2006."
   },
   "abe1": {
     "id": "abe1",
@@ -376,7 +497,37 @@ const CAB_PROFILES = {
         "desc": "在印度国会发表“两洋交汇”著名演讲，首次提出印太四边安全合作（QUAD）雏形。"
       }
     ],
-    "crisisZh": "参院大选惨败后，在国会发表施政演说仅两天后，因溃疡性大肠炎剧烈恶化无法正常履职，于2007年9月12日突然在记者会宣布辞职，引发政坛震荡。"
+    "crisisZh": "参院大选惨败后，在国会发表施政演说仅两天后，因溃疡性大肠炎剧烈恶化无法正常履职，于2007年9月12日突然在记者会宣布辞职，引发政坛震荡。",
+    "policiesJa": [
+      {
+        "title": "防衛庁の省昇格",
+        "desc": "1954年の防衛庁設置以来の長年の悲願を実現し、正式な国の省へと昇格させて、自衛隊の国際的地位と法整備を高めた。"
+      },
+      {
+        "title": "国民投票法の成立",
+        "desc": "憲法改正の手続きを定める国民投票法を制定し、後の改憲論議の最初の法的基礎を築いた。あわせて60年ぶりに教育基本法を改正した。"
+      },
+      {
+        "title": "日米豪印の枠組み構想",
+        "desc": "インド国会で「二つの大洋の交わり」と題する演説を行い、インド太平洋における4か国安全保障協力（QUAD）の原型を初めて提唱した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Defense Agency Upgrade",
+        "desc": "Fulfilled the long-standing goal since the agency's 1954 founding by upgrading it to a full ministry, raising the Self-Defense Forces' international standing and legal footing."
+      },
+      {
+        "title": "Referendum Law",
+        "desc": "Enacted the National Referendum Act setting out constitutional amendment procedures, laying the first legal foundation for later debate on revising the charter, and amended the 60-year-old Fundamental Law of Education."
+      },
+      {
+        "title": "Quad Concept",
+        "desc": "In a landmark 'Confluence of the Two Seas' address to the Indian parliament, he first proposed what became the four-nation Indo-Pacific security grouping (Quad)."
+      }
+    ],
+    "crisisJa": "参院選で大敗した後、国会での所信表明演説からわずか2日後、潰瘍性大腸炎の急激な悪化で職務遂行が困難となり、2007年9月12日に記者会見で突然辞任を表明し、政界に衝撃を与えた。",
+    "crisisEn": "After a crushing Upper House election defeat, only two days after delivering his policy speech to the Diet he suddenly announced his resignation at a press conference on September 12, 2007, as acute worsening of ulcerative colitis left him unable to perform his duties, shaking the political world."
   },
   "fukuda": {
     "id": "fukuda",
@@ -415,7 +566,37 @@ const CAB_PROFILES = {
         "desc": "主张重视亚洲外交，实现中日首脑互访并签署第四个政治文件，使中日关系重新步入春暖花开轨道。"
       }
     ],
-    "crisisZh": "参议院在野党多数频繁否决关键人事与法案，2008年9月1日因自民党支持率持续低迷且政权停滞，宣布内阁总辞职以打破国会僵局。"
+    "crisisZh": "参议院在野党多数频繁否决关键人事与法案，2008年9月1日因自民党支持率持续低迷且政权停滞，宣布内阁总辞职以打破国会僵局。",
+    "policiesJa": [
+      {
+        "title": "消費者庁の創設",
+        "desc": "毒入り餃子事件など食品・製品の安全問題を踏まえ、省庁の縦割りを打破して消費者保護を一元化する「消費者庁」を創設した。"
+      },
+      {
+        "title": "福田ビジョン",
+        "desc": "洞爺湖サミットを前に、温室効果ガスを60〜80%削減する長期的な環境ビジョンを提唱し、低炭素社会に向けた国家の指針を示した。"
+      },
+      {
+        "title": "日中関係の改善",
+        "desc": "アジア外交を重視する立場から、日中首脳の相互訪問と4つ目の政治文書の署名を実現し、日中関係を再び改善の軌道に乗せた。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Consumer Affairs Agency",
+        "desc": "Amid food and product safety scares such as the tainted dumpling incident, he cut through bureaucratic silos to create the Consumer Affairs Agency as a dedicated body coordinating nationwide consumer protection."
+      },
+      {
+        "title": "Fukuda Vision",
+        "desc": "Ahead of the Toyako G8 summit, he proposed a long-term environmental vision of cutting greenhouse gas emissions by 60–80%, setting a national benchmark for low-carbon development."
+      },
+      {
+        "title": "China Rapprochement",
+        "desc": "Championing diplomacy that values Asia, he realized reciprocal prime ministerial visits and signed a fourth political document, putting Japan-China ties back on a thawing track."
+      }
+    ],
+    "crisisJa": "参議院では野党が多数を占め、重要人事や法案が相次いで否決された。2008年9月1日、自民党支持率の低迷と政権の停滞を受け、国会の膠着を打破するため内閣総辞職を表明した。",
+    "crisisEn": "With opposition parties commanding the Upper House and repeatedly blocking key appointments and bills, on September 1, 2008, citing persistently low LDP support and a stalled government, he announced the cabinet's resignation to break the Diet deadlock."
   },
   "aso": {
     "id": "aso",
@@ -454,7 +635,37 @@ const CAB_PROFILES = {
         "desc": "积极提倡“动漫外交”与流行文化外宣（Cool Japan 构想），规划设立国立媒体艺术综合中心。"
       }
     ],
-    "crisisZh": "2009年8月30日第45届众议院大选，民主党赢得308席历史性大胜，自民党仅获119席惨败，自1955年自民党建党以来首度真正丢掉第一大党执政权。"
+    "crisisZh": "2009年8月30日第45届众议院大选，民主党赢得308席历史性大胜，自民党仅获119席惨败，自1955年自民党建党以来首度真正丢掉第一大党执政权。",
+    "policiesJa": [
+      {
+        "title": "リーマン対策と給付金",
+        "desc": "総額75兆円規模の経済対策を4次にわたって打ち出し、全国民に1人1万2,000円（高齢者・子どもは2万円）の定額給付金を支給した。"
+      },
+      {
+        "title": "IMFへの緊急融資拡大",
+        "desc": "ワシントンでの初回G20金融サミットで、国際通貨基金（IMF）に最大1,000億ドルの外貨準備を拠出すると表明し、世界の為替・金融システムの安定を図った。"
+      },
+      {
+        "title": "アニメ文化外交の推進",
+        "desc": "「アニメ外交」やポップカルチャーの対外発信（クールジャパン構想）を積極的に提唱し、国立メディア芸術総合センターの設置を構想した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Lehman Stimulus and Handouts",
+        "desc": "Rolled out four stimulus packages totaling 75 trillion yen and distributed 12,000-yen cash handouts to every citizen (20,000 yen for the elderly and children)."
+      },
+      {
+        "title": "Expanded IMF Lending",
+        "desc": "At the first G20 financial summit in Washington, he pledged up to 100 billion dollars of foreign reserves to the International Monetary Fund to stabilize the global financial and currency system."
+      },
+      {
+        "title": "Anime Cultural Diplomacy",
+        "desc": "Actively promoted 'anime diplomacy' and pop-culture outreach (the Cool Japan concept) and planned a national center for media arts."
+      }
+    ],
+    "crisisJa": "2009年8月30日の第45回衆議院選挙で、民主党が308議席を獲得して歴史的勝利を収め、自民党は119議席にとどまった。1955年の結党以来、初めて第一党の座と政権を本格的に失った。",
+    "crisisEn": "In the 45th general election on August 30, 2009, the DPJ won a historic landslide with 308 seats while the LDP was reduced to 119, marking the first time since the party's founding in 1955 that it genuinely lost both its leading-party status and control of government."
   },
   "hatoyama": {
     "id": "hatoyama",
@@ -493,7 +704,37 @@ const CAB_PROFILES = {
         "desc": "提出构建紧密的东亚共同体构想，承诺日本到2020年温室气体排放比1990年削减25%的雄心目标。"
       }
     ],
-    "crisisZh": "普天间基地迁移案被迫回归美日原案引发冲绳民众抗议，社民党党首福岛瑞穗被罢免导致执政联盟破裂，加之个人母亲伪造政治献金丑闻，于2010年6月与小泽一郎双双辞职。"
+    "crisisZh": "普天间基地迁移案被迫回归美日原案引发冲绳民众抗议，社民党党首福岛瑞穗被罢免导致执政联盟破裂，加之个人母亲伪造政治献金丑闻，于2010年6月与小泽一郎双双辞职。",
+    "policiesJa": [
+      {
+        "title": "子ども手当と高校無償化",
+        "desc": "「コンクリートから人へ」の政策転換を掲げ、全国の世帯に月額の子ども手当を支給し、公立高校の授業料を全面無償化して家族政策を再構築した。"
+      },
+      {
+        "title": "事業仕分けの実施",
+        "desc": "行政刷新会議のもと、各省庁の予算を国民とメディアの面前で公開審査し削減した。蓮舫氏の「2位じゃダメなんでしょうか」が名場面となった。"
+      },
+      {
+        "title": "東アジア共同体の提唱",
+        "desc": "緊密な東アジア共同体の構想を掲げ、2020年までに温室効果ガスを1990年比25%削減する目標を表明した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Child Allowance and Free Tuition",
+        "desc": "Pursuing a shift 'from concrete to people', his government paid monthly child allowances to households nationwide and made public high school tuition free, reshaping family welfare policy."
+      },
+      {
+        "title": "Budget Screening",
+        "desc": "Opened ministry budgets to public questioning and cuts in front of citizens and the media, producing the memorable exchange in which Renho asked whether being second in the world was not good enough."
+      },
+      {
+        "title": "East Asian Community",
+        "desc": "Proposed building a close East Asian community and pledged to cut Japan's greenhouse gas emissions 25% below 1990 levels by 2020."
+      }
+    ],
+    "crisisJa": "普天間基地移設問題が日米原案への回帰を余儀なくされて沖縄県民の抗議を招き、社民党の福島瑞穂党首の罷免で連立政権が崩壊した。さらに母の政治資金偽装問題も重なり、2010年6月に小沢一郎とともに辞任した。",
+    "crisisEn": "The Futenma base relocation was forced back to the original US-Japan plan, triggering protests in Okinawa, while the dismissal of Social Democratic Party leader Mizuho Fukushima broke the ruling coalition. Coupled with the scandal over his mother's falsified political funding, he resigned together with Ichiro Ozawa in June 2010."
   },
   "kan": {
     "id": "kan",
@@ -532,7 +773,37 @@ const CAB_PROFILES = {
         "desc": "首次在亚太经合组织提出日本参与跨太平洋战略经济伙伴关系协定（TPP）谈判的构想。"
       }
     ],
-    "crisisZh": "核电站事故初期的指挥沟通备受自民党与舆论指责，在野党提出不信任案后，菅直人承诺以公债发行特例法案与再生能源法案通过为辞职条件，于2011年8月底辞职。"
+    "crisisZh": "核电站事故初期的指挥沟通备受自民党与舆论指责，在野党提出不信任案后，菅直人承诺以公债发行特例法案与再生能源法案通过为辞职条件，于2011年8月底辞职。",
+    "policiesJa": [
+      {
+        "title": "3.11震災と原発対応",
+        "desc": "緊急災害対策本部を設置し、自衛隊10万人を動員して震災救援にあたった。福島第一原発事故では官邸に統括する緊急対応チームを速やかに立ち上げた。"
+      },
+      {
+        "title": "再生エネ特措法の成立",
+        "desc": "辞任前に党内や電力大手の強い抵抗を押し切り、再生可能エネルギーの固定価格買取制度（FIT制度）を成立させ、日本の太陽光産業の急拡大を引き起こした。"
+      },
+      {
+        "title": "TPP交渉参加の提唱",
+        "desc": "APECの場で初めて、日本が環太平洋パートナーシップ協定（TPP）交渉に参加する構想を打ち出した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "3.11 Disaster Response",
+        "desc": "Set up an emergency disaster response headquarters and deployed 100,000 Self-Defense Force personnel for relief, and promptly formed a prime minister's office team to coordinate the Fukushima Daiichi nuclear accident."
+      },
+      {
+        "title": "Feed-in Tariff Law",
+        "desc": "Before stepping down, he overcame resistance from within his party and from major utilities to pass the feed-in tariff system for renewable energy, setting off a boom in Japan's solar industry."
+      },
+      {
+        "title": "TPP Negotiations",
+        "desc": "At APEC he proposed for the first time that Japan join negotiations for the Trans-Pacific Partnership."
+      }
+    ],
+    "crisisJa": "原発事故初期の指揮と意思疎通は自民党と世論の批判を浴び、野党が不信任案を提出した。菅直人は公債発行特例法案と再生可能エネルギー法案の成立を辞任条件とし、2011年8月末に辞任した。",
+    "crisisEn": "His command and communication in the early phase of the nuclear accident drew heavy criticism from the LDP and the public, and the opposition filed a no-confidence motion. Kan made passage of the special deficit-financing bond bill and the renewable energy bill conditions for his resignation, and stepped down at the end of August 2011."
   },
   "noda": {
     "id": "noda",
@@ -571,7 +842,37 @@ const CAB_PROFILES = {
         "desc": "为防止东京都知事石原慎太郎民间购岛激化矛盾，采取由国家直接出资买断国有化方针，导致中日关系陷入严峻冰点。"
       }
     ],
-    "crisisZh": "消费税法案导致小泽一郎带数十名议员脱党出走；2012年11月14日在与安倍晋三党首辩论中当场提出解散众院，12月大选民主党仅剩57席惨败，政权彻底终结。"
+    "crisisZh": "消费税法案导致小泽一郎带数十名议员脱党出走；2012年11月14日在与安倍晋三党首辩论中当场提出解散众院，12月大选民主党仅剩57席惨败，政权彻底终结。",
+    "policiesJa": [
+      {
+        "title": "社会保障と税の一体改革",
+        "desc": "与野党の隔たりを越え、自民党総裁谷垣禎一、公明党と歴史的な三党合意を結び、消費税率を2段階で10%に引き上げて社会保障の財源を確保した。"
+      },
+      {
+        "title": "復興庁の設置",
+        "desc": "東日本大震災からの復興を統括する内閣復興庁を設置し、25兆円を投じ10年間の集中復興期間を定めた。"
+      },
+      {
+        "title": "尖閣諸島の国有化",
+        "desc": "東京都知事石原慎太郎の民間による購入で対立が激化するのを防ぐため、国が直接買い取る国有化の方針を採り、日中関係は厳しい冷え込みに陥った。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Tax and Social Security Reform",
+        "desc": "Bridging ruling and opposition lines, he reached a historic three-party agreement with LDP leader Sadakazu Tanigaki and Komeito to raise the consumption tax to 10% in two stages and secure social security funding."
+      },
+      {
+        "title": "Reconstruction Agency",
+        "desc": "Established the Reconstruction Agency under the cabinet to oversee recovery from the Great East Japan Earthquake and committed 25 trillion yen to a ten-year intensive reconstruction program."
+      },
+      {
+        "title": "Senkaku Nationalization",
+        "desc": "To prevent Tokyo Governor Shintaro Ishihara's private purchase plan from inflaming tensions, he chose a state buyout and nationalization, plunging Japan-China relations into a severe chill."
+      }
+    ],
+    "crisisJa": "消費税法案により小沢一郎が数十名の議員を率いて離党した。2012年11月14日、安倍晋三との党首討論でその場で衆議院解散を表明し、12月の総選挙で民主党は57議席まで落ち込んで惨敗、政権は完全に終焉した。",
+    "crisisEn": "The consumption tax bill drove Ichiro Ozawa to leave the party with dozens of lawmakers. In a party-leader debate with Shinzo Abe on November 14, 2012, Noda called a snap election on the spot; the DPJ was crushed down to 57 seats in December, ending its hold on power."
   },
   "abe2": {
     "id": "abe2",
@@ -610,7 +911,37 @@ const CAB_PROFILES = {
         "desc": "在美国退出 TPP 后毅然主导完成 11 国 CPTPP 协议生效，签署日欧 EPA，确立自由开放印太愿景。"
       }
     ],
-    "crisisZh": "遭遇森友学园、加计学园及“赏樱会”公金私用丑闻反复审查；2020年新冠疫情应对受挫，叠加溃疡性大肠炎旧疾复发，于2020年8月28日正式辞职。（注：2022年7月8日在奈良街头演说时遭枪击不幸遇刺身亡）。"
+    "crisisZh": "遭遇森友学园、加计学园及“赏樱会”公金私用丑闻反复审查；2020年新冠疫情应对受挫，叠加溃疡性大肠炎旧疾复发，于2020年8月28日正式辞职。（注：2022年7月8日在奈良街头演说时遭枪击不幸遇刺身亡）。",
+    "policiesJa": [
+      {
+        "title": "アベノミクスの三本の矢",
+        "desc": "黒田東彦の日銀による異次元の量的・質的金融緩和、機動的な財政出動、規制緩和の成長戦略を進め、日経平均は8,000円台から23,000円台へと急騰した。"
+      },
+      {
+        "title": "国家安全保障会議の設置",
+        "desc": "省庁の縦割りを打破し、外交・防衛を統括する日本版NSCを設けた。平和安全法制の成立を主導し、戦後初めて集団的自衛権の限定的な行使を可能にした。"
+      },
+      {
+        "title": "CPTPPとFOIPの推進",
+        "desc": "米国離脱後に11か国でのCPTPP発効を主導し、日EU・EPAに署名。「自由で開かれたインド太平洋」のビジョンを掲げた。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Three Arrows of Abenomics",
+        "desc": "With Bank of Japan Governor Haruhiko Kuroda he launched massive quantitative and qualitative easing, flexible fiscal spending and a deregulation growth strategy, driving the Nikkei from about 8,000 to 23,000."
+      },
+      {
+        "title": "National Security Council",
+        "desc": "Cutting across ministerial silos, he established a Japanese-style NSC to coordinate diplomacy and defense, and led passage of the peace and security legislation that allowed the limited exercise of collective self-defense for the first time since the war."
+      },
+      {
+        "title": "CPTPP and FOIP",
+        "desc": "After the US withdrawal from the TPP he led the 11-nation CPTPP into force, signed the Japan-EU EPA, and set out the Free and Open Indo-Pacific vision."
+      }
+    ],
+    "crisisJa": "森友学園・加計学園問題や「桜を見る会」の公私混同疑惑が繰り返し追及された。2020年の新型コロナ対応で失速し、潰瘍性大腸炎の再発も重なり、2020年8月28日に正式に辞任した。（注：2022年7月8日、奈良市の街頭演説中に銃撃を受け死去）",
+    "crisisEn": "He faced repeated scrutiny over the Moritomo Gakuen and Kake Gakuen affairs and the alleged misuse of public funds for the cherry-blossom viewing party. With his COVID-19 response faltering and ulcerative colitis returning, he formally resigned on August 28, 2020. (Note: he was assassinated by gunfire during a street speech in Nara on July 8, 2022.)"
   },
   "suga": {
     "id": "suga",
@@ -649,7 +980,37 @@ const CAB_PROFILES = {
         "desc": "在国会施政演说中正式向全世界宣布日本将于 2050 年实现温室气体净零排放目标，制定绿色成长战略。"
       }
     ],
-    "crisisZh": "疫情反复导致医疗资源紧张，支持率随疫苗接种初期的混乱下滑；2021年9月在面临自民党总裁换届前夕，出人意料宣布专注防疫不谋求连任，执政一年功成退居二线。"
+    "crisisZh": "疫情反复导致医疗资源紧张，支持率随疫苗接种初期的混乱下滑；2021年9月在面临自民党总裁换届前夕，出人意料宣布专注防疫不谋求连任，执政一年功成退居二线。",
+    "policiesJa": [
+      {
+        "title": "デジタル庁の創設",
+        "desc": "省庁のデジタル化における縦割りを打破し、わずか1年でデジタル庁を発足させた。政府システムのクラウド化とマイナンバーカードの普及を統括した。"
+      },
+      {
+        "title": "携帯料金の引き下げ",
+        "desc": "大手3社の価格同盟を崩し、各社に月額20GB／2,980円の低価格プランを出させて、全国の家計の負担を軽くした。"
+      },
+      {
+        "title": "2050年脱炭素宣言",
+        "desc": "国会の所信表明演説で、2050年に温室効果ガスを実質ゼロにする目標を世界に向けて正式に宣言し、グリーン成長戦略を策定した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Digital Agency",
+        "desc": "Breaking the compartmentalized approach to government digitization, he stood up the Digital Agency in just one year to coordinate cloud migration of national systems and wider use of the My Number Card."
+      },
+      {
+        "title": "Mobile Rate Cuts",
+        "desc": "Broke the price alignment among the three major carriers and pushed them to offer 20GB plans at 2,980 yen a month, easing household costs nationwide."
+      },
+      {
+        "title": "2050 Carbon Neutrality",
+        "desc": "In his Diet policy speech he formally declared to the world that Japan would achieve net-zero greenhouse gas emissions by 2050 and drew up a green growth strategy."
+      }
+    ],
+    "crisisJa": "感染拡大の波で医療体制が逼迫し、ワクチン接種初期の混乱で支持率が低下した。2021年9月、自民党総裁選を前に、防疫に専念するとして異例の不出馬を表明し、1年の任期で退いた。",
+    "crisisEn": "Repeated pandemic waves strained medical capacity and his support fell amid the chaotic early vaccination rollout. In September 2021, on the eve of the LDP leadership race, he unexpectedly announced he would not run in order to focus on pandemic response, leaving after one year in office."
   },
   "kishida": {
     "id": "kishida",
@@ -688,7 +1049,37 @@ const CAB_PROFILES = {
         "desc": "全面扩容个人免税投资账户（新 NISA）促进“储蓄向投资”转化；春斗实现 30 余年来最大幅度工资增长（超5%）。"
       }
     ],
-    "crisisZh": "自民党派阀政治资金“黑金”宴会丑闻全面暴发，民调长期跌至20%危险水域，岸田毅然带头解散自民党宏池会并处分多名骨干，2024年8月宣布不参选自民党总裁，主动承担政治责任让位。"
+    "crisisZh": "自民党派阀政治资金“黑金”宴会丑闻全面暴发，民调长期跌至20%危险水域，岸田毅然带头解散自民党宏池会并处分多名骨干，2024年8月宣布不参选自民党总裁，主动承担政治责任让位。",
+    "policiesJa": [
+      {
+        "title": "防衛力の抜本的強化",
+        "desc": "国家安全保障戦略など安保3文書を改定し、防衛予算をGDP比2%へ大幅に増額した。遠距離攻撃が可能な反撃能力の保有も決めた。"
+      },
+      {
+        "title": "G7広島と日韓関係改善",
+        "desc": "被爆地広島でG7首脳とともに核兵器のない世界に向けたビジョンを打ち出し、ゼレンスキー大統領が来日した。韓国の尹錫悦大統領とのシャトル外交を再開し、軍事情報協定を回復した。"
+      },
+      {
+        "title": "新NISAと賃上げの推進",
+        "desc": "少額投資非課税制度（新NISA）を大幅に拡充して「貯蓄から投資へ」を促し、春闘では30年余りで最大となる5%超の賃上げを実現した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Historic Defense Buildup",
+        "desc": "Revised the three national security documents, including the National Security Strategy, to raise defense spending to 2% of GDP, and decided to acquire counterstrike capabilities with long-range strike potential."
+      },
+      {
+        "title": "Hiroshima G7 and Seoul Thaw",
+        "desc": "At the G7 summit in bombed Hiroshima he rallied leaders around a vision of a world without nuclear weapons, with President Zelenskyy attending in person, and restarted shuttle diplomacy with South Korean President Yoon Suk Yeol, restoring the military intelligence pact."
+      },
+      {
+        "title": "New NISA and Wage Growth",
+        "desc": "Expanded the tax-free individual investment account (new NISA) to shift savings into investment, while annual spring wage talks delivered the largest pay increase in more than 30 years, above 5%."
+      }
+    ],
+    "crisisJa": "自民党派閥の政治資金をめぐる「裏金」パーティー問題が全面化し、内閣支持率は長く20%台の危険水域に沈んだ。岸田は自ら宏池会の解散を主導して幹部らを処分し、2024年8月に総裁選不出馬を表明、政治責任を取って退陣した。",
+    "crisisEn": "The LDP factions' unreported political-fund 'slush fund' party scandal erupted and his approval ratings lingered in the dangerous 20% range. Kishida took the lead in dissolving his own Kochikai faction and disciplined senior members, then announced in August 2024 that he would not run in the leadership race, stepping down to take political responsibility."
   },
   "ishiba": {
     "id": "ishiba",
@@ -727,7 +1118,37 @@ const CAB_PROFILES = {
         "desc": "审慎研究日美地位协定修订，强化日本本土及西南诸岛自卫队防卫设施与军工产能基础。"
       }
     ],
-    "crisisZh": "国会执政党席位未过半，面临在野党提出的国民所得门槛调整及预算博弈，政权运作如履薄冰，2025年自民党迎来新一轮激荡重组。"
+    "crisisZh": "国会执政党席位未过半，面临在野党提出的国民所得门槛调整及预算博弈，政权运作如履薄冰，2025年自民党迎来新一轮激荡重组。",
+    "policiesJa": [
+      {
+        "title": "防災庁の創設",
+        "desc": "能登半島地震など大規模災害の教訓を踏まえ、省庁横断の災害対応体制の統合を進め、独立した防災庁を設置する法案の審議を急いだ。"
+      },
+      {
+        "title": "地方創生2.0戦略",
+        "desc": "地方創生交付金を倍増し、農林水産業、地域の中小製造業、地方へ移住するデジタルノマドへの支援に重点を置いた。"
+      },
+      {
+        "title": "安全保障法制の細部整備",
+        "desc": "日米地位協定の改定を慎重に検討し、本土および南西諸島における自衛隊の防衛施設と防衛産業の生産基盤を強化した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Disaster Management Agency",
+        "desc": "Drawing lessons from the Noto Peninsula earthquake and other major disasters, he pushed to integrate cross-ministerial emergency response and expedited deliberation of a bill to create a stand-alone disaster management agency."
+      },
+      {
+        "title": "Regional Revitalization 2.0",
+        "desc": "Doubled the regional revitalization grants, focusing support on agriculture, forestry and fisheries, local small manufacturers, and digital nomads relocating to the regions."
+      },
+      {
+        "title": "Security Legislation Refinement",
+        "desc": "He carefully examined revisions to the US-Japan Status of Forces Agreement and strengthened SDF defense facilities and the defense industrial base on the mainland and the Nansei Islands."
+      }
+    ],
+    "crisisJa": "国会で与党が過半数を割り込み、野党が求める国民所得の壁の見直しや予算をめぐる攻防に直面した。政権運営は薄氷を踏む思いであり、2025年に自民党は新たな激動の再編を迎えた。",
+    "crisisEn": "With the ruling party short of a Diet majority, he faced opposition demands to adjust the income threshold and battled over the budget. Governing on thin ice, he saw the LDP enter a new round of turbulent realignment in 2025."
   },
   "takaichi": {
     "id": "takaichi",
@@ -766,7 +1187,37 @@ const CAB_PROFILES = {
         "desc": "组建统合网络防卫指挥部，赋予自卫队主动网络防御（Active Cyber Defense）职能。"
       }
     ],
-    "crisisZh": "在极化复杂的国会中力主积极财政引发央行加息抗通胀博弈，直面老龄化加深与财政纪律两难抉择。"
+    "crisisZh": "在极化复杂的国会中力主积极财政引发央行加息抗通胀博弈，直面老龄化加深与财政纪律两难抉择。",
+    "policiesJa": [
+      {
+        "title": "危機管理投資戦略",
+        "desc": "国家安全保障上の危機を投資の原動力に変え、半導体製造、人工知能、量子計算、宇宙技術に国家的な資本補助を実施した。"
+      },
+      {
+        "title": "経済安全保障法制の強化",
+        "desc": "重要インフラの安全審査体制を整え、機密情報を扱う人材のセキュリティ・クリアランス制度を法制度化して確実に運用に移した。"
+      },
+      {
+        "title": "サイバー・宇宙防衛の強化",
+        "desc": "統合サイバー防衛指揮部を編成し、自衛隊に能動的サイバー防御（アクティブ・サイバー・ディフェンス）の機能を付与した。"
+      }
+    ],
+    "policiesEn": [
+      {
+        "title": "Crisis-Management Investment",
+        "desc": "Turning national security crises into investment momentum, she directed state capital subsidies into semiconductor manufacturing, artificial intelligence, quantum computing and space technology."
+      },
+      {
+        "title": "Economic Security Legislation",
+        "desc": "She strengthened security reviews of critical infrastructure and put in place a legal security clearance system for personnel handling classified information."
+      },
+      {
+        "title": "Cyber and Space Defense",
+        "desc": "She formed an integrated cyber defense command and gave the Self-Defense Forces an active cyber defense mandate."
+      }
+    ],
+    "crisisJa": "分極化した複雑な国会で積極財政を主張し、中央銀行の利上げによるインフレ抑制策とのせめぎ合いに直面した。高齢化の深刻化と財政規律という二律背反の選択を迫られている。",
+    "crisisEn": "In a polarized and complex parliament she championed expansionary fiscal policy, running into conflict with the central bank's rate hikes to contain inflation, and faces the dilemma between deepening aging and fiscal discipline."
   }
 };
 
@@ -932,11 +1383,19 @@ function injectCss() {
   document.head.appendChild(st);
 }
 
+let lastBoxW = 0, lastBoxH = 0;
 function onCabResize() {
   if (resizeRaf) cancelAnimationFrame(resizeRaf);
   resizeRaf = requestAnimationFrame(() => {
     if (!chart) return;
     if (isInitialAnimating) return;
+    // 尺寸没变就不 resize：更新面板会触发布局，反复 resize 会和 ResizeObserver 互相喂事件
+    const box = hostEl ? hostEl.querySelector('#cab-chart') : null;
+    if (box) {
+      const w = Math.round(box.clientWidth), h = Math.round(box.clientHeight);
+      if (w === lastBoxW && h === lastBoxH) return;
+      lastBoxW = w; lastBoxH = h;
+    }
     try { chart.resize(); } catch (e) {}
   });
 }
@@ -1021,6 +1480,14 @@ function renderZoomSeg() {
   });
 }
 
+function pmDisplayName(id) {
+  const p = CAB_PROFILES[id] || {};
+  if (currentLang === 'zh') return p.nameZh || id;
+  if (currentLang === 'en') return p.nameEn || id;
+  return p.nameJa || id;
+}
+function overviewName(id) { return pmDisplayName(id); }
+
 function renderPanel(targetCabId) {
   if (!panelEl || !rawData) return;
   const t = I18N[currentLang] || I18N.ja;
@@ -1045,19 +1512,19 @@ function renderPanel(targetCabId) {
         <div class="stat-grid">
           <div class="stat-box">
             <div class="stat-num">${avgAll}<span style="font-size:16px;font-weight:300">%</span></div>
-            <div class="stat-label">${t.meanLabel} (14${langKey==='zh'?'内阁总均值':langKey==='en'?'Cabinets Mean':'内閣平均'})</div>
+            <div class="stat-label">${t.meanLabel} (14${langKey==='zh'?' 内阁总均值':langKey==='en'?'-Cabinet Mean':'内閣平均'})</div>
           </div>
           <div class="stat-box">
             <div class="stat-num">${totalPolls}</div>
-            <div class="stat-label">${t.pollsLabel} (NHK/日経/朝日各社)</div>
+            <div class="stat-label">${t.pollsLabel} (${langKey === 'en' ? 'NHK / Nikkei / Asahi' : 'NHK / 日経 / 朝日'})</div>
           </div>
           <div class="stat-box">
-            <div class="stat-num" style="color:#2F6B4F">85.2<span style="font-size:16px;font-weight:300">%</span></div>
-            <div class="stat-label">${t.highLabel} (小泉純一郎 2001)</div>
+            <div class="stat-num">85.2<span style="font-size:16px;font-weight:300">%</span></div>
+            <div class="stat-label">${t.highLabel} (${overviewName("koizumi")} 2001)</div>
           </div>
           <div class="stat-box">
-            <div class="stat-num" style="color:#C84B31">7.0<span style="font-size:16px;font-weight:300">%</span></div>
-            <div class="stat-label">${t.lowLabel} (森喜朗 2001)</div>
+            <div class="stat-num">7.0<span style="font-size:16px;font-weight:300">%</span></div>
+            <div class="stat-label">${t.lowLabel} (${overviewName("mori")} 2001)</div>
           </div>
         </div>
 
@@ -1120,8 +1587,12 @@ function renderPanel(targetCabId) {
   const trendTitle = langKey === 'zh' ? p.trendBadgeZh : (langKey === 'en' ? p.trendBadgeEn : p.trendBadgeJa);
   const originTitle = langKey === 'zh' ? p.originZh : (langKey === 'en' ? p.originEn : p.originJa);
   const bioTitle = langKey === 'zh' ? p.bioZh : (langKey === 'en' ? p.bioEn : (p.bioJa || p.bioZh));
-  const policies = p.policiesZh || [];
-  const crisisTitle = langKey === 'zh' ? p.crisisZh : (langKey === 'en' ? (p.crisisZh || '') : (p.crisisZh || ''));
+  // 档案正文只有中文（bio 已有三语，政策与危机暂无 Ja/En）。
+  // 日/英界面里宁可不显示，也不要把中文段落冒充成日文/英文。
+  const policies = langKey === 'zh'
+    ? (p.policiesZh || [])
+    : (langKey === 'en' ? (p.policiesEn || []) : (p.policiesJa || []));
+  const crisisTitle = langKey === 'zh' ? (p.crisisZh || '') : (langKey === 'en' ? (p.crisisEn || '') : (p.crisisJa || ''));
 
   panelEl.innerHTML = `
     <!-- 卡片 1: 领导人抬头与支持率四宫格 -->
@@ -1148,15 +1619,15 @@ function renderPanel(targetCabId) {
       <!-- 四宫格数据块 -->
       <div class="stat-grid">
         <div class="stat-box">
-          <div class="stat-num" style="color:${color}">${s.mean}<span style="font-size:16px;font-weight:300">%</span></div>
+          <div class="stat-num">${s.mean}<span style="font-size:16px;font-weight:300">%</span></div>
           <div class="stat-label">${t.meanLabel} (${s.polls}${langKey==='zh'?'次民调':langKey==='en'?' polls':'回'})</div>
         </div>
         <div class="stat-box">
-          <div class="stat-num" style="color:#2F6B4F">${s.high}<span style="font-size:16px;font-weight:300">%</span></div>
+          <div class="stat-num">${s.high}<span style="font-size:16px;font-weight:300">%</span></div>
           <div class="stat-label">${t.highLabel} (${s.highYM})</div>
         </div>
         <div class="stat-box">
-          <div class="stat-num" style="color:#C84B31">${s.low}<span style="font-size:16px;font-weight:300">%</span></div>
+          <div class="stat-num">${s.low}<span style="font-size:16px;font-weight:300">%</span></div>
           <div class="stat-label">${t.lowLabel} (${s.lowYM})</div>
         </div>
         <div class="stat-box">
@@ -1236,6 +1707,93 @@ function pmByDate(dateStr) {
   return rawData.cabinets[0];
 }
 
+// 图上名签只写姓氏，日/中/英各一套；两任「菅」用名首字区分
+const PM_SURNAME = {
+  obuchi: ['小渕', '小渊', 'Obuchi'],
+  mori: ['森', '森', 'Mori'],
+  koizumi: ['小泉', '小泉', 'Koizumi'],
+  abe1: ['安倍', '安倍', 'Abe'],
+  abe2: ['安倍', '安倍', 'Abe'],
+  fukuda: ['福田', '福田', 'Fukuda'],
+  aso: ['麻生', '麻生', 'Aso'],
+  hatoyama: ['鳩山', '鸠山', 'Hatoyama'],
+  kan: ['菅(直)', '菅(直)', 'Kan'],
+  noda: ['野田', '野田', 'Noda'],
+  suga: ['菅(義)', '菅(义)', 'Suga'],
+  kishida: ['岸田', '岸田', 'Kishida'],
+  ishiba: ['石破', '石破', 'Ishiba'],
+  takaichi: ['高市', '高市', 'Takaichi']
+};
+
+let lastSeries = null, labelTimer = 0;
+
+// 拖动滑块换窗口后，顶部名签必须按新窗口重算，否则名字会全部消失
+function refreshWindowLabels(startPct, endStartPct) {
+  if (!chart || !lastSeries || !rawData) return;
+  const ds = rawData.polls.map(p => p.date).sort();
+  const t0 = new Date(ds[0]).getTime();
+  const t1 = new Date(ds[ds.length - 1]).getTime();
+  const pct = Math.max(0, Math.min(100, startPct || 0));
+  const win = new Date(t0 + (t1 - t0) * pct / 100).toISOString().slice(0, 10);
+  const endPct = Math.max(pct, Math.min(100, endStartPct || 100));
+  const winEnd = new Date(t0 + (t1 - t0) * endPct / 100).toISOString().slice(0, 10);
+  const isNarrow = window.innerWidth <= 960;
+  const pPM = plotPxPerMonth(win);
+  lastSeries.forEach((sr) => {
+    const c = rawData.cabinets.find(x => x.id === sr.__cabId);
+    // markLine.data 是「一组两点」的数组：data[0] = [起点, 终点]
+    const pair = sr.markLine && sr.markLine.data && sr.markLine.data[0];
+    if (!c || !pair || pair.length < 2) return;
+    // 窗口右侧之外的任期内阁也一并藏掉，免得 markLine 被裁到图外还留着状态
+    const out = c.end <= win || c.start > winEnd;
+    const clamped = c.start < win && !out;
+    const x = clamped ? win : c.start;
+    pair[0].coord = [x, 0];
+    pair[1].coord = [x, 96];
+    if (pair[1].label) {
+      const spanPx = ((new Date(c.end) - new Date(c.start)) / 86400000 / 30.44) * pPM;
+      const txt = String(pair[1].label.formatter || '');
+      const slack = /[A-Za-z]/.test(txt) ? 1.28 : 0.62;
+      const fs = pair[1].label.fontSize || 11;
+      pair[1].label.show = !isNarrow && !out && (clamped || spanPx >= chipTextPx(txt, fs) * slack);
+      // 默认名字在分割线右边；只有贴着绘图区右沿会切字时才翻到左侧
+      let px = NaN;
+      try { px = chart.convertToPixel({ xAxisIndex: 0 }, x); } catch (err) {}
+      // 只在真会被画布右沿切掉时才翻到线左侧；图表右侧是给面板留的空白，不算越界
+      const overflow = isFinite(px) && px + chipTextPx(txt, 11) > chart.getWidth() - 6;
+      pair[1].label.align = overflow ? 'right' : 'left';
+      pair[1].label.offset = overflow ? [-6, 0] : [4, 0];
+    }
+    sr.markLine.lineStyle = sr.markLine.lineStyle || {};
+    // 完全透明会把整条 markLine（含名字）一起吞掉，跨窗口左沿的只留一条很淡的影子
+    sr.markLine.lineStyle.opacity = out ? 0 : (clamped ? 0.16 : 0.65);
+  });
+  chart.setOption({ series: lastSeries }, { lazyUpdate: true });
+}
+
+const _chipCtx = (function () {
+  try { return document.createElement('canvas').getContext('2d'); } catch (e) { return null; }
+})();
+function chipTextPx(text, fs) {
+  if (!_chipCtx) return text.length * fs * 0.62 + 14;
+  _chipCtx.font = '400 ' + fs + 'px system-ui, sans-serif';
+  return _chipCtx.measureText(text).width + 14;   // 含内边距
+}
+// 每像素对应多少个月：用来判断相邻首相挨得太近、标签必然互相压字
+function plotPxPerMonth(winStartISO) {
+  const ds = rawData.polls.map(p => p.date).sort();
+  const t0 = new Date(winStartISO).getTime();
+  const t1 = new Date(ds[ds.length - 1]).getTime();
+  const box = hostEl && hostEl.querySelector('#cab-chart');
+  // 绘图区宽度要扣掉固定右边距（那是右侧面板的地盘），否则每像素月数会被高估
+  const narrow = window.innerWidth <= 960;
+  const w = Math.max(200, (box ? box.clientWidth : 1000) - (narrow ? 36 : 48) - (narrow ? 20 : 384));
+  return w / Math.max(1, (t1 - t0) / 86400000 / 30.44);
+}
+
+let zoomingUntil = 0;
+let panelRaf = 0;
+
 function renderChart() {
   if (!window.echarts || !rawData) return;
   const t = I18N[currentLang] || I18N.ja;
@@ -1249,7 +1807,8 @@ function renderChart() {
   const T = tchart();
   const isNarrow = window.innerWidth <= 960;
   const gridL = isNarrow ? 36 : 48;
-  const gridR = isNarrow ? 20 : 344;
+  // 右侧面板 352px + 16px 边距 + 16px 呼吸：早先只留 344，最新一任的折线正好被面板压住
+  const gridR = isNarrow ? 20 : 384;
 
   const buckets = {};
   polls.forEach(p => {
@@ -1274,9 +1833,48 @@ function renderChart() {
     ];
   });
 
+  // 当前可见窗口的左沿：起点落在窗口外的首相，名字贴到左沿，否则那条线就没有名字。
+  // 必须放在序列循环之前——这里直接从 polls 推算，不依赖后面才声明的 startDate。
+  const winStartISO = (function () {
+    const ds = polls.map(p => p.date).sort();
+    const t0 = new Date(ds[0]).getTime();
+    const t1 = new Date(ds[ds.length - 1]).getTime();
+    const wm = RANGE_WINDOW_MONTHS[activeRange];
+    if (!(wm > 0) || !(t1 > t0)) return ds[0];
+    const pct = Math.max(0, 1 - (wm * 30.44 * 86400000) / (t1 - t0));
+    return new Date(t0 + (t1 - t0) * pct).toISOString().slice(0, 10);
+  })();
+
   const series = [];
   cabinets.forEach((c, i) => {
+    // 每一任给独立色：只留一色时 14 段折线在深色底上糊成一片灰线，读不出政权更替。
+    const isActive = focusCabinet ? focusCabinet === c.id : i === cabinets.length - 1;
     const color = C[i % C.length];
+    // 起点在窗口外时，名字与竖线都贴到窗口左沿（竖线不画，只留名字）
+    const outOfWindow = c.end <= winStartISO;      // 整段都在窗口左侧：不标名字
+    const clamped = c.start < winStartISO && !outOfWindow; // 跨窗口左沿：名字贴左沿
+    const _prof = CAB_PROFILES[c.id] || {};
+    const pmName = currentLang === 'zh' ? (_prof.nameZh || c.pm)
+      : currentLang === 'en' ? (_prof.nameEn || c.pm)
+      : (_prof.nameJa || c.pm);
+    // 图上只放姓氏（同一高度、等宽短标签），全名放 tooltip / 右侧面板，避免名签高低不齐
+    const _tagM = String(c.pm).match(/\((.*?)\)/);
+    const _tag = _tagM ? '(' + _tagM[1].replace(/次/, '') + ')' : '';
+    const _full = pmName.replace(/\(.*\)$/, '');
+    const _sn = PM_SURNAME[c.id];
+    const _pmBase = _sn ? _sn[currentLang === 'zh' ? 1 : currentLang === 'en' ? 2 : 0]
+      : (currentLang === 'en' ? _full.split(' ').pop() : _full);
+    const labelX = clamped ? winStartISO : c.start;
+    // 英文姓氏比日文长得多，全期間视图里一年一换的内阁会互相压字：放不下就不标
+    const _pPM = plotPxPerMonth(winStartISO);
+    const _spanPx = ((new Date(c.end) - new Date(c.start)) / 86400000 / 30.44) * _pPM;
+    // 任期不到 4 个月的宽度就别带 (1)/(2) 尾巴，否则一定压到邻居
+    const _crowded = _spanPx < 44;
+    const pmShort = _crowded ? _pmBase : _pmBase + _tag;
+    const _fs = _crowded ? 10 : 11;
+    const _slack = /[A-Za-z]/.test(pmShort) ? 1.28 : 0.62;
+    const showLabel = !isNarrow && !outOfWindow && !clamped
+      && _spanPx >= chipTextPx(pmShort, _fs) * _slack;
     const points = [];
     Object.keys(buckets).sort().forEach(key => {
       const rec = buckets[key];
@@ -1289,7 +1887,8 @@ function renderChart() {
     if (points.length > 0) {
       const focused = focusCabinet === c.id;
       series.push({
-        name: c.pm,
+        __cabId: c.id,
+        name: pmName,
         type: 'line',
         data: points,
         showSymbol: true,
@@ -1299,7 +1898,7 @@ function renderChart() {
         connectNulls: false,
         lineStyle: {
           color: color,
-          width: focused ? 3.5 : 2.2,
+          width: focused ? 3.5 : (isActive ? 2.6 : 2.0),
           type: 'solid',
           opacity: 0.9,
           shadowBlur: currentVariant === 'tactical' ? (focused ? 10 : 4) : 0,
@@ -1317,7 +1916,7 @@ function renderChart() {
             { offset: 0.85, color: hexToRgba(color, 0.02) },
             { offset: 1, color: hexToRgba(color, 0.0) }
           ]),
-          opacity: 0.8
+          opacity: focused ? 0.9 : (isActive ? 0.72 : 0.34)
         },
         emphasis: { focus: 'none', scale: 1.25 },
         z: focused ? 6 : 3,
@@ -1332,27 +1931,31 @@ function renderChart() {
             color: currentVariant === 'editorial' ? 'rgba(23,33,26,0.18)' : 'rgba(237,235,228,0.16)',
             type: 'dashed',
             width: focused ? 2.5 : 1.2,
-            opacity: 0.65
+            // 贴到窗口左沿的名字不应该凭空多出一条更替竖线
+            opacity: clamped ? 0 : (outOfWindow ? 0 : 0.65)
           },
           data: [
             [
-              { coord: [c.start, 0], symbol: 'none' },
+              { coord: [labelX, 0], symbol: 'none' },
               {
-                coord: [c.start, 97],
+                coord: [labelX, 96],
                 symbol: 'none',
                 label: {
-                  show: true,
+                  // 每位首相都标名字；窄屏放不下、或整段还在窗口左侧时不标
+                  show: showLabel,
                   position: 'end',
-                  distance: 12,
+                  distance: 10,
                   align: 'left',
-                  formatter: String(c.pm),
-                  fontSize: isNarrow ? 17 : 24,
-                  fontWeight: 300,
-                  letterSpacing: 1.5,
+                  offset: [4, 0],
+                  formatter: String(pmShort),
+                  fontSize: _fs,
+                  fontWeight: 400,
+                  letterSpacing: .3,
                   color: color,
-                  fontFamily: 'var(--ja-sans), system-ui, sans-serif',
-                  padding: [3, 8],
-                  backgroundColor: currentVariant === 'editorial' ? 'rgba(250,252,246,0.95)' : 'rgba(28,28,24,0.95)',
+                  fontFamily: cssFont('--ja-sans', 'system-ui, sans-serif'),
+                  padding: [2, 6],
+                  borderRadius: 2,
+                  backgroundColor: T.markLabelBg,
                   borderColor: hexToRgba(color, 0.45),
                   borderWidth: 1.2,
                   borderRadius: 4
@@ -1404,6 +2007,7 @@ function renderChart() {
   // 底部长条 slider：左侧留出标签按钮空间 (366px)，右侧留出面板空间 (344px)！
   const sliderDZ = {
     type: 'slider', xAxisIndex: 0,
+    show: !isNarrow,
     left: isNarrow ? 36 : 366,
     right: gridR,
     height: 24, bottom: 8,
@@ -1444,7 +2048,7 @@ function renderChart() {
       borderWidth: 1,
       padding: [12, 16],
       extraCssText: 'border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);pointer-events:none;',
-      textStyle: { color: T.tooltipText, fontSize: 13, fontFamily: 'var(--font-sans, "MiSans VF", "MiSans", "PingFang SC", system-ui, sans-serif)' },
+      textStyle: { color: T.tooltipText, fontSize: 13, fontFamily: cssFont('--font-sans', 'system-ui, sans-serif') },
       formatter: function(params) {
         if (!params || params.length === 0) return '';
         const d = new Date(params[0].axisValue);
@@ -1457,7 +2061,7 @@ function renderChart() {
         const cabIdx = cab ? cabinets.findIndex(x => x.id === cab.id) : 0;
         const col = C[cabIdx % C.length] || '#FF6A3D';
         const pmName = cab ? cab.pm : '';
-        const fontSans = 'var(--font-sans, "MiSans VF", "MiSans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif)';
+        const fontSans = 'var(--font-sans, system-ui, sans-serif)';
 
         let html = '<div style="min-width:220px;font-family:' + fontSans + ';color:' + T.tooltipText + '">';
         
@@ -1539,22 +2143,45 @@ function renderChart() {
   };
 
   chart.setOption(option, true);
+  lastSeries = series;
+  try { refreshWindowLabels(zoomStart, 100); } catch (err) {}
+
+  // 拖动底部滑块时：面板重建会让每一帧都重排，先压住，松手后再恢复
+  chart.off('datazoom');
+  chart.on('datazoom', (e) => {
+    const dz = (e && e.batch && e.batch[0]) || e || {};
+    if (typeof dz.start !== 'number') return;
+    zoomStart = dz.start;
+    zoomingUntil = Date.now() + 260;
+    if (labelTimer) clearTimeout(labelTimer);
+    // 松手后再刷：拖动过程中每帧重排名签反而卡
+    labelTimer = setTimeout(() => {
+      labelTimer = 0;
+      try { refreshWindowLabels(dz.start, dz.end); } catch (err) {}
+    }, 240);
+  });
 
   // 鼠标交互：更新右侧深度面板
   chart.off('updateAxisPointer');
   chart.on('updateAxisPointer', (event) => {
+    if (Date.now() < zoomingUntil) return;      // 拖动中不重建面板
     if (!event.axesInfo || !event.axesInfo[0]) return;
     const val = event.axesInfo[0].value;
     const cab = pmByDate(val);
     if (cab && cab.id !== activeHoverCab) {
       activeHoverCab = cab.id;
-      renderPanel(cab.id);
+      if (panelRaf) return;
+      panelRaf = requestAnimationFrame(() => {
+        panelRaf = 0;
+        if (activeHoverCab && Date.now() >= zoomingUntil) renderPanel(activeHoverCab);
+      });
     }
   });
 
   chart.getZr().off('globalout');
   chart.getZr().on('globalout', () => {
     activeHoverCab = null;
+    try { chart.dispatchAction({ type: 'hideTip' }); } catch (e) {}
     renderPanel(focusCabinet || null);
   });
 
