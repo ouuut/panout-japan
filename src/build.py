@@ -504,6 +504,7 @@ COPY = {
     "b.index.sub": ("在任期間・平均・最高・最低。", "任期、平均、最高、最低。",
                     "Term, mean, high and low."),
 
+    "cab.loading": ("331か月の世論調査データを展開中…", "331个月民调数据载入中…", "Loading 331 months of poll data…"),
     "d.year.months": ("月別の震源数", "月度震源数", "Events by month"),
     "d.year.top": ("主な地震", "主要地震", "Notable events"),
     "d.year.energy": ("エネルギー", "能量", "Energy"),
@@ -883,16 +884,32 @@ def build_crime():
 
 def build_cabinet():
     series = [(ym[2:], v) for ym, v in sorted(MONTH_MEAN.items())]
+    head_extra = """<link rel="preload" href="/app/cabinet/vendor/echarts.min.js" as="script">
+<link rel="preload" href="/app/cabinet/data.json" as="fetch" crossorigin>
+<link rel="modulepreload" href="/app/cabinet/view.js">"""
     body = f"""<main id="main" class="chapter-app-page">
 <h1 class="sr-only"{tattr('b.h1')}>{ja('b.h1')}</h1>
 <p class="sr-only"{tattr('b.lede')}>{ja('b.lede')}</p>
 <div class="stage stage-cabinet" data-live="0" data-stage-auto="cabinet" data-view="cabinet">
+<div class="cab-veil" id="cab-app-veil" role="progressbar" aria-label="Loading cabinet approval data">
+  <div class="cab-veil-inner">
+    <div class="cab-veil-pulse">
+      <svg class="cab-veil-wave" viewBox="0 0 120 28" fill="none">
+        <path class="cab-veil-path-base" d="M0,14 L30,14 L45,4 L60,24 L75,10 L90,14 L120,14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="cab-veil-path-glow" d="M0,14 L30,14 L45,4 L60,24 L75,10 L90,14 L120,14" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="cab-veil-text"{tattr('cab.loading')}>{ja('cab.loading')}</div>
+  </div>
+</div>
+<noscript>
 <div class="stage-poster">
 <figure class="figure" style="margin:0">
 {line_svg(series)}
 <figcaption>1998–2026 · monthly mean · {n(len(POLLS))} polls</figcaption>
 </figure>
 </div>
+</noscript>
 <div class="stage-live"></div>
 </div>
 </main>"""
@@ -907,7 +924,7 @@ def build_cabinet():
     }
     return page("/cabinet/", f"内閣 — 331か月の支持率 | {BRAND}",
                 "1998年から2026年までの内閣支持率644調査。月次平均331か月、14内閣。",
-                body, "cabinet", jsonld, fullscreen=True)
+                body, "cabinet", jsonld, head_extra=head_extra, fullscreen=True)
 
 
 def fill_copy(s):

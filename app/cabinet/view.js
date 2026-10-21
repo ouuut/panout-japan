@@ -15,6 +15,8 @@
 const DATA_CANDIDATES = ["./app/cabinet/data.json","../app/cabinet/data.json"];
 let cabForcedBase = null; // shell opts.base wins
 const ECHARTS_URLS = [
+  "/app/cabinet/vendor/echarts.min.js",
+  "./app/cabinet/vendor/echarts.min.js",
   "https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js",
   "https://unpkg.com/echarts@5.5.1/dist/echarts.min.js"
 ];
@@ -328,7 +330,29 @@ function injectCss() {
   document.head.appendChild(st);
 }
 
-function onCabResize() { if (chart) { try { chart.resize(); } catch (e) {} } }
+let isInitialAnimating = true;
+let resizeRaf = null;
+function onCabResize() {
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => {
+    if (!chart) return;
+    if (isInitialAnimating) return;
+    try { chart.resize(); } catch (e) {}
+  });
+}
+
+function dismissVeil() {
+  try {
+    const stage = hostEl ? hostEl.closest('.stage-cabinet') : document.querySelector('.stage-cabinet');
+    const veil = (stage && stage.querySelector('#cab-app-veil')) || document.getElementById('cab-app-veil');
+    if (veil) {
+      veil.classList.add('fade-out');
+      setTimeout(() => {
+        try { if (veil.parentNode) veil.parentNode.removeChild(veil); } catch (e) {}
+      }, 750);
+    }
+  } catch (e) {}
+}
 
 async function boot(token) {
   const problems = checkI18n();
@@ -366,6 +390,21 @@ async function boot(token) {
   renderZoomSeg();
   buildLegend();
   renderChart();
+  if (typeof requestAnimationFrame !== 'undefined') {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (hostEl) hostEl.classList.remove('cab-init-hidden');
+        dismissVeil();
+        setTimeout(() => {
+          isInitialAnimating = false;
+          if (chart) try { chart.resize(); } catch (e) {}
+        }, 1250);
+      });
+    });
+  } else {
+    if (hostEl) hostEl.classList.remove('cab-init-hidden');
+    dismissVeil();
+  }
   return lastSummary;
 }
 
@@ -377,6 +416,8 @@ function mountCabinet(root, opts) {
   if (!host) throw new Error('cab: mount root missing');
   hostEl = host;
   host.classList.add('cab-host');
+  host.classList.add('cab-init-hidden');
+  isInitialAnimating = true;
   injectCss();
 
   const viewport = host.querySelector('#v-cabinet-viewport') || host.querySelector('.stage') || host;
@@ -444,6 +485,8 @@ function unmountCabinet() {
   mounted = false;
   if (typeof window !== 'undefined' && window.removeEventListener) window.removeEventListener('resize', onCabResize);
   if (ro) { try { ro.disconnect(); } catch (e) {} ro = null; }
+  if (resizeRaf) { cancelAnimationFrame(resizeRaf); resizeRaf = null; }
+  isInitialAnimating = false;
   if (chart) { try { chart.dispose(); } catch (e) {} chart = null; }
   lastSummary = null;
   if (refs.viewport) {

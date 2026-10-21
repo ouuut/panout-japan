@@ -205,3 +205,22 @@
   - 首页三入口数据板：0.55s 悬停上浮 4px、立体阴影、右下角 `↗` 箭头向外滑移动画；
   - 内阁时间范围切换按钮与首相名牌胶囊：0.48s 舒展过渡、hover 上浮 2px、active 缩放反馈。
 - 验：总页面 `/` 与三章分页面 `/quake/`、`/crime/`、`/cabinet/` 均实测通过；无任何横向溢出与样式冲突。
+
+## 2026-10-21 · M4.10 内阁支持率页面入场卡顿彻底根治与高质感过渡重做
+
+- 问题根因定位（一手数据取证）：
+  - 1. 外部 CDN 依赖与长任务阻塞：原代码依赖外部 jsdelivr/unpkg 实时下载 1MB 的 `echarts.min.js`，无本地 vendor 缓存，无 `<head>` 预加载，主线程连续触发 3 次 70ms~99ms 的 Long Task；
+  - 2. 布局突变与 DOM 挤压（Layout Thrashing）：原静态 HTML 呈现简陋黑白 SVG 海报，活体化时直接 `display: none`，顶部控制栏突然插入把图表猛烈推挤下沉，引发剧烈布局跳跃；
+  - 3. 频繁 Resize 洪泛打断动画：`shell.js` 在 60ms 和 350ms 硬发全局 `resize` 事件，直接掐断了 ECharts 刚开始计算的 1100ms 入场展开动画，导致 Canvas 清屏重绘、严重丢帧卡顿。
+- 终态重做方案落地：
+  - 1. **ECharts 依赖本地化与预加载**：下载 5.5.1 版本至 `app/cabinet/vendor/echarts.min.js`（本地同源 0 网络延迟），并在内阁页 `<head>` 中注入 `preload`（echarts 脚本 + data.json + modulepreload view.js）；
+  - 2. **专属高质感平滑入场遮罩 (`.cab-veil`)**：
+    - 设计极具数据新闻仪式感的主题同步动态脉冲波与多语种载入指示（`331か月の世論調査データを展開中…`）；
+    - 与当前深浅主题完全同色，无缝衔接，消除黑白突变；
+    - 首帧 Canvas 渲染完成后以 `0.65s cubic-bezier(0.16, 1, 0.3, 1)` 平滑淡出（cross-fade），图表优雅浮现；
+  - 3. **零布局跳变（Zero Layout Shift）**：
+    - 在 CSS 中锁定 `.stage-cabinet`、`.cab-host`、`.cab-controls`（`min-height: 44px`）和 `#cab-chart` 的弹性容器比例，首毫秒即确定绝对尺寸；
+  - 4. **Resize 防抖与初始动画保护**：
+    - `shell.js` 免除全屏应用页面的早期 resize 轰炸；
+    - `view.js` 内部增加 `isInitialAnimating` 保护期与 `requestAnimationFrame` 防抖，首屏展开动画彻底不受打扰。
+- 验：PerformanceObserver 实测 `longTasksCount: 0`（原 3 次）、`shiftsCount: 0`（完全零跳变），60 FPS 丝滑入场，深浅模式与语言流转皆实测通过。

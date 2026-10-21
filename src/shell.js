@@ -147,9 +147,11 @@
       stage.dataset.live = '1';
       stage.classList.remove('stage-failed');
       delete stage.dataset.busy;
-      [60, 350, 900, 2400, 5000, 8000, 12000].forEach(function (ms) {
-        setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, ms);
-      });
+      if (!document.body.classList.contains('chapter-app')) {
+        [60, 350, 900, 2400].forEach(function (ms) {
+          setTimeout(function () { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }, ms);
+        });
+      }
       try { window.dispatchEvent(new CustomEvent('pj:stage-mounted', { detail: { ch: ch } })); } catch (e) {}
     }).catch(function (err) {
       console.error(err);
