@@ -4,7 +4,7 @@
 
 > 状态：**M4.19 第四章「住宅」上线——东京23区中古マンション成約価格**（2026-10-22）。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
-> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4.19 commit `__COMMIT__`）。
+> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，M4.19 commit `2d59d21`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
 > 第四章：`/housing/` 用国土交通省不动产情报图书馆（PDL 1.0）2025Q2–2026Q1 成約数据，把 60–80㎡ 的㎡単価中位数换算成 70㎡ 总价，23 区一张 Leaflet 地图 + 排行面板；千代田 16,928 万円（n=86，标参考）到足立 3,900 万円。首页第四块数据板同步上屏。
 
