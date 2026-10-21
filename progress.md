@@ -322,4 +322,4 @@
 - 拖动卡死根因：`updateAxisPointer → renderPanel` 每帧重建右侧面板 + `ResizeObserver → resize → 布局` 回路。修法：rAF 合并面板重建、`datazoom` 后 260ms 抑制、尺寸未变直接 return、指针离开 `hideTip`。实测 150 次拖动 346 帧：max 19ms / p99 18ms。
 - 拥挤处理：`plotPxPerMonth` 扣 48 左距 + 384 右面板；日文 slack 0.62、英文 1.28；任期窄于 44px 字号 10 且去 (1)(2)。
 - 收口：5 个提交（6e774c8 / b1c7e1c / d0ab959 / 394a18b / af72de1）推到 origin(github) 与 gitea，两边 `behind=0`；harness doctor 全绿。
-- 未做：线上仍是 `panout-site` 旧版，未跑 `wrangler pages deploy`。
+- 发布：`wrangler pages deploy site --project-name=panout-site --branch=main`（ouuut 账号 `cf9d7a…`，token 取 `custom.ouuut_cf_api_token`），部署域 `https://7e596ded.panout-site.pages.dev`；自定义域 `japan.ouuut.com` 已回新字节（`app.css?v=d71b3356` 与本地构建一致）。线上验收：内阁全期間 14 个名签单行、高市在线右侧；拖动 65→45 换窗口且名签跟随；犯罪页瓦片 18 张、下钻面板出数；三页 0 console error。
