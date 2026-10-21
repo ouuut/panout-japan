@@ -28,9 +28,12 @@ const I18N = {
     byValueDesc: "平均㎡単価の高い順", noTownData: "データなし",
     instTitle: "町名の分布", instMedian: "東京中央値", instMax: "以上",
     rankExtreme: "最高水準", rankHigh: "高水準", rankNormal: "標準",
+    period: "2025Q2–2026Q1 成約", periodTip: "直近4四半期（2025年4月–2026年3月）の成約価格。それより新しい四半期はまだ公表されていません。",
+    metaPeriod: "対象期間 2025Q2–2026Q1（直近4四半期）",
     metaTitle: "データ", metaL1: "国土交通省 不動産情報ライブラリ「不動産取引価格情報／成約価格情報」（PDL 1.0）。", metaL2: "町名（地区名）単位で平均。本ページは当サイトが加工して作成したものであり、国が作成・公表したものではありません。",
     faqTitle: "読み方", faqSub: "FAQ",
     faq: [
+      { q: "いつのデータですか？", a: "直近4四半期（2025年第2四半期〜2026年第1四半期＝2025年4月〜2026年3月）の成約価格です。国交省の公表は約1四半期遅れるため、それより新しい四半期はまだ出ていません。" },
       { q: "なぜ町名までしか分かれないのですか？", a: "公式データの位置情報は「市区町村＋地区名（町名）」までで、丁目や座標は含まれません。" },
       { q: "平均はどう計算していますか？", a: "その町の成約1件ごとの㎡単価（総額÷面積）を平均しています。面積の絞り込みはしていません。" },
     ],
@@ -48,9 +51,12 @@ const I18N = {
     byValueDesc: "按平均㎡单价排序", noTownData: "无数据",
     instTitle: "町名分布", instMedian: "东京中位数", instMax: "以上",
     rankExtreme: "最高档", rankHigh: "高档", rankNormal: "标准",
+    period: "2025Q2–2026Q1 成交", periodTip: "最近四个季度（2025年4月–2026年3月）的成交价；更新的季度尚未公布。",
+    metaPeriod: "时间范围 2025Q2–2026Q1（最近四个季度）",
     metaTitle: "数据", metaL1: "国土交通省 不动产情报图书馆（PDL 1.0）。", metaL2: "按町名（地区名）平均。本页由本站加工制作，并非日本政府发布。",
     faqTitle: "怎么读", faqSub: "FAQ",
     faq: [
+      { q: "数据是什么时间范围？", a: "最近四个季度（2025 年第 2 季度至 2026 年第 1 季度，即 2025 年 4 月至 2026 年 3 月）的成交价。国交省发布约滞后一个季度，更新的季度尚未公布。" },
       { q: "为什么只到町名？", a: "官方数据的位置只到「市区町村 + 地区名（町名）」，不含丁目和坐标。" },
       { q: "平均怎么算？", a: "对该町每笔成交的㎡单价（总价÷面积）取平均，不筛面积。" },
     ],
@@ -68,9 +74,12 @@ const I18N = {
     byValueDesc: "by mean price per m²", noTownData: "No data",
     instTitle: "Town distribution", instMedian: "Tokyo median", instMax: "+",
     rankExtreme: "top tier", rankHigh: "high", rankNormal: "typical",
+    period: "2025Q2–2026Q1 closed", periodTip: "Latest four quarters (Apr 2025 – Mar 2026) of closed prices; newer quarters are not published yet.",
+    metaPeriod: "Period: 2025Q2–2026Q1 (latest four quarters)",
     metaTitle: "Data", metaL1: "MLIT Real Estate Information Library (PDL 1.0).", metaL2: "Averaged by town (district). Compiled by this site; not a government publication.",
     faqTitle: "How to read", faqSub: "FAQ",
     faq: [
+      { q: "What period does this cover?", a: "The latest four quarters: Q2 2025 – Q1 2026 (April 2025 – March 2026), closed prices. MLIT publishes with roughly a one-quarter lag, so newer quarters are not out yet." },
       { q: "Why only to town level?", a: "The official records locate a deal to municipality + town (district) only; no chome, no coordinates." },
       { q: "How is the mean computed?", a: "Mean of each deal's price per m² (price ÷ area) inside the town; no area filter." },
     ],
@@ -494,6 +503,7 @@ function metaHtml() {
         <span style="font-size:11px;font-weight:var(--fw-mid);color:var(--text-main);letter-spacing:0.5px">${t().metaTitle}</span>
         <span style="font-size:11px;color:var(--text-faint);font-family:var(--font-num)">MLIT / PDL 1.0</span>
       </div>
+      <div style="font-size:11px;color:var(--text-main);line-height:1.4;margin-bottom:3px;font-weight:var(--fw-mid)">${esc(t().metaPeriod)}</div>
       <div style="font-size:11px;color:var(--text-muted);line-height:1.4">${t().metaL1}<br>${t().metaL2}</div>
       <div class="faq-block"><div class="faq-head"><span class="faq-title">${t().faqTitle}</span><span class="faq-sub">${t().faqSub}</span></div>${faq}</div>
       <div class="faq-source">${t().siteBy} · <a href="../" style="color:var(--accent)">japan.ouuut.com</a> · <a href="../quake/" style="color:var(--accent)">${t().navQuake}</a> · <a href="../crime/" style="color:var(--accent)">${t().navCrime}</a></div>
@@ -550,7 +560,8 @@ function controlsHtml() {
 
 function mountControls(box) {
   const label = curLang === "zh" ? "筛选" : curLang === "en" ? "Filter" : "絞り込み";
-  box.innerHTML = `<button type="button" class="hsg-ctl-toggle" aria-expanded="false" aria-label="${label}"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg><span>${label}</span></button>`
+  box.innerHTML = `<span class="hsg-period" title="${esc(t().periodTip)}">${esc(t().period)}</span>`
+    + `<button type="button" class="hsg-ctl-toggle" aria-expanded="false" aria-label="${label}"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg><span>${label}</span></button>`
     + `<div class="hsg-ctl">${controlsHtml()}</div>`;
   const tg = box.querySelector(".hsg-ctl-toggle");
   if (tg) tg.addEventListener("click", () => { const open = box.classList.toggle("is-open"); tg.setAttribute("aria-expanded", String(open)); });

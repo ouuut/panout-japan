@@ -435,11 +435,11 @@ COPY = {
     "card.cabinet.claim": ("14内閣、331か月。最大の月変動は+20.5。",
                            "14届内阁、331个月。最大单月变动+20.5。",
                            "14 cabinets, 331 months. Largest monthly swing +20.5."),
-    "card.housing.unit": ("中古マンション / 4四半期", "二手公寓 / 4 个季度", "Used flats / 4 quarters"),
+    "card.housing.unit": ("中古マンション / 2025Q2–2026Q1", "二手公寓 / 2025Q2–2026Q1", "Used flats / 2025Q2–2026Q1"),
     "card.housing.title": ("並べて見る", "比着看", "Compare"),
-    "card.housing.claim": (f"町名ごとの平均㎡単価で塗る。{HOUSE_TOWNS:,}町・{HOUSE_N:,}件。",
-                           f"按町名平均㎡单价上色。{HOUSE_TOWNS:,} 个町、{HOUSE_N:,} 笔成交。",
-                           f"Mean price per m² by town: {HOUSE_TOWNS:,} towns, {HOUSE_N:,} deals."),
+    "card.housing.claim": (f"直近4四半期の成約で町名ごとの平均㎡単価を塗る。{HOUSE_TOWNS:,}町・{HOUSE_N:,}件。",
+                           f"用最近四个季度成交，按町名平均㎡单价上色。{HOUSE_TOWNS:,} 个町、{HOUSE_N:,} 笔。",
+                           f"Latest four quarters of closed prices, mean per m² by town: {HOUSE_TOWNS:,} towns, {HOUSE_N:,} deals."),
 
     "q.eyebrow": ("01 / 引いて見る", "01 / 拉远看", "01 / Pull back"),
     "q.h1": ("地震 — <em>40,079</em>の震源", "地震 — <em>40,079</em>个震源", "Earthquakes — <em>40,079</em> hypocentres"),
@@ -498,10 +498,10 @@ COPY = {
                "1998年至2026年，逐月支持率。跨过内阁，连成一条线。",
                "Monthly approval from 1998 to 2026, joined across cabinets into one line."),
     "h.eyebrow": ("04 / 並べて見る", "04 / 比着看", "04 / Compare"),
-    "h.h1": ("住宅 — <em>23</em>区の成約", "住宅 — <em>23</em>区成交", "Housing — <em>23</em> wards"),
-    "h.lede": ("中古マンションの成約価格。町名（地区名）ごとの平均㎡単価で塗る。",
-               "二手公寓成交价。按町名（地区名）的平均㎡单价上色。",
-               "Used-flat closed prices, shaded by the mean price per m² of each town."),
+    "h.h1": ("住宅 — <em>町</em>名の価格", "住宅 — <em>町</em>名价格", "Housing — price by <em>town</em>"),
+    "h.lede": ("中古マンションの成約価格、直近4四半期（2025年4月–2026年3月）。町名（地区名）ごとの平均㎡単価で塗る。",
+               "二手公寓成交价，最近四个季度（2025年4月–2026年3月）。按町名（地区名）的平均㎡单价上色。",
+               "Used-flat closed prices for the latest four quarters (Apr 2025 – Mar 2026), shaded by each town's mean price per m²."),
     "b.stat.polls": ("調査", "调查", "Polls"),
     "b.stat.months": ("月", "月", "Months"),
     "b.stat.cabinets": ("内閣", "内阁", "Cabinets"),
@@ -958,7 +958,7 @@ def build_housing():
 <p class="sr-only"{tattr('h.lede')}>{ja('h.lede')}</p>
 <div class="stage stage-housing" data-live="0" data-stage-auto="housing" data-view="housing">
 <div class="stage-poster">{HP.housing_svg(HOUSE_WARDS, MUNI_POLY, 1000, 620, deals=HOUSE_N, towns=HOUSE_TOWNS)}</div>
-<p class="stage-caption">中古マンション · 成約 {HOUSE['totals']['trades']:,}件 · 60–80㎡ · {HOUSE['basis']} · 国土交通省</p>
+<p class="stage-caption">中古マンション · 成約 {HOUSE_N:,}件 · {HOUSE['basis']}（直近4四半期） · 国土交通省</p>
 <div class="stage-live"></div>
 </div>
 </main>"""
@@ -973,7 +973,7 @@ def build_housing():
         "url": SITE_URL + "/housing/",
     }
     return page("/housing/", f"住宅 — 町名の価格 | {BRAND}",
-                "東京の中古マンション成約価格。町名（地区名）ごとの平均㎡単価を塗った地図。国交省データを加工。",
+                "東京の中古マンション成約価格。直近4四半期（2025Q2–2026Q1）を町名（地区名）ごとの平均㎡単価で塗った地図。国交省データを加工。",
                 body, "housing", jsonld, fullscreen=True)
 
 
@@ -1232,7 +1232,7 @@ def write_meta(font_meta):
 - [地震](/quake/): 2000–2026.07、M4以上の震源40,079点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。
 - [内閣](/cabinet/): 1998–2026、644調査、331か月、14内閣。
-- [住宅](/housing/): 2025Q2–2026Q1、東京、中古マンション成約26,416件を町名（1,237町）ごとに平均した㎡単価の地図。
+- [住宅](/housing/): 直近4四半期 2025Q2–2026Q1（2025年4月–2026年3月）、東京、中古マンション成約26,416件を町名（1,237町）ごとに平均した㎡単価の地図。
 
 Build: {BUILD_STAMP}. Sources: USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
 """, encoding="utf-8")

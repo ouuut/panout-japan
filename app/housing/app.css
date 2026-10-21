@@ -1187,6 +1187,7 @@ html body #hsg-root #hsg-ctl-host {
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
   backdrop-filter: blur(14px) saturate(1.4);
 }
+html body #hsg-root #hsg-ctl-host { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 html body #hsg-root #hsg-ctl-host .hsg-ctl { gap: 8px; }
 /* 窄屏：整组筛选收进一个抽屉按钮，不再占两行压在图上 */
 html body #hsg-root #hsg-ctl-host .hsg-ctl-toggle {
@@ -1212,7 +1213,7 @@ html body #hsg-root #hsg-ctl-host .hsg-ctl-toggle {
   html body #hsg-root #hsg-ctl-host .hsg-ctl-toggle { display: inline-flex; }
   html body #hsg-root #hsg-ctl-host .hsg-ctl { display: none; }
   html body #hsg-root #hsg-ctl-host.is-open .hsg-ctl {
-    display: flex; flex-wrap: wrap; gap: 8px;
+    display: flex; flex-wrap: wrap; gap: 8px; flex-basis: 100%;
     padding: 8px 6px 4px;
   }
   html body #hsg-root #hsg-ctl-host.is-open { border-radius: 4px; }
@@ -1243,4 +1244,23 @@ html body #hsg-root #hsg-ctl-host .hsg-q { border-radius: var(--btn-radius, 2px)
   --bg-card-sub: var(--surface);
   --line-main: transparent;
   --shadow-card: none;
+}
+
+/* 数据期间徽标：常驻在工具条最左，窄屏收起筛选后仍然可见 */
+html body #hsg-root #hsg-ctl-host .hsg-period {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 10px 0 4px;
+  margin-right: 2px;
+  font-family: var(--font-num);
+  font-size: 11px;
+  letter-spacing: .03em;
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
+  white-space: nowrap;
+  border-right: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  cursor: help;
+}
+@media (max-width: 640px) {
+  html body #hsg-root #hsg-ctl-host .hsg-period { padding-left: 8px; font-size: 10.5px; }
 }
