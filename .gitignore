@@ -33,4 +33,7 @@ sites/quake/.work/
 # 构建产物与本地缓存（python src/build.py 重建）
 site/
 .cache/
+
+# 外部 LLM 评审包（tools/export-review.py 生成：文本包 + 截图 + 回执）
+.review/
 mcp.json

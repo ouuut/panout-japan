@@ -290,3 +290,13 @@
   - 1. 全量将 view.js 中的 `var(--text-main, #141A15)` 及 `var(--text-main)` 统一替换为项目权威真相源 `var(--ink)`，次级文本统一使用 `var(--muted)`；
   - 2. 在 src/app.css 中针对 `html[data-theme="dark"] .cab-panel` 及其所有子卡片、标题、正文、大数字强力注入 `color: #EDEBE4 !important` 与次级 `color: #A09E96 !important`；
   - 3. 在 Chromium 中真机切换至 Dark 模式并点击安倍晋三(第二次)全量抽检所有 DOM 节点计算颜色（已全部转为 rgb(237, 235, 228) 象牙白），并截图留证；同时复验 Sage 浅色模式，确保双主题均呈现顶级对比度。
+
+## 2026-10-21 · M4.16 外部 LLM 评审通道打通（Gemini 网页版）
+
+- 目标：把整站（4 页）连同源码交给网页版 Gemini 做第三方评审，产出可执行的 P0/P1/P2 意见。
+- 通道：
+  - `tools/export-review.py` 生成评审包到 `.review/`（已 gitignore）：`text/B_HTML.txt`（4 页构建产物，内联 SVG path 压成占位符）、`C_CSS.txt`、`D_JS.txt`、`E_DATA.txt`（数据样本）；截图 10 张（4 页 × sage/dark 桌面 + 2 张 390×844 移动端）。
+  - Gemini 无公开上传 API，走本机 Chrome relay：`Page.setInterceptFileChooserDialog` 拦截原生文件选择框 → `DOM.setFileInputFiles` 灌入本地文件 → `Input.insertText` 写入提示词 → Enter 发送。首轮上传会弹一次 Google「画像とファイルからコンテンツを作成する」同意框，需先同意。
+  - 分两轮喂：第一轮 BRIEF + 8 张桌面截图（视觉/信息架构），第二轮 4 个源码包 + 2 张移动端（实现/可访问性）。回执存 `.review/gemini-round1.md`、`gemini-round2.md`。
+- 已知坑：Gemini 网页版单条消息附件上限约 10 个，故分两轮；`tab.run` 里的裸 `page.evaluate(fn)` 在 relay 下会丢闭包，传字符串或用 host `tab.evaluate` 才稳。
+- 一手核验：Gemini 第二轮 P1 第 4 条称「home-preview.css 全部内容在 app.css 中重复了一遍」——实测 app.css 只有 1 处 `.hp-band/.hp-entry` 出现在选择器列表，dot-rule 76 条全在 home-preview.css，**该条为幻觉，不予采纳**。其余条目待逐条核实后再动。
