@@ -313,3 +313,13 @@
   - `src/shell.js:17` `lang()` 先读 localStorage 再读 `?lang=` → 分享链接语言参数对老访客失效；
   - 犯罪页中位数显示 3.8‰ 与站点 4.4‰ 矛盾；仅用町丁级复算得 4.49‰，`buildScales()` 混入了 MUNI 行。
 - 已证伪：Argon 称犯罪页 TOP5 把 ‰ 写成 % —— 源码两处均为 ‰，属截图小字号误读。
+
+## 2026-10-21 · M4.18 内阁图名签与拖动 + 上一轮硬 Bug 全清
+
+- 犯罪页三条硬 Bug 已修：模板残留 `data-crm-chome="${pr.name}', true)"`、`mountCrimeControls()` 未挂载、中位数口径混入 MUNI 行（现 4.4‰ 与站点一致）；Leaflet 改本地 `app/crime/vendor/`，加 15s 看门狗与 ≤760px 筛选抽屉。
+- 内阁页：`@media (max-width:960px)` 改为面板下沉抽屉而非 `display:none`；`shell.js` 的 `?lang=` 优先于 localStorage。
+- 内阁图名签重做：取消 `i%3` 三行错位，单行同高、只写姓氏（`PM_SURNAME` 日/中/英三套，两任菅写 菅(直)/菅(義)，安倍用 (1)/(2)）；默认落在分割线右侧，仅在会撞画布右沿时翻左；`datazoom` 松手 240ms 调 `refreshWindowLabels(startPct,endPct)` 按新窗口重算 show/coord/align。
+- 拖动卡死根因：`updateAxisPointer → renderPanel` 每帧重建右侧面板 + `ResizeObserver → resize → 布局` 回路。修法：rAF 合并面板重建、`datazoom` 后 260ms 抑制、尺寸未变直接 return、指针离开 `hideTip`。实测 150 次拖动 346 帧：max 19ms / p99 18ms。
+- 拥挤处理：`plotPxPerMonth` 扣 48 左距 + 384 右面板；日文 slack 0.62、英文 1.28；任期窄于 44px 字号 10 且去 (1)(2)。
+- 收口：5 个提交（6e774c8 / b1c7e1c / d0ab959 / 394a18b / af72de1）推到 origin(github) 与 gitea，两边 `behind=0`；harness doctor 全绿。
+- 未做：线上仍是 `panout-site` 旧版，未跑 `wrangler pages deploy`。
