@@ -74,9 +74,21 @@ html[lang="ja"] .hp-lede, html[lang="zh"] .hp-lede { font-size: 15px; line-heigh
   min-width: 0;
   padding: clamp(18px, 2vw, 26px);
   color: var(--ink);
-  transition: background-color .25s ease, color .25s ease;
+  transition: background-color 0.55s ease,
+              color 0.55s ease,
+              transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.55s ease;
 }
-.hp-entry:hover { background: var(--accent-soft); color: var(--ink); }
+.hp-entry:hover {
+  background: var(--accent-soft);
+  color: var(--ink);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+}
+.hp-entry:active {
+  transform: translateY(-1px);
+  transition-duration: 0.15s;
+}
 .hp-entry:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
 
 .hp-entry-head {
@@ -205,6 +217,14 @@ html[lang="zh"] .hp-source { font-family: var(--zh-sans); }
   text-transform: uppercase;
   color: var(--accent-ink);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: transform 0.48s cubic-bezier(0.16, 1, 0.3, 1), color 0.48s ease;
+}
+.hp-entry:hover .hp-enter {
+  transform: translate(4px, -2px);
+  color: var(--accent);
 }
 html[lang="ja"] .hp-enter, html[lang="zh"] .hp-enter {
   font-family: var(--ja-sans);

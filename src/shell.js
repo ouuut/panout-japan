@@ -27,7 +27,16 @@
     return '';
   }
 
-  function setLang(l) {
+  function updateTextEls(l) {
+    if (!dic) return;
+    var els = document.querySelectorAll('[data-t]');
+    for (var j = 0; j < els.length; j++) {
+      var v = dic[els[j].dataset.t];
+      if (v && v[l]) els[j].innerHTML = v[l];
+    }
+  }
+
+  function setLang(l, animate) {
     if (LANGS.indexOf(l) < 0) return;
     put('pj-lang', l);
     doc.lang = l;
@@ -35,11 +44,16 @@
     for (var i = 0; i < btns.length; i++) {
       btns[i].setAttribute('aria-pressed', String(btns[i].dataset.lang === l));
     }
-    if (!dic) return;
-    var els = document.querySelectorAll('[data-t]');
-    for (var j = 0; j < els.length; j++) {
-      var v = dic[els[j].dataset.t];
-      if (v && v[l]) els[j].innerHTML = v[l];
+    if (animate && dic) {
+      doc.classList.add('lang-switching');
+      setTimeout(function () {
+        updateTextEls(l);
+        setTimeout(function () {
+          doc.classList.remove('lang-switching');
+        }, 30);
+      }, 190);
+    } else {
+      updateTextEls(l);
     }
     var live = document.querySelector('.stage[data-live="1"] .stage-live');
     if (live && live._setVendorLang) live._setVendorLang(l);
@@ -252,7 +266,7 @@
     for (var i = 0; i < langs.length; i++) {
       langs[i].addEventListener('click', function () {
         var l = this.dataset.lang;
-        loadDic().then(function () { setLang(l); });
+        loadDic().then(function () { setLang(l, true); });
       });
     }
 

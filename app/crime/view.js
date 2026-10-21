@@ -1434,12 +1434,12 @@ export async function mountCrime(el, opts) {
     applyAccentPalette(currentAccent);
     bindControls();
     const ldr = $el('crm-app-loader');
-    if (ldr) { ldr.classList.add('fade-out'); setTimeout(() => { if (ldr.parentNode) ldr.remove(); }, 400); }
+    if (ldr) { ldr.classList.add('fade-out'); setTimeout(() => { if (ldr.parentNode) ldr.remove(); }, 750); }
     mounted = true;
     return true;
   } catch (e) {
     const ldr2 = $el('crm-app-loader');
-    if (ldr2) { ldr2.classList.add('fade-out'); setTimeout(() => { if (ldr2.parentNode) ldr2.remove(); }, 400); }
+    if (ldr2) { ldr2.classList.add('fade-out'); setTimeout(() => { if (ldr2.parentNode) ldr2.remove(); }, 750); }
     throw e;
   }
 }

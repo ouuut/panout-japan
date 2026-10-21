@@ -773,7 +773,11 @@ function renderChart() {
         zoomOnMouseWheel: 'shift', moveOnMouseWheel: true
       }
     ],
-    animation: false,
+    animation: true,
+    animationDuration: 1100,
+    animationDurationUpdate: 650,
+    animationEasing: 'cubicOut',
+    animationEasingUpdate: 'cubicOut',
     series: series
   };
 
