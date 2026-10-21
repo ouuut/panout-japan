@@ -28,6 +28,7 @@ html[data-theme="dark"] #hsg-map .leaflet-tile-pane{filter:invert(1) hue-rotate(
 #hsg-legend .lg-t{font-size:10px;letter-spacing:.08em;color:var(--muted);margin-bottom:6px;font-family:var(--font-num)}
 #hsg-legend .lg-row{display:flex;align-items:center;gap:6px;font-family:var(--font-num);font-size:10.5px;color:var(--muted);line-height:1.5}
 #hsg-legend .lg-sw{width:22px;height:9px;border-radius:1px;flex:none}
+#hsg-legend .lg-credit{display:none}
 #hsg-panel{position:absolute;right:20px;top:20px;bottom:20px;width:var(--panel-w);z-index:820;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 #hsg-card{background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:4px;padding:16px 16px 14px}
 #hsg-card .c-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
@@ -65,6 +66,8 @@ html[data-theme="dark"] #hsg-map .leaflet-tile-pane{filter:invert(1) hue-rotate(
   #hsg-head h2{font-size:13px}
   #hsg-panel{left:12px;right:12px;top:auto;bottom:12px;width:auto;max-height:54vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
   #hsg-map .leaflet-control-zoom{display:none}
+  #hsg-map .leaflet-control-attribution{display:none}
+  #hsg-legend .lg-credit{display:block;margin-top:5px;font-size:9px;letter-spacing:.02em;color:var(--muted);opacity:.85}
   #hsg-card{padding:12px}
   #hsg-card .c-name{font-size:18px}
   #hsg-card .c-big b{font-size:26px}
@@ -295,7 +298,7 @@ function renderLegend() {
     const label = i === n - 1 ? `${lo.toFixed(0)} +` : `${lo.toFixed(0)}–${hi.toFixed(0)}`;
     rows += `<div class="lg-row"><span class="lg-sw" style="background:color-mix(in srgb,var(--accent) ${Math.round(rampFor(i, n) * 100)}%,transparent)"></span>${label}</div>`;
   }
-  el.innerHTML = `<div class="lg-t">${esc(t().legend)}</div>${rows}`;
+  el.innerHTML = `<div class="lg-t">${esc(t().legend)}</div>${rows}<div class="lg-credit">© 国土地理院 · Leaflet</div>`;
 }
 
 function renderCard() {

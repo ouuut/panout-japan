@@ -338,4 +338,5 @@
 - 首页：第四块数据板 `housing_svg()`（23 区 fill-opacity 梯度 + 价签落在最高区质心），`hp-band` 改 4 列（≥1200 四列 / 1000–1199 两列 / <1000 单列），导航与页脚补第四条。
 - 构建：`pages: 5`，`app.css` 54KB / `shell.js` 10KB，字体子集 13 文件 2.07MB（charset 2,157 字，已含新文案）。页面首屏 ≈136KB br（HTML 10 + view.js 8 + leaflet 41 + 几何 76 + 统计 1）。
 - 验收：本地 1413 / 1130 / 390 三档 + sage/dark 双主题 + ja/en/zh 三语截图留证（`.review/shots/r21-*`）；点选足立区出 3,900 万円、列表自动滚到第 23 行；5 个页面 0 console error、无横向溢出。
-- 发布：`wrangler pages deploy site --project-name=panout-site --branch=main` → `96a1d762.panout-site.pages.dev`；主域实测 `stage-housing` live=1、23 行排行、图例 6 档、attribution 主题化。
+- 手机端出典：Leaflet attribution 在 ≤760px 被底部抽屉压住 → 抽屉内隐藏控件，把「© 国土地理院 · Leaflet」并入图例卡片，始终可见。
+- 发布：`wrangler pages deploy site --project-name=panout-site --branch=main` → `ecf0819d.panout-site.pages.dev`；主域实测 `stage-housing` live=1、23 行排行、图例 6 档、attribution 主题化。
