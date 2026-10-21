@@ -323,3 +323,5 @@
 - 拥挤处理：`plotPxPerMonth` 扣 48 左距 + 384 右面板；日文 slack 0.62、英文 1.28；任期窄于 44px 字号 10 且去 (1)(2)。
 - 收口：5 个提交（6e774c8 / b1c7e1c / d0ab959 / 394a18b / af72de1）推到 origin(github) 与 gitea，两边 `behind=0`；harness doctor 全绿。
 - 发布：`wrangler pages deploy site --project-name=panout-site --branch=main`（ouuut 账号 `cf9d7a…`，token 取 `custom.ouuut_cf_api_token`），部署域 `https://7e596ded.panout-site.pages.dev`；自定义域 `japan.ouuut.com` 已回新字节（`app.css?v=d71b3356` 与本地构建一致）。线上验收：内阁全期間 14 个名签单行、高市在线右侧；拖动 65→45 换窗口且名签跟随；犯罪页瓦片 18 张、下钻面板出数；三页 0 console error。
+
+- 线上回评修正：犯罪页筛选工具条原本 `top:84px`（相对已在地图舞台内的 `#crm-root`）→ 悬空在地图中部；改为 `top:12px`（窄屏 8px），贴地图左上角。部署 `a90e2c84.panout-site.pages.dev`，主域实测 `ctl.y - map.y = 12`、`app.css?v=52e920da`。
