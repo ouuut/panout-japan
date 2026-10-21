@@ -189,14 +189,21 @@ function polyLabelPos(geom) {
   return [cy / (6 * area), cx / (6 * area)];
 }
 
+function accentColor() {
+  try {
+    const v = getComputedStyle(rootEl || document.documentElement).getPropertyValue("--accent").trim();
+    if (v) return v;
+  } catch (e) {}
+  return curVariant === "tactical" ? "#FF6A3D" : "#2F6B4F";
+}
 function styleTown(f) {
   const p = f && f.properties;
   if (!p) return {};
   const x = TOWNS[p.i];
   const v = x && x.n ? townVal(x) : null;
-  const sel = selTown && selTown.properties && selTown.properties.i === p.i;
+  const sel = selTown === p.i;
   return {
-    color: sel ? "#FF6A3D" : (curVariant === "tactical" ? "rgba(255,244,232,0.10)" : "rgba(24,22,20,0.10)"),
+    color: sel ? accentColor() : (curVariant === "tactical" ? "rgba(255,244,232,0.10)" : "rgba(24,22,20,0.10)"),
     weight: sel ? 2.4 : 0.55,
     fillColor: colorFor(v),
     fillOpacity: sel ? 1 : 0.9,
@@ -208,7 +215,7 @@ function styleWard(f) {
   const v = wardVal(p.ward_ja);
   const sel = selWard === p.ward_ja;
   return {
-    color: sel ? "#FF6A3D" : (curVariant === "tactical" ? "rgba(255,244,232,0.14)" : "rgba(24,22,20,0.14)"),
+    color: sel ? accentColor() : (curVariant === "tactical" ? "rgba(255,244,232,0.14)" : "rgba(24,22,20,0.14)"),
     weight: sel ? 2.2 : 0.8,
     fillColor: colorFor(v),
     fillOpacity: sel ? 0.98 : 0.88,
@@ -618,6 +625,7 @@ function applyVariant(v) {
     buildScale(); updateLegendBar(); updateHistogram();
     if (townLayer) townLayer.setStyle(styleTown);
     if (wardLayer) wardLayer.setStyle(styleWard);
+    if (parentLayer) parentLayer.setStyle({ color: accentColor(), fillColor: accentColor() });
   }
 }
 

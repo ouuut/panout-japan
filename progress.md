@@ -368,3 +368,12 @@
 - 坑：`setStyle(fn)` 会以 feature 调用，需防 undefined；`zoomSnap` 默认 0.25 与 fitBounds 交互导致留白，改为 fit 全东京本土 bbox；标签在 z<10.5 收起（否则 62 个市名叠成一团）；数据 fetch 加 `no-cache` 避免旧 towns.json。
 - 验收：桌面 2134×847 与手机 390 两档、sage(editorial)/dark(tactical) 双主题、ja 三语；点击 東尾久/向山 出卡，0 console error。
 - 发布：`218d30a5.panout-site.pages.dev`，主域实测 live=1、町卡出数、无报错。
+
+## 2026-10-22 · M4.19e 配色归位（用户第二次否掉）
+
+- 症状：sage 模式重点色是朱红 `#9f3c2c`、dark 是琥珀 `#d0801a`，与犯罪率章（sage `#2F6B4F` / dark `#FF6A3D`）不一致。
+- 根因一：`app/housing/app.css` 自带一套变体令牌（自带纸色/墨色/阴影/重点色），不是犯罪章那套站点令牌；且文件末尾还有一条通用 `#hsg-root{--accent:var(--accent)}` 把值交给站点主题，导致重点色随站点走（sage 站点重点色是红）。
+- 根因二：选中描边硬编码 `#FF6A3D`；且 `selTown` 是数字，旧判断读 `.properties` 恒 false，选中高亮从未生效；父级区描边只在创建时取色，切主题不刷新。
+- 修法：变体令牌改为站点令牌派生（`--bg-page:var(--bg)`、`--text-main:var(--ink)`、`--bg-card: color-mix(surface 55%)`、`--shadow-card:none`），重点色钉死 `#2F6B4F`/`#FF6A3D` 并排在通用规则之后；描边统一走 `accentColor()`；`applyVariant` 重刷父级描边；`selTown === p.i`。
+- 根因三：`/app/housing/app.css` 无版本号，Pages/浏览器缓存旧样式；且外壳只按模块字节给 `?v=`，样式改了而 view.js 字节没变 → 旧模块引用旧样式。修法：构建时把样式内容哈希写进 view.js 的 href，并把补丁后的字节计入 `JS_VER`。
+- 验收：线上 sage `#2F6B4F` / dark `#FF6A3D`，`--shadow-card:none`，控制台仅 GSI 空白瓦片 ORB 噪声。

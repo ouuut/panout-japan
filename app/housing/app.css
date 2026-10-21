@@ -137,154 +137,48 @@
 /* ---- 方案 A：大报典范 · 纸感白 (Editorial Newsroom / Parchment) ---- */
 
 #hsg-root[data-hsg-variant="editorial"] {
-
   color-scheme: light;
-
-  --bg-page: #faf8f5;
-
-  --bg-glass: rgba(250, 248, 245, 0.45);
-
-  --bg-map: #f4efe6;
-
-  --bg-card: rgba(255, 255, 255, 0.60);
-
-  --bg-card-sub: rgba(255, 255, 255, 0.38);
-
-  --text-main: #181614;
-
-  --text-muted: #6e675c;
-
-  --text-faint: #9c9486;
-
-  --line-main: #e2ddd3;
-
-  --line-strong: #181614;
-
-  --accent: #9f3c2c; /* 传统朱印墨 */
-
-  --accent-soft: rgba(159, 60, 44, 0.08);
-
-  --shadow-card: 0 4px 20px rgba(24, 22, 20, 0.08), 0 0 0 1px rgba(24, 22, 20, 0.05);
-
-  --card-glass: blur(26px) saturate(1.9);
-
-  --capsule-bg: rgba(255, 253, 249, 0.95);
-
-  --capsule-line: rgba(24, 22, 20, 0.14);
-
+  /* 与犯罪率章同一套站点令牌：纸色/墨色/无卡片阴影/深绿重点色 */
+  --bg-page: var(--bg);
+  --bg-glass: color-mix(in srgb, var(--bg) 45%, transparent);
+  --bg-map: var(--bg);
+  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card-sub: var(--surface);
+  --bg-hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --text-main: var(--ink);
+  --text-muted: var(--muted);
+  --text-faint: var(--muted);
+  --line-main: transparent;
+  --line-strong: var(--ink);
+  --accent: #2F6B4F;
+  --accent-soft: rgba(47, 107, 79, .08);
+  --shadow-card: none;
+  --card-glass: blur(26px) saturate(1.4);
+  --capsule-bg: color-mix(in srgb, var(--surface) 94%, transparent);
+  --capsule-line: color-mix(in srgb, var(--ink) 14%, transparent);
 }
-
-
 
 /* ---- 方案 B：暖炭黑 (Warm Charcoal / 深色去蓝定稿) ---- */
-
 #hsg-root[data-hsg-variant="tactical"] {
-
   color-scheme: dark;
-
-  --bg-page: #141210;
-
-  --bg-glass: rgba(20, 18, 16, 0.55);
-
-  --bg-map: #0d0c0b;
-
-  --bg-card: rgba(27, 25, 23, 0.62);
-
-  --bg-card-sub: rgba(53, 47, 42, 0.42);
-
-  --bg-hover: rgba(255, 244, 232, 0.08);
-
-  --text-main: #f5f0e8;
-
-  --text-muted: #a89d8d;
-
-  --text-faint: #6f675b;
-
-  --line-main: rgba(255, 244, 232, 0.1);
-
-  --line-strong: #f5f0e8;
-
-  --accent: #d0801a; /* 暖琥珀：已调低饱和度，温润内敛，夜间极度舒适 */
-
-  --accent-soft: rgba(208, 128, 26, 0.16);
-
-  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 244, 232, 0.08);
-
-  --card-glass: blur(26px) saturate(1.5);
-
-  --capsule-bg: rgba(18, 16, 14, 0.94);
-
-  --capsule-line: rgba(255, 244, 232, 0.14);
-
+  --bg-page: var(--bg);
+  --bg-glass: color-mix(in srgb, var(--bg) 55%, transparent);
+  --bg-map: var(--bg);
+  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card-sub: var(--surface);
+  --bg-hover: color-mix(in srgb, var(--ink) 8%, transparent);
+  --text-main: var(--ink);
+  --text-muted: var(--muted);
+  --text-faint: var(--muted);
+  --line-main: transparent;
+  --line-strong: var(--ink);
+  --accent: #FF6A3D;
+  --accent-soft: rgba(255, 106, 61, .12);
+  --shadow-card: none;
+  --card-glass: blur(26px) saturate(1.4);
+  --capsule-bg: color-mix(in srgb, var(--surface) 94%, transparent);
+  --capsule-line: color-mix(in srgb, var(--ink) 14%, transparent);
 }
-
-
-
-/* =====================================================================
-
-   低饱和优雅重点色系统 (4 套精心调配 · 深浅双模式全域无感热切换)
-
-   ===================================================================== */
-
-/* 1. 焦糖暖橙 (Amber - 柔和暖橙) */
-
-#hsg-root[data-hsg-accent="amber"] {
-
-  --accent: #d0801a;
-
-  --accent-soft: rgba(208, 128, 26, 0.16);
-
-}
-
-#hsg-root[data-hsg-variant="editorial"][data-hsg-accent="amber"] {
-
-  --accent: #9f3c2c;
-
-  --accent-soft: rgba(159, 60, 44, 0.1);
-
-}
-
-
-
-/* 2. 朱砂绯红 (Crimson - 低饱和冷红，克制不刺目) */
-
-#hsg-root[data-hsg-accent="crimson"] {
-
-  --accent: #de4848;
-
-  --accent-soft: rgba(222, 72, 72, 0.16);
-
-}
-
-#hsg-root[data-hsg-variant="editorial"][data-hsg-accent="crimson"] {
-
-  --accent: #b91c1c;
-
-  --accent-soft: rgba(185, 28, 28, 0.1);
-
-}
-
-
-
-/* 3. 战术钢蓝 (Steel - 理性战术灰蓝) */
-
-#hsg-root[data-hsg-accent="steel"] {
-
-  --accent: #4a8bb2;
-
-  --accent-soft: rgba(74, 139, 178, 0.16);
-
-}
-
-#hsg-root[data-hsg-variant="editorial"][data-hsg-accent="steel"] {
-
-  --accent: #2c5e8a;
-
-  --accent-soft: rgba(44, 94, 138, 0.1);
-
-}
-
-
 
 /* =====================================================================
 
@@ -1327,3 +1221,26 @@ html body #hsg-root #hsg-ctl-host .hsg-ctl-toggle {
 html body #hsg-root #hsg-ctl-host .hsg-sel,
 html body #hsg-root #hsg-ctl-host .hsg-q { border-radius: var(--btn-radius, 2px); }
 
+/* =====================================================================
+   与犯罪率章对齐：重点色 / 卡片表面 / 无阴影（必须排在通用 #hsg-root 之后）
+   ===================================================================== */
+#hsg-root[data-hsg-variant="editorial"] {
+  --accent: #2F6B4F;
+  --accent-soft: rgba(47, 107, 79, .08);
+  --zoom-accent: #2F6B4F;
+  --zoom-accent-soft: rgba(47, 107, 79, .08);
+  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card-sub: var(--surface);
+  --line-main: transparent;
+  --shadow-card: none;
+}
+#hsg-root[data-hsg-variant="tactical"] {
+  --accent: #FF6A3D;
+  --accent-soft: rgba(255, 106, 61, .12);
+  --zoom-accent: #FF6A3D;
+  --zoom-accent-soft: rgba(255, 106, 61, .12);
+  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card-sub: var(--surface);
+  --line-main: transparent;
+  --shadow-card: none;
+}

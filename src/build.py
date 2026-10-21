@@ -1010,10 +1010,17 @@ def main():
     CSS_VER = hashlib.sha1(css_bytes).hexdigest()[:8]
     # The shell stamps its own ?v= onto every lazy /app/ module URL, so it must
     # change whenever any app code (view/vendor) changes, not just shell.js.
+    # 章节样式表的内容哈希：外壳把 ?v= 打在模块 URL 上，若样式变了而模块字节没变，
+    # 浏览器会拿旧 view.js（旧样式链接）当缓存，所以先把补丁写进参与哈希的字节里。
+    HSG_CSS_VER = hashlib.sha1((ROOT / "app/housing/app.css").read_bytes()).hexdigest()[:8]
     app_code = b""
     for ap in sorted((ROOT / "app").rglob("*")):
         if ap.is_file() and "/data/" not in ap.as_posix() and ap.suffix in (".js", ".css"):
-            app_code += ap.read_bytes()
+            b = ap.read_bytes()
+            if ap.as_posix().endswith("app/housing/view.js"):
+                b = b.replace(b'/app/housing/app.css"',
+                              f'/app/housing/app.css?v={HSG_CSS_VER}"'.encode())
+            app_code += b
     JS_VER = hashlib.sha1(js_bytes + app_code).hexdigest()[:8]
 
     # fonts first (needs the charset), then CSS can reference the version
@@ -1131,6 +1138,15 @@ def write_site(files):
                 shutil.rmtree(dst)
             shutil.copytree(src, dst,
                             ignore=shutil.ignore_patterns("__pycache__", "*.map"))
+
+    # 章节样式表加内容哈希：Pages/浏览器会缓存无版本号的 URL，改色后仍旧图
+    hv = SITE / "app" / "housing" / "view.js"
+    hc = SITE / "app" / "housing" / "app.css"
+    if hv.exists() and hc.exists():
+        v = hashlib.sha1(hc.read_bytes()).hexdigest()[:8]
+        txt = hv.read_text(encoding="utf-8")
+        txt = txt.replace('/app/housing/app.css"', f'/app/housing/app.css?v={v}"')
+        hv.write_text(txt, encoding="utf-8")
 
     # favicon
     fav = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
