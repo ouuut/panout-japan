@@ -265,6 +265,37 @@ html[data-theme="sage"] #v-quake-viewport {
   --eq-coast: #1A251C !important;
 }
 
+/* 地震视口深色模式：此前完全没写映射，地球底色停在 vendor 的棕黑 #12100d */
+html[data-theme="dark"] #v-quake-viewport {
+  --bg0: #0E0E0C !important;
+  --bg0-h: #171714 !important;
+  --bg1: #1c1b18 !important;
+  --fg: #EDEBE4 !important;
+  --fg1: #FF6A3D !important;
+  --gray: #A09E96 !important;
+  --accent: #FF6A3D !important;
+  --accent-soft: rgba(255, 106, 61, 0.12) !important;
+  --bg-page: #0E0E0C !important;
+  --bg-map: #0E0E0C !important;
+  --text-main: #EDEBE4 !important;
+  --text-muted: #A09E96 !important;
+  --text-faint: #6f6d66 !important;
+  --line-main: rgba(237, 235, 228, 0.12) !important;
+  --panel-bg: rgba(14, 14, 12, 0.88) !important;
+  --panel-bg-soft: rgba(14, 14, 12, 0.72) !important;
+  --panel-shadow: none !important;
+  --bottom-grad: transparent !important;
+  --eq-coast: #EDEBE4 !important;
+}
+
+/* PWA 安装按钮文案是中文「安装」，与日文界面不符，且 Chromium 专属；隐藏 */
+#v-quake-viewport #eq-pwa-install { display: none !important; }
+
+/* 全站零投影纪律：地震浮层所有胶囊一律不带投影 */
+#v-quake-viewport [class*="eq-"] {
+  box-shadow: none !important;
+}
+
 /* 彻底去掉地图下方的渐变遮罩 */
 #v-quake-viewport .eq-bottom {
   background: none !important;
@@ -375,22 +406,6 @@ html[lang="zh"] body, html[lang="zh"] p, html[lang="zh"] li,
 html[lang="zh"] .lede, html[lang="zh"] .section-sub {
   font-family: var(--zh-sans);
   line-height: var(--lh-cjk);
-}
-html[lang="ja"] h1, html[lang="ja"] h2, html[lang="ja"] h3,
-html[lang="ja"] .section-title, html[lang="ja"] .prod-name,
-html[lang="ja"] .beat h3, html[lang="ja"] .notfound h1 {
-  font-family: var(--ja-serif);
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1.2;
-}
-html[lang="zh"] h1, html[lang="zh"] h2, html[lang="zh"] h3,
-html[lang="zh"] .section-title, html[lang="zh"] .prod-name,
-html[lang="zh"] .beat h3, html[lang="zh"] .notfound h1 {
-  font-family: var(--zh-serif);
-  font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1.18;
 }
 html[lang="ja"] .section-title, html[lang="zh"] .section-title { max-width: 18em; }
 
@@ -611,8 +626,8 @@ body.menu-open { overflow: hidden; }
 .mobile-nav-links { display: flex; flex-direction: column; gap: 20px; }
 .mobile-nav-links a { font-family: var(--serif); font-size: 32px; color: var(--ink); }
 .mobile-nav-links a[aria-current="page"] { color: var(--accent); }
-html[lang="ja"] .mobile-nav-links a { font-family: var(--ja-serif); font-weight: 700; }
-html[lang="zh"] .mobile-nav-links a { font-family: var(--zh-serif); font-weight: 700; }
+html[lang="ja"] .mobile-nav-links a { font-family: var(--ja-sans); font-weight: 300; }
+html[lang="zh"] .mobile-nav-links a { font-family: var(--zh-sans); font-weight: 300; }
 .mobile-foot { display: flex; flex-direction: column; gap: 18px; padding-top: 24px; }
 
 /* ---------------- cover ---------------- */
@@ -641,15 +656,15 @@ html[lang="zh"] .mobile-nav-links a { font-family: var(--zh-serif); font-weight:
   max-width: none;
 }
 html[lang="ja"] .cover h1 {
-  font-family: var(--ja-serif);
-  font-weight: 700;
+  font-family: var(--ja-sans);
+  font-weight: 200;
   font-size: var(--fs-h1-ja);
   line-height: 1.3;
   letter-spacing: 0;
 }
 html[lang="zh"] .cover h1 {
-  font-family: var(--zh-serif);
-  font-weight: 700;
+  font-family: var(--zh-sans);
+  font-weight: 200;
   font-size: var(--fs-h1-zh);
   line-height: 1.28;
   letter-spacing: 0;
@@ -1215,8 +1230,53 @@ html body #crm-root[data-crm-variant="tactical"] {
   --accent-soft: rgba(255, 106, 61, .12);
   --shadow-card: none;
 }
-html body #crm-root { --font-sans: var(--ja-sans); --font-num: var(--mono); --title-font: var(--ja-serif); --radius-ui: 2px; --radius-inner: 2px; --radius-card: 4px; }
-html[lang="zh"] body #crm-root { --font-sans: var(--zh-sans); --title-font: var(--zh-serif); }
+html body #crm-root { --font-sans: var(--ja-sans); --font-num: var(--mono); --title-font: var(--ja-sans); --radius-ui: 2px; --radius-inner: 2px; --radius-card: 4px; }
+
+/* 犯罪页筛选控件宿主：全屏地图上方的浮动工具条（此前整组控件从未挂载） */
+html body #crm-root #crm-ctl-host {
+  position: absolute;
+  left: 20px;
+  top: 84px;
+  z-index: 1200;
+  max-width: calc(100% - 40px);
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+html body #crm-root #crm-ctl-host .crm-ctl { gap: 8px; }
+/* 窄屏：整组筛选收进一个抽屉按钮，不再占两行压在图上 */
+html body #crm-root #crm-ctl-host .crm-ctl-toggle {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 350;
+  cursor: pointer;
+}
+@media (max-width: 760px) {
+  html body #crm-root #crm-ctl-host {
+    left: 12px; right: 12px; max-width: none; top: 72px;
+    padding: 4px; border-radius: 18px;
+  }
+  html body #crm-root #crm-ctl-host .crm-ctl-toggle { display: inline-flex; }
+  html body #crm-root #crm-ctl-host .crm-ctl { display: none; }
+  html body #crm-root #crm-ctl-host.is-open .crm-ctl {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 8px 6px 4px;
+  }
+  html body #crm-root #crm-ctl-host.is-open { border-radius: 16px; }
+  html body #crm-root #crm-ctl-host .crm-q { width: 100%; }
+}
+html[lang="zh"] body #crm-root { --font-sans: var(--zh-sans); --title-font: var(--zh-sans); }
 html body #crm-root #crm-lx-capsule .lx-name {
   font-family: var(--title-font) !important;
   font-weight: 700 !important;
@@ -1352,27 +1412,29 @@ html body #crm-root .panel-card { border-radius: 4px !important; }
 }
 
 /* ---- 内阁右侧多卡片面板深浅主题自适应 ---- */
+/* 零投影 + 零结构线：只靠底色区分层级，圆角沿用全站 4px / 2px */
 html[data-theme="dark"] .cab-panel .panel-card {
   background: rgba(18, 18, 16, 0.88) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 html[data-theme="dark"] .cab-panel .stat-box {
   background: rgba(255, 255, 255, 0.04) !important;
-  border-color: rgba(255, 255, 255, 0.06) !important;
+  border: 0 !important;
 }
 html[data-theme="dark"] .cab-panel .back-btn {
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  border: 0 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   color: #edebe4 !important;
 }
 html[data-theme="sage"] .cab-panel .panel-card {
   background: rgba(233, 237, 227, 0.90) !important;
-  border-color: rgba(20, 26, 21, 0.12) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 html[data-theme="sage"] .cab-panel .stat-box {
   background: rgba(0, 0, 0, 0.035) !important;
-  border-color: rgba(0, 0, 0, 0.04) !important;
+  border: 0 !important;
 }
 
 /* ---- 地震左上角控制按钮强制水平居中对齐 ---- */
@@ -1394,9 +1456,9 @@ html[data-theme="sage"] .cab-panel .stat-box {
 
 /* ---- 全站排版体系统一收敛（极细无衬线规范） ---- */
 :root {
-  --font-sans: "Noto Sans JP", "Noto Sans SC", "MiSans VF", "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
-  --ja-sans: "Noto Sans JP", "MiSans VF", "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
-  --zh-sans: "Noto Sans SC", "MiSans VF", "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --font-sans: "Noto Sans JP", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  --ja-sans: "Noto Sans JP", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --zh-sans: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
   --title-font: var(--font-sans);
 }
 
@@ -1421,6 +1483,11 @@ h1, h2, h3, h4, .title, .card-title, .section-title, .hero-panel h1, .hero-panel
   font-weight: 350 !important;
   height: 28px !important;
   min-height: 28px !important;
+  /* 固定 52px 宽会把「メニュー」「インストール」挤成两行再被 28px 高度裁掉 */
+  width: auto !important;
+  min-width: 44px;
+  padding: 0 10px !important;
+  white-space: nowrap !important;
 }
 #v-quake-viewport .eq-pop-val {
   font-family: var(--font-sans) !important;
