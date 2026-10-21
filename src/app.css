@@ -1351,4 +1351,45 @@ html body #crm-root .panel-card { border-radius: 4px !important; }
   .pager { font-size: 11px; }
 }
 
+/* ---- 内阁右侧多卡片面板深浅主题自适应 ---- */
+html[data-theme="dark"] .cab-panel .panel-card {
+  background: rgba(18, 18, 16, 0.88) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
+}
+html[data-theme="dark"] .cab-panel .stat-box {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+html[data-theme="dark"] .cab-panel .back-btn {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #edebe4 !important;
+}
+html[data-theme="sage"] .cab-panel .panel-card {
+  background: rgba(233, 237, 227, 0.90) !important;
+  border-color: rgba(20, 26, 21, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+html[data-theme="sage"] .cab-panel .stat-box {
+  background: rgba(0, 0, 0, 0.035) !important;
+  border-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ---- 地震左上角控制按钮强制水平居中对齐 ---- */
+#eq-menu-row, #eq-menu-items {
+  display: flex !important;
+  align-items: center !important;
+}
+.eq-tool {
+  display: flex !important;
+  align-items: center !important;
+}
+.eq-tool > .eq-sq, .eq-sq-row > .eq-sq, .eq-menu-items > .eq-sq {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
+}
+
 /*__FONT_FACES__*/

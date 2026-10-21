@@ -69,16 +69,17 @@ function detectLang() {
 }
 
 function detectTheme() {
+  const de = (typeof document !== 'undefined') ? document.documentElement.getAttribute('data-theme') : null;
+  if (de === 'sage' || de === 'dark') return de;
   try {
-    const t = localStorage.getItem('pp-theme');
+    const t = localStorage.getItem('pj-theme') || localStorage.getItem('eq-theme');
     if (t === 'sage' || t === 'dark') return t;
   } catch (e) {}
-  const de = document.documentElement.getAttribute('data-theme');
-  if (de === 'sage' || de === 'dark') return de;
   return 'sage';
 }
 
 function injectCss() {
+  const _alignSt = document.createElement('style'); _alignSt.textContent = "\n/* 严格保证左上角工具按钮水平居中对齐 */\n#eq-menu-row, #eq-menu-items {\n  display: flex !important;\n  align-items: center !important;\n}\n.eq-tool {\n  display: flex !important;\n  align-items: center !important;\n}\n.eq-tool > .eq-sq, .eq-sq-row > .eq-sq, .eq-menu-items > .eq-sq {\n  display: flex !important;\n  align-items: center !important;\n  justify-content: center !important;\n  margin: 0 !important;\n  vertical-align: middle !important;\n}\n"; document.head.appendChild(_alignSt);
   if (document.getElementById('qk-style')) return Promise.resolve();
   const libs = forcedBase ? [forcedBase + 'app/quake/vendor/quake-core.css'] : CSS_CANDIDATES.slice();
   return new Promise((resolve) => {
@@ -157,6 +158,7 @@ async function boot(token) {
   }
   if (token !== bootToken || !mounted) return null;
   // Vendor runs synchronously on import against #v-quake-viewport (already in DOM).
+  setQuakeTheme(currentTheme);
   summary = readSummaryFromDom();
   localizeDock();
   [600, 1800].forEach(function (ms) {
@@ -296,7 +298,7 @@ function mountQuake(root, opts) {
     mo = new MutationObserver(() => {
       try {
         const t = document.documentElement.getAttribute('data-theme');
-        if (t && THEME_MAP[t]) viewportEl.setAttribute('data-quake-theme', THEME_MAP[t]);
+        if (t) setQuakeTheme(t);
       } catch (e) {}
     });
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
