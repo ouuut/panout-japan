@@ -84,16 +84,17 @@ const I18N = {
   ja: {
     title: "東京23区 中古マンション価格",
     basisP: "成約価格",
+    meanUnit: "㎡単価（平均）",
     medianUnit: "㎡単価（中央値）",
     p70: "70㎡換算",
     totalMed: "総額（中央値）",
     totalMean: "総額（平均）",
     deals: "成約件数",
-    allUnits: "全サイズの㎡単価",
+    allUnits: "全サイズの㎡単価（平均）",
     band: "60–80㎡の帯",
     rank: "23区中",
-    note: "中央値は「真ん中の取引」。平均は高額取引に引っ張られるため、地図と代表値は中央値を使用。",
-    legend: "㎡単価（万円/㎡）",
+    note: "平均は成約価格の単純平均。高額取引に引っ張られるため、件数の少ない区（n<100）は順位に「参考」を付ける。",
+    legend: "㎡単価（平均・万円/㎡）",
     listHead: "23区 一覧",
     loading: "読み込み中",
     source: "出典：国土交通省 不動産情報ライブラリ（PDL 1.0）／本ページの区別集計は当サイトが加工した参考情報であり、国が作成・公表したものではありません。",
@@ -106,16 +107,17 @@ const I18N = {
   zh: {
     title: "东京23区 二手房（公寓）价格",
     basisP: "成约价格",
+    meanUnit: "㎡单价（平均）",
     medianUnit: "㎡单价（中位数）",
     p70: "70㎡换算",
     totalMed: "总价（中位数）",
     totalMean: "总价（平均）",
     deals: "成约件数",
-    allUnits: "全部面积㎡单价",
+    allUnits: "全部面积㎡单价（平均）",
     band: "60–80㎡ 区间",
     rank: "23区排名",
-    note: "中位数是「中间那笔交易」；平均会被豪宅抬高，因此地图与代表值用中位数。",
-    legend: "㎡单价（万日元/㎡）",
+    note: "平均为成交价的简单平均。高额交易会抬高均值，因此件数少于 100 的区在名次旁标「参考」。",
+    legend: "㎡单价（平均・万日元/㎡）",
     listHead: "23区 一览",
     loading: "加载中",
     source: "数据来源：日本国土交通省「不动产情报图书馆」（PDL 1.0）；本页各区数值为本站加工的参考统计，并非日本政府发布。",
@@ -128,16 +130,17 @@ const I18N = {
   en: {
     title: "Tokyo 23 wards — used apartment prices",
     basisP: "closed prices",
+    meanUnit: "Price per m² (mean)",
     medianUnit: "Price per m² (median)",
     p70: "70 m² equivalent",
     totalMed: "Total (median)",
     totalMean: "Total (mean)",
     deals: "Closed deals",
-    allUnits: "All sizes, per m²",
+    allUnits: "All sizes, per m² (mean)",
     band: "60–80 m² band",
     rank: "of 23 wards",
-    note: "The median is the middle transaction; the mean is pulled up by high-end deals, so the map and headline use the median.",
-    legend: "¥10k per m²",
+    note: "Plain mean of closed prices. High-end deals pull it up, so wards with n<100 carry a reference mark next to their rank.",
+    legend: "¥10k per m² (mean)",
     listHead: "All 23 wards",
     loading: "Loading",
     source: "Source: MLIT Real Estate Information Library (PDL 1.0). Ward figures are statistics compiled by this site, not official government publications.",
@@ -216,7 +219,7 @@ async function fetchJson(name, signal) {
 }
 
 // ---------------------------------------------------------------- scale
-function unitOf(w) { return (w.band && w.band.unit) || w.unit || 0; }
+function unitOf(w) { return (w.band && w.band.unit_mean) || w.unit_mean || w.unit || 0; }
 
 function scaleOf(data) {
   const vals = data.wards.map(unitOf).filter(Boolean).map((v) => Math.log10(v));
@@ -309,13 +312,13 @@ function renderCard() {
   const b = w.band || {};
   el.innerHTML = `
     <div class="c-top"><span class="c-name">${esc(w.ward)}</span><span class="c-rank">${w.rank} / 23${(b.n || 0) < 100 ? " · " + esc(t().thin) : ""}</span></div>
-    <div class="c-big"><b>${fmt(b.p70)}</b><small>${esc(t().wan)} · ${esc(t().p70)}</small></div>
+    <div class="c-big"><b>${fmt(b.p70_mean)}</b><small>${esc(t().wan)} · ${esc(t().p70)}</small></div>
     <p class="c-sub">${esc(t().band)} · n=${fmt(b.n)}</p>
     <div class="c-rows">
-      <div class="c-row"><span>${esc(t().medianUnit)}</span><b>${fmt(Math.round(unitOf(w) / 10000 * 10) / 10)} ${esc(t().perM2)}</b></div>
-      <div class="c-row"><span>${esc(t().totalMed)}</span><b>${fmt(b.total_med)} ${esc(t().wan)}</b></div>
+      <div class="c-row"><span>${esc(t().meanUnit)}</span><b>${fmt(Math.round(unitOf(w) / 10000 * 10) / 10)} ${esc(t().perM2)}</b></div>
       <div class="c-row"><span>${esc(t().totalMean)}</span><b>${fmt(b.total_mean)} ${esc(t().wan)}</b></div>
-      <div class="c-row"><span>${esc(t().allUnits)}</span><b>${fmt(Math.round((w.unit || 0) / 10000 * 10) / 10)} ${esc(t().perM2)}</b></div>
+      <div class="c-row"><span>${esc(t().totalMed)}</span><b>${fmt(b.total_med)} ${esc(t().wan)}</b></div>
+      <div class="c-row"><span>${esc(t().allUnits)}</span><b>${fmt(Math.round((w.unit_mean || 0) / 10000 * 10) / 10)} ${esc(t().perM2)}</b></div>
       <div class="c-row"><span>${esc(t().deals)}</span><b>${fmt(w.n)}</b></div>
     </div>
     <p class="c-note">${esc(t().note)}</p>`;
@@ -324,13 +327,13 @@ function renderCard() {
 function renderList() {
   const el = $("hsg-list");
   if (!el) return;
-  const max = Math.max(...DATA.wards.map((w) => w.band.p70 || 0));
+  const max = Math.max(...DATA.wards.map((w) => w.band.p70_mean || 0));
   el.innerHTML = DATA.wards.map((w) => {
-    const pct = Math.max(3, Math.round(((w.band.p70 || 0) / max) * 100));
+    const pct = Math.max(3, Math.round(((w.band.p70_mean || 0) / max) * 100));
     return `<div class="l-row${w.ward === curWard ? " on" : ""}" data-ward="${esc(w.ward)}" tabindex="0" role="button">
       <span class="l-rk">${w.rank}</span>
       <span>${esc(w.ward)}<span class="l-bar"><i style="width:${pct}%"></i></span></span>
-      <span class="l-val">${fmt(w.band.p70)}<span class="l-unit">${esc(t().wan)}</span></span>
+      <span class="l-val">${fmt(w.band.p70_mean)}<span class="l-unit">${esc(t().wan)}</span></span>
     </div>`;
   }).join("");
   const on = el.querySelector(".l-row.on");

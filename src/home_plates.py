@@ -285,7 +285,7 @@ def housing_svg(wards, muni_poly, w=1000, h=760):
         out.append(f'<text x="{x + dx:.1f}" y="{y + dy:.1f}" text-anchor="{anchor}" '
                    f'class="ward halo ink">{name}</text>')
 
-    top = max(wards, key=lambda x: x["band"]["p70"])
+    top = max(wards, key=lambda x: x["band"]["p70_mean"])
     top_feat = next((f for f in features if f["properties"]["ward_ja"] == top["ward"]), None)
     if top_feat is not None:
         c = make_valid(shape(top_feat["geometry"])).centroid
@@ -293,7 +293,7 @@ def housing_svg(wards, muni_poly, w=1000, h=760):
     else:
         tx, ty = proj.xy(139.735, 35.660)
     out.append(f'<text x="{tx:.1f}" y="{ty:.1f}" text-anchor="middle" class="note halo ink">'
-               f'{top["band"]["p70"]:,} 万円 / 70㎡</text>')
+               f'{top["band"]["p70_mean"]:,} 万円 / 70㎡</text>')
 
     ky = h - 56
     out.append(f'<text x="54" y="{ky}" class="legend">MEDIAN / 万円 per ㎡</text>')

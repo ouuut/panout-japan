@@ -6,7 +6,7 @@ Single source of truth:
   app/quake/data/*      USGS hypocentres + coastline
   app/crime/data/*      Tokyo chome counts + polygons + population
   app/cabinet/data.json polls + cabinets
-  app/housing/data/*   Tokyo 23-ward used-flat medians (MLIT) + ward polygons
+  app/housing/data/*   Tokyo 23-ward used-flat mean prices (MLIT) + ward polygons
   src/*.css, src/shell.js
 
 Output: pre-rendered pages + assets + CSV + sitemap + headers.
@@ -46,8 +46,8 @@ CHOME = json.loads((ROOT / "app/crime/data/chome_poly.json").read_text(encoding=
 MUNI_POLY = json.loads((ROOT / "app/crime/data/muni_poly.json").read_text(encoding="utf-8"))
 HOUSE = json.loads((ROOT / "app/housing/data/wards.json").read_text(encoding="utf-8"))
 HOUSE_WARDS = HOUSE["wards"]
-HOUSE_TOP = max(HOUSE_WARDS, key=lambda w: w["band"]["p70"])
-HOUSE_BOTTOM = min(HOUSE_WARDS, key=lambda w: w["band"]["p70"])
+HOUSE_TOP = max(HOUSE_WARDS, key=lambda w: w["band"]["p70_mean"])
+HOUSE_BOTTOM = min(HOUSE_WARDS, key=lambda w: w["band"]["p70_mean"])
 
 MUNI_BY = {m["ward"]: m for m in MUNI}
 CAB_BY = {c["pm"]: c for c in CAB["cabinets"]}
@@ -436,9 +436,9 @@ COPY = {
                            "14 cabinets, 331 months. Largest monthly swing +20.5."),
     "card.housing.unit": ("中古マンション / 4四半期", "二手公寓 / 4 个季度", "Used flats / 4 quarters"),
     "card.housing.title": ("並べて見る", "比着看", "Compare"),
-    "card.housing.claim": (f"70㎡換算の中央値は、{HOUSE_TOP['ward']} {HOUSE_TOP['band']['p70']:,}万円、{HOUSE_BOTTOM['ward']} {HOUSE_BOTTOM['band']['p70']:,}万円。",
-                           f"70㎡换算中位价：{HOUSE_TOP['ward']} {HOUSE_TOP['band']['p70']:,}万日元，{HOUSE_BOTTOM['ward']} {HOUSE_BOTTOM['band']['p70']:,}万日元。",
-                           f"Median 70 m² equivalent: {HOUSE_TOP['band']['p70']:,} ×10k yen in {HOUSE_TOP['ward']} vs {HOUSE_BOTTOM['band']['p70']:,} ×10k in {HOUSE_BOTTOM['ward']}."),
+    "card.housing.claim": (f"70㎡換算の平均は、{HOUSE_TOP['ward']} {HOUSE_TOP['band']['p70_mean']:,}万円、{HOUSE_BOTTOM['ward']} {HOUSE_BOTTOM['band']['p70_mean']:,}万円。",
+                           f"70㎡换算平均价：{HOUSE_TOP['ward']} {HOUSE_TOP['band']['p70_mean']:,}万日元，{HOUSE_BOTTOM['ward']} {HOUSE_BOTTOM['band']['p70_mean']:,}万日元。",
+                           f"Mean 70 m² equivalent: {HOUSE_TOP['band']['p70_mean']:,} ×10k yen in {HOUSE_TOP['ward']} vs {HOUSE_BOTTOM['band']['p70_mean']:,} ×10k in {HOUSE_BOTTOM['ward']}."),
 
     "q.eyebrow": ("01 / 引いて見る", "01 / 拉远看", "01 / Pull back"),
     "q.h1": ("地震 — <em>40,079</em>の震源", "地震 — <em>40,079</em>个震源", "Earthquakes — <em>40,079</em> hypocentres"),
@@ -498,9 +498,9 @@ COPY = {
                "Monthly approval from 1998 to 2026, joined across cabinets into one line."),
     "h.eyebrow": ("04 / 並べて見る", "04 / 比着看", "04 / Compare"),
     "h.h1": ("住宅 — <em>23</em>区の価格", "住宅 — <em>23</em>区价格", "Housing — <em>23</em> ward prices"),
-    "h.lede": ("中古マンションの成約価格。60–80㎡に揃え、㎡単価の中央値を23区で比べる。",
-               "二手公寓成约价格。统一到 60–80㎡，比较 23 区的㎡单价中位数。",
-               "Closed prices for used flats, held to 60–80 m², compared across the 23 wards by median price per m²."),
+    "h.lede": ("中古マンションの成約価格。60–80㎡に揃え、㎡単価の平均を23区で比べる。",
+               "二手公寓成约价格。统一到 60–80㎡，比较 23 区的㎡单价平均值。",
+               "Closed prices for used flats, held to 60–80 m², compared across the 23 wards by mean price per m²."),
     "b.stat.polls": ("調査", "调查", "Polls"),
     "b.stat.months": ("月", "月", "Months"),
     "b.stat.cabinets": ("内閣", "内阁", "Cabinets"),
@@ -963,8 +963,8 @@ def build_housing():
 </main>"""
     jsonld = {
         "@context": "https://schema.org", "@type": "Dataset",
-        "name": f"Tokyo 23 wards — used apartment median prices, {HOUSE['basis']}",
-        "description": "Median price per square metre and 70 m² equivalent for used apartments (60–80 m²) in Tokyo's 23 wards, derived from MLIT Real Estate Information Library transaction and closed-price records.",
+        "name": f"Tokyo 23 wards — used apartment mean prices, {HOUSE['basis']}",
+        "description": "Mean price per square metre and 70 m² equivalent for used apartments (60–80 m²) in Tokyo's 23 wards, derived from MLIT Real Estate Information Library transaction and closed-price records.",
         "temporalCoverage": "2025-04-01/2026-03-31",
         "spatialCoverage": "Tokyo 23 wards",
         "license": "https://www.digital.go.jp/resources/open_data/public_data_license_v1.0",
@@ -972,7 +972,7 @@ def build_housing():
         "url": SITE_URL + "/housing/",
     }
     return page("/housing/", f"住宅 — 23区の価格 | {BRAND}",
-                "東京23区の中古マンション成約価格。60–80㎡に揃えた㎡単価の中央値と70㎡換算で区を比べる。国交省データを加工。",
+                "東京23区の中古マンション成約価格。60–80㎡に揃えた㎡単価の平均と70㎡換算で区を比べる。国交省データを加工。",
                 body, "housing", jsonld, fullscreen=True)
 
 
@@ -1213,7 +1213,7 @@ def write_meta(font_meta):
 - [地震](/quake/): 2000–2026.07、M4以上の震源40,079点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。
 - [内閣](/cabinet/): 1998–2026、644調査、331か月、14内閣。
-- [住宅](/housing/): 2025Q2–2026Q1、東京23区、中古マンション成約21,848件の㎡単価中央値。
+- [住宅](/housing/): 2025Q2–2026Q1、東京23区、中古マンション成約21,848件の㎡単価平均。
 
 Build: {BUILD_STAMP}. Sources: USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
 """, encoding="utf-8")

@@ -150,14 +150,17 @@ def summarise(q, periods):
             "ward": name,
             "n": len(rows),
             "unit": round(median(units)) if units else None,
+            "unit_mean": round(st.mean(units)) if units else None,
             "total_med": round(median(prices)) if prices else None,
             "total_mean": round(st.mean(prices)) if prices else None,
             "band": {
                 "n": len(band),
                 "unit": round(median(band_units)) if band_units else None,
+                "unit_mean": round(st.mean(band_units)) if band_units else None,
                 "total_med": round(median(band_prices)) if band_prices else None,
                 "total_mean": round(st.mean(band_prices)) if band_prices else None,
                 "p70": round(median(band_units) * 70 / 1e4) if band_units else None,
+                "p70_mean": round(st.mean(band_units) * 70 / 1e4) if band_units else None,
             },
         })
     wards.sort(key=lambda w: -(w["unit"] or 0))
@@ -218,7 +221,7 @@ def main(argv=None):
         "license": "PDL 1.0 (https://www.digital.go.jp/resources/open_data/public_data_license_v1.0)",
         "definition": {
             "type": TYPE_USED, "category": CATEGORY_CLOSED,
-            "band": [BAND_MIN, BAND_MAX], "statistic": "median",
+            "band": [BAND_MIN, BAND_MAX], "statistic": "mean",
         },
         "totals": {"wards": len(wards), "trades": total},
         "wards": wards,
