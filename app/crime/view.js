@@ -582,6 +582,7 @@ const CF_R8 = { total: "r8", nb: "r8nb", bi: "r8bi", r: "r8r", v: "r8v", o: "r8o
 const MLABEL = { ...(I18N[currentLang] || I18N.zh).metrics };
 
 let map = null, muniLayer = null, chomeLayer = null, labelLayer = null, parentBoundaryLayer = null;
+let userNavigated = false; // 用户已主动点选：延迟的首次 fit 不要再把视角拽回全局
 let zoomSliderRender = null;
 let curSelected = null;
 let PTS = [], POLY, MUNI_POLY, MUNI;
@@ -1101,6 +1102,7 @@ function initMap() {
         muniLayer.setStyle(muniLayer.options.style);
         lastAnchor = e.latlng;
         showToast(f.properties.ward_ja, "ward");
+        flyToFeature(layer, 12);
       });
     }
   });
@@ -1134,6 +1136,7 @@ function initMap() {
         highlightParentBoundary(f.properties.ward);
         lastAnchor = e.latlng;
         showToast(f.properties.name, "chome");
+        flyToFeature(layer, 15.25);
       });
     }
   });
@@ -1154,7 +1157,10 @@ function initMap() {
     L.marker(pos, { icon, interactive: false }).addTo(labelLayer);
   }
   labelLayer.addTo(map);
-  const gateLabels = () => { try { const z = map.getZoom(); if (z < 10) { if (map.hasLayer(labelLayer)) map.removeLayer(labelLayer); } else if (!map.hasLayer(labelLayer)) labelLayer.addTo(map); } catch (e) {} };
+  // 底图在 z13 以上自己印区名，再叠我们的标签就会重影
+  const gateLabels = () => { try { const z = map.getZoom(); const want = z >= 10 && z < 13;
+      if (want && !map.hasLayer(labelLayer)) labelLayer.addTo(map);
+      else if (!want && map.hasLayer(labelLayer)) map.removeLayer(labelLayer); } catch (e) {} };
   map.on("zoomend", gateLabels); gateLabels();
 
   applyMode();
@@ -1176,6 +1182,28 @@ function highlightParentBoundary(wardName) {
     },
     interactive: false
   }).addTo(map);
+}
+
+// 点击区域后平滑飞到该区域：留出右侧卡片/底部抽屉的余量，缩放到刚好装下
+function flyToFeature(layer, maxZoom) {
+  if (!map || !layer || !layer.getBounds) return;
+  userNavigated = true;
+  let b = null;
+  try { b = layer.getBounds(); } catch (e) { return; }
+  if (!b || (b.isValid && !b.isValid())) return;
+  const size = map.getSize();
+  const desktop = size.x >= 900;
+  const opts = {
+    paddingTopLeft: desktop ? [56, 84] : [20, 84],
+    paddingBottomRight: desktop ? [404, 56] : [20, Math.round(size.y * 0.46)],
+    maxZoom: desktop ? maxZoom : Math.max(9, maxZoom - 1),
+    animate: true,
+    duration: 0.9,
+    easeLinearity: 0.2,
+  };
+  let reduce = false;
+  try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+  if (reduce) map.fitBounds(b, opts); else map.flyToBounds(b, opts);
 }
 
 // 左侧竖向缩放拖动条：拖动/点击定位，橙色填充，双向同步地图缩放
@@ -1457,8 +1485,8 @@ export async function mountCrime(el, opts) {
     if (my !== bootSeq) { try { map.remove(); } catch (e) {} map = null; return false; }
     initZoomSlider();
     map.on('move zoom', refreshCallout);
-    try { requestAnimationFrame(() => setTimeout(() => { try { if (map) { map.invalidateSize(); fitTokyo23(); } } catch (e) {} }, 60)); } catch (e) {}
-    try { setTimeout(() => { try { if (map) { map.invalidateSize(); fitTokyo23(); } } catch (e) {} }, 1500); } catch (e) {}
+    try { requestAnimationFrame(() => setTimeout(() => { try { if (map) { map.invalidateSize(); if (!userNavigated) fitTokyo23(); } } catch (e) {} }, 60)); } catch (e) {}
+    try { setTimeout(() => { try { if (map) { map.invalidateSize(); if (!userNavigated) fitTokyo23(); } } catch (e) {} }, 1500); } catch (e) {}
     $el('crm-card').addEventListener('click', onCardClick);
     try { if (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) { /* mobile: 卡片默认收起，点选才展开 */ } else selectChomeByName('新宿区歌舞伎町2丁目', false, true); } catch (e) { selectChomeByName('新宿区歌舞伎町2丁目', false, true); }
     applyThemeVariant(currentVariant);
@@ -1480,7 +1508,7 @@ export function unmountCrime() {
   if (aborter) { try { aborter.abort(); } catch (e) {} aborter = null; }
   if (docClickBound) { document.removeEventListener('click', onDocClick); docClickBound = false; }
   try { if (map) { const m = map; map = null; try { m.off(); } catch (e) {} try { m.eachLayer((l) => { try { m.removeLayer(l); } catch (e) {} }); } catch (e) {} try { m.remove(); } catch (e) {} } } catch (e) {}
-  map = null; muniLayer = null; chomeLayer = null; labelLayer = null; parentBoundaryLayer = null;
+  map = null; muniLayer = null; chomeLayer = null; labelLayer = null; parentBoundaryLayer = null; userNavigated = false;
   curSelected = null; lastAnchor = null;
   const lk = document.getElementById('crm-leaflet-css'); if (lk) lk.remove();
   const st = document.getElementById('crm-style'); if (st) st.remove();
