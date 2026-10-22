@@ -1155,9 +1155,9 @@
 #hsg-root{position:relative;width:100%;height:100%;min-height:420px;overflow:hidden;background:var(--bg-map);color:var(--text-main);isolation:isolate;z-index:0}
 #hsg-root{--stage:var(--bg);--faint:color-mix(in srgb,var(--muted) 72%,transparent);--bg-page:var(--bg);--bg-glass:var(--surface);--bg-map:var(--stage);--bg-card:var(--surface);--bg-card-sub:var(--surface);--bg-hover:var(--surface);--text-main:var(--ink);--text-muted:var(--muted);--text-faint:var(--faint);--line-main:color-mix(in srgb,var(--ink) 14%,transparent);--line-strong:var(--ink);--accent:var(--accent);--accent-soft:var(--accent-soft);--zoom-accent:var(--accent);--zoom-accent-soft:var(--accent-soft);--shadow-card:0 4px 20px rgba(0,0,0,.10);--card-glass:blur(26px) saturate(1.6);--capsule-bg:var(--bg);--capsule-line:color-mix(in srgb,var(--ink) 14%,transparent)}
 .hsg-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.hsg-sel,.hsg-q{height:32px;box-sizing:border-box;background:var(--surface);border:0;border-radius:999px;color:var(--ink);font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;padding:0 14px;outline:none}
+.hsg-q{height:32px;box-sizing:border-box;background:var(--surface);border:0;border-radius:999px;color:var(--ink);font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;padding:0 14px;outline:none}
 .hsg-q{width:190px}
-.hsg-sel:focus-visible,.hsg-q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}/* MOBILE */
+.hsg-q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}/* MOBILE */
 
 @media (max-width: 640px) {
 
@@ -1219,7 +1219,6 @@ html body #hsg-root #hsg-ctl-host .hsg-ctl-toggle {
   html body #hsg-root #hsg-ctl-host.is-open { border-radius: 4px; }
   html body #hsg-root #hsg-ctl-host .hsg-q { width: 100%; }
 }
-html body #hsg-root #hsg-ctl-host .hsg-sel,
 html body #hsg-root #hsg-ctl-host .hsg-q { border-radius: var(--btn-radius, 2px); }
 
 /* =====================================================================
@@ -1246,40 +1245,43 @@ html body #hsg-root #hsg-ctl-host .hsg-q { border-radius: var(--btn-radius, 2px)
   --shadow-card: none;
 }
 
-/* 数据期间徽标：常驻在工具条最左，窄屏收起筛选后仍然可见 */
-html body #hsg-root #hsg-ctl-host .hsg-period {
-  display: inline-flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 10px 0 4px;
-  margin-right: 2px;
-  font-family: var(--font-num);
-  font-size: 11px;
-  letter-spacing: .03em;
-  color: color-mix(in srgb, var(--ink) 78%, transparent);
-  white-space: nowrap;
-  border-right: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
-  cursor: help;
+/* ---------------- 工具条下拉（替换原生 select / 二选一按钮组） ---------------- */
+html body #hsg-root #hsg-ctl-host .hsg-dd { position: relative; }
+html body #hsg-root #hsg-ctl-host .hsg-dd-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 30px; padding: 0 10px 0 12px;
+  border: 0; border-radius: 2px;
+  background: var(--surface); color: var(--ink);
+  font-family: var(--font-sans); font-size: 13px; font-weight: 350;
+  letter-spacing: .01em; cursor: pointer; white-space: nowrap;
+  transition: background .15s ease;
 }
-@media (max-width: 640px) {
-  html body #hsg-root #hsg-ctl-host .hsg-period { padding-left: 8px; font-size: 10.5px; }
-}
-
-/* 右侧数据面板改成实心底：满屏橙色时毛玻璃会把整块面板也染成橙色 */
-#hsg-root #hsg-card {
-  --bg-card: var(--bg);
-  --bg-card-sub: color-mix(in srgb, var(--ink) 7%, var(--bg));
-  --card-glass: none;
-}
-#hsg-root #hsg-card .panel-card {
+html body #hsg-root #hsg-ctl-host .hsg-dd-btn:hover { background: color-mix(in srgb, var(--ink) 10%, var(--bg)); }
+html body #hsg-root #hsg-ctl-host .hsg-dd.open .hsg-dd-btn { background: color-mix(in srgb, var(--ink) 16%, var(--bg)); }
+html body #hsg-root #hsg-ctl-host .hsg-dd-btn .dd-caret { opacity: .55; transition: transform .18s ease; }
+html body #hsg-root #hsg-ctl-host .hsg-dd.open .dd-caret { transform: rotate(180deg); }
+html body #hsg-root #hsg-ctl-host .hsg-dd-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%;
+  padding: 4px; z-index: 1400;
   background: var(--bg);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  border-radius: 4px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .38);
+  display: none;
 }
+html body #hsg-root #hsg-ctl-host .hsg-dd.open .hsg-dd-menu { display: block; }
+html body #hsg-root #hsg-ctl-host .dd-opt {
+  display: block; width: 100%; text-align: left;
+  padding: 7px 12px; border: 0; border-radius: 2px;
+  background: transparent; color: var(--ink);
+  font-family: var(--font-sans); font-size: 13px; font-weight: 350;
+  cursor: pointer; white-space: nowrap;
+}
+html body #hsg-root #hsg-ctl-host .dd-opt:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+html body #hsg-root #hsg-ctl-host .dd-opt.on { background: var(--accent); color: var(--bg); }
 
-/* 左下分布仪也用实心底，和工具条、右侧面板统一 */
-#hsg-root #hsg-legend-instrument {
-  background: var(--bg);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+/* 数据期间：属于信息，放在左下分布仪里 */
+#hsg-root .inst-period {
+  font-family: var(--font-num); font-size: 10.5px; letter-spacing: .03em;
+  color: var(--text-muted); margin: 1px 0 5px;
 }

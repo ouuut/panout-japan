@@ -11,7 +11,7 @@ const SKELETON = `
 <div id="hsg-map"></div>
 <div id="hsg-drop"></div>
 <div id="hsg-zoom-slider"><span class="zs-cap" id="hsg-zsPlus" title="+">+</span><div class="zs-track" id="hsg-zsTrack"><div class="zs-fill" id="hsg-zsFill"></div><div class="zs-thumb" id="hsg-zsThumb"></div></div><span class="zs-cap" id="hsg-zsMinus" title="-">-</span></div>
-<aside id="hsg-legend-instrument"><div class="inst-header"><span class="inst-title" id="hsg-inst-title"></span><span class="inst-readout" id="hsg-inst-readout"></span></div><div class="inst-hist-wrap"><svg id="hsg-hist-svg" viewBox="0 0 332 22" preserveAspectRatio="none"></svg><div id="hsg-hist-cursor"></div></div><div class="inst-bar" id="hsg-legendBarDiv"></div><div class="inst-ticks" id="hsg-legendTicks"></div></aside>
+<aside id="hsg-legend-instrument"><div class="inst-header"><span class="inst-title" id="hsg-inst-title"></span><span class="inst-readout" id="hsg-inst-readout"></span></div><div class="inst-period" id="hsg-inst-period"></div><div class="inst-hist-wrap"><svg id="hsg-hist-svg" viewBox="0 0 332 22" preserveAspectRatio="none"></svg><div id="hsg-hist-cursor"></div></div><div class="inst-bar" id="hsg-legendBarDiv"></div><div class="inst-ticks" id="hsg-legendTicks"></div></aside>
 <aside id="hsg-card"></aside>
 <svg id="hsg-lx-svg"></svg><div id="hsg-lx-capsule"></div>`;
 
@@ -25,7 +25,7 @@ const I18N = {
     unitRate: "万円/㎡", unitTotal: "万円",
     deals: "成約件数", meanTotal: "平均成約価格", meanUnit: "平均㎡単価",
     breakdown: "内訳", backTo: "← 戻る", top5TownTitle: "区内で高い町", top5WardTitle: "東京で高い区市町村",
-    byValueDesc: "平均㎡単価の高い順", noTownData: "データなし",
+    byValueDesc: (m) => `${m}の高い順`, noTownData: "データなし",
     instTitle: "町名の分布", instMedian: "東京中央値", instMax: "以上",
     rankExtreme: "最高水準", rankHigh: "高水準", rankNormal: "標準",
     period: "2025Q2–2026Q1 成約", periodTip: "直近4四半期（2025年4月–2026年3月）の成約価格。それより新しい四半期はまだ公表されていません。",
@@ -48,7 +48,7 @@ const I18N = {
     unitRate: "万日元/㎡", unitTotal: "万日元",
     deals: "成交笔数", meanTotal: "平均成交价", meanUnit: "平均㎡单价",
     breakdown: "明细", backTo: "← 返回", top5TownTitle: "区内最贵的町", top5WardTitle: "东京最贵的区市町村",
-    byValueDesc: "按平均㎡单价排序", noTownData: "无数据",
+    byValueDesc: (m) => `按${m}排序`, noTownData: "无数据",
     instTitle: "町名分布", instMedian: "东京中位数", instMax: "以上",
     rankExtreme: "最高档", rankHigh: "高档", rankNormal: "标准",
     period: "2025Q2–2026Q1 成交", periodTip: "最近四个季度（2025年4月–2026年3月）的成交价；更新的季度尚未公布。",
@@ -71,7 +71,7 @@ const I18N = {
     unitRate: "¥10k/m²", unitTotal: "¥10k",
     deals: "Deals", meanTotal: "Mean sale price", meanUnit: "Mean price/m²",
     breakdown: "Breakdown", backTo: "← Back", top5TownTitle: "Priciest towns in ward", top5WardTitle: "Priciest municipalities",
-    byValueDesc: "by mean price per m²", noTownData: "No data",
+    byValueDesc: (m) => `by ${m}`, noTownData: "No data",
     instTitle: "Town distribution", instMedian: "Tokyo median", instMax: "+",
     rankExtreme: "top tier", rankHigh: "high", rankNormal: "typical",
     period: "2025Q2–2026Q1 closed", periodTip: "Latest four quarters (Apr 2025 – Mar 2026) of closed prices; newer quarters are not published yet.",
@@ -479,7 +479,7 @@ function rankingHtml() {
     <div class="panel-card">
       <div class="card-head" style="margin-bottom:4px">
         <div style="font-size:13px;font-weight:var(--fw-mid);color:var(--text-main)">${t().top5WardTitle}</div>
-        <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-num)">${t().byValueDesc}</span>
+        <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-num)">${t().byValueDesc(t().metrics[metric])}</span>
       </div>
       <div class="rank-card-list">
         ${list.map((x, i) => `
@@ -602,7 +602,7 @@ function refreshCallout() {
 
 function selectTown(i, fly, anchor) {
   selTown = i; selWard = null; mode = "chome";
-  $qa("[data-hsg-mode]").forEach((b) => b.classList.toggle("on", b.getAttribute("data-hsg-mode") === "chome"));
+  syncDropdown("mode", t().modes.chome);
   applyMode();
   townLayer.setStyle(styleTown);
   renderCard();
@@ -617,7 +617,7 @@ function selectTown(i, fly, anchor) {
 
 function selectWardByName(name, anchor) {
   selWard = name; selTown = null; mode = "muni";
-  $qa("[data-hsg-mode]").forEach((b) => b.classList.toggle("on", b.getAttribute("data-hsg-mode") === "muni"));
+  syncDropdown("mode", t().modes.muni);
   applyMode();
   wardLayer.setStyle(styleWard);
   renderCard();
@@ -629,47 +629,88 @@ function selectWardByName(name, anchor) {
 }
 
 // ---- controls -----------------------------------------------------------
+const DD_CARET = '<svg class="dd-caret" viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>';
+
+function ddHtml(key, current, items) {
+  const opts = items.map(([k, n]) =>
+    `<button type="button" class="dd-opt${k === current ? " on" : ""}" data-dd-key="${k}" role="option" aria-selected="${k === current}">${esc(n)}</button>`).join("");
+  return `<div class="hsg-dd" data-dd="${key}">`
+    + `<button type="button" class="hsg-dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="dd-label">${esc(items.find((x) => x[0] === current)?.[1] || "")}</span>${DD_CARET}</button>`
+    + `<div class="hsg-dd-menu" role="listbox">${opts}</div></div>`;
+}
+
 function controlsHtml() {
   const t0 = t();
-  const opts = Object.entries(t0.metrics).map(([k, n]) => `<option value="${k}"${k === metric ? " selected" : ""}>${esc(n)}</option>`).join("");
-  return `<select id="hsg-metric" class="hsg-sel" title="${esc(t0.tooltipMetric)}">${opts}</select>`
-    + `<div class="seg" role="group"><button data-hsg-mode="muni" class="${mode === "muni" ? "on" : ""}">${esc(t0.modes.muni)}</button><button data-hsg-mode="chome" class="${mode === "chome" ? "on" : ""}">${esc(t0.modes.chome)}</button></div>`
+  return ddHtml("metric", metric, Object.entries(t0.metrics))
+    + ddHtml("mode", mode, [["muni", t0.modes.muni], ["chome", t0.modes.chome]])
     + `<input id="hsg-q" class="hsg-q" type="search" placeholder="${esc(t0.searchPh)}" autocomplete="off">`;
 }
 
 function mountControls(box) {
   const label = curLang === "zh" ? "筛选" : curLang === "en" ? "Filter" : "絞り込み";
-  box.innerHTML = `<span class="hsg-period" title="${esc(t().periodTip)}">${esc(t().period)}</span>`
-    + `<button type="button" class="hsg-ctl-toggle" aria-expanded="false" aria-label="${label}"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg><span>${label}</span></button>`
+  box.innerHTML = `<button type="button" class="hsg-ctl-toggle" aria-expanded="false" aria-label="${label}"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg><span>${label}</span></button>`
     + `<div class="hsg-ctl">${controlsHtml()}</div>`;
   const tg = box.querySelector(".hsg-ctl-toggle");
   if (tg) tg.addEventListener("click", () => { const open = box.classList.toggle("is-open"); tg.setAttribute("aria-expanded", String(open)); });
   bindControls();
 }
 
+function syncDropdown(key, label) {
+  const dd = document.querySelector('.hsg-dd[data-dd="' + key + '"]');
+  if (!dd) return;
+  const lab = dd.querySelector(".dd-label");
+  if (lab && label != null) lab.textContent = label;
+  dd.querySelectorAll(".dd-opt").forEach((o) => {
+    const on = key === "metric" ? o.getAttribute("data-dd-key") === metric : o.getAttribute("data-dd-key") === mode;
+    o.classList.toggle("on", on);
+    o.setAttribute("aria-selected", String(on));
+  });
+}
+
+function closeDropdowns(except) {
+  $qa(".hsg-dd.open").forEach((dd) => { if (dd !== except) { dd.classList.remove("open"); const b = dd.querySelector(".hsg-dd-btn"); if (b) b.setAttribute("aria-expanded", "false"); } });
+}
+
 function bindControls() {
-  const m = $el("hsg-metric");
-  if (m && !m.__hsgBound) {
-    m.__hsgBound = true;
-    m.addEventListener("change", (e) => {
-      metric = e.target.value;
-      buildScale(); updateLegendBar(); updateHistogram();
-      if (mode === "muni") wardLayer.setStyle(styleWard); else townLayer.setStyle(styleTown);
-      renderCard();
+  $qa(".hsg-dd").forEach((dd) => {
+    const key = dd.getAttribute("data-dd");
+    const btn = dd.querySelector(".hsg-dd-btn");
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = !dd.classList.contains("open");
+      closeDropdowns(dd);
+      dd.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
     });
-  }
-  $qa("[data-hsg-mode]").forEach((b) => {
-    if (b.__hsgBound) return; b.__hsgBound = true;
-    b.addEventListener("click", () => {
-      const m0 = b.getAttribute("data-hsg-mode");
-      $qa("[data-hsg-mode]").forEach((x) => x.classList.remove("on"));
-      b.classList.add("on");
-      mode = m0;
-      if (mode === "muni") { selTown = null; applyMode(); wardLayer.setStyle(styleWard); renderCard(); }
-      else { selWard = null; applyMode(); townLayer.setStyle(styleTown); renderCard(); }
-      buildScale(); updateLegendBar(); updateHistogram();
+    dd.querySelectorAll(".dd-opt").forEach((opt) => {
+      opt.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const v = opt.getAttribute("data-dd-key");
+        dd.classList.remove("open");
+        btn.setAttribute("aria-expanded", "false");
+        if (key === "metric") {
+          if (v === metric) return;
+          metric = v;
+          syncDropdown("metric", t().metrics[v]);
+          buildScale(); updateLegendBar(); updateHistogram();
+          if (mode === "muni") wardLayer.setStyle(styleWard); else townLayer.setStyle(styleTown);
+          renderCard();
+        } else if (key === "mode") {
+          if (v === mode) return;
+          mode = v;
+          syncDropdown("mode", v === "muni" ? t().modes.muni : t().modes.chome);
+          if (mode === "muni") { selTown = null; applyMode(); wardLayer.setStyle(styleWard); renderCard(); }
+          else { selWard = null; applyMode(); townLayer.setStyle(styleTown); renderCard(); }
+          buildScale(); updateLegendBar(); updateHistogram();
+        }
+      });
     });
   });
+  if (!window.__hsgDdBound) {
+    window.__hsgDdBound = true;
+    document.addEventListener("click", () => closeDropdowns(null));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDropdowns(null); });
+  }
   const q = $el("hsg-q");
   if (q && !q.__hsgBound) {
     q.__hsgBound = true;
@@ -805,5 +846,7 @@ function setLanguage(lang) {
   curLang = lang;
   if (rootEl) rootEl.lang = lang;
   if (controlsRoot) mountControls(controlsRoot);
+  const per = $el("hsg-inst-period");
+  if (per) { per.textContent = t().period; per.title = t().periodTip; }
   if (SCALE) { updateLegendBar(); updateHistogram(); renderCard(); }
 }
