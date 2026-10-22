@@ -542,12 +542,14 @@ function flyToBounds(b, maxZoom) {
     paddingBottomRight: desktop ? [404, 56] : [20, Math.round(size.y * 0.46)],
     maxZoom: desktop ? maxZoom : Math.max(9, maxZoom - 1),
     animate: true,
-    duration: 0.9,
-    easeLinearity: 0.2,
+    duration: 0.65,
+    easeLinearity: 0.45,
   };
   let reduce = false;
   try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
-  if (reduce) map.fitBounds(b, opts); else map.flyToBounds(b, opts);
+  // 让本次点击的样式/卡片先落一帧，再开始动画，避免「先卡一下再走」
+  const go = () => { if (reduce) map.fitBounds(b, opts); else map.flyToBounds(b, opts); };
+  requestAnimationFrame(() => requestAnimationFrame(go));
 }
 
 function townBounds(i) {

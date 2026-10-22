@@ -1264,3 +1264,15 @@ html body #hsg-root #hsg-ctl-host .hsg-period {
 @media (max-width: 640px) {
   html body #hsg-root #hsg-ctl-host .hsg-period { padding-left: 8px; font-size: 10.5px; }
 }
+
+/* 右侧数据面板改成实心底：满屏橙色时毛玻璃会把整块面板也染成橙色 */
+#hsg-root #hsg-card {
+  --bg-card: var(--bg);
+  --bg-card-sub: color-mix(in srgb, var(--ink) 7%, var(--bg));
+  --card-glass: none;
+}
+#hsg-root #hsg-card .panel-card {
+  background: var(--bg);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
