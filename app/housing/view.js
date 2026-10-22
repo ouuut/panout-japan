@@ -238,7 +238,7 @@ function styleWard(f) {
 }
 
 function initMap() {
-  map = L.map("hsg-map", { zoomControl: false, preferCanvas: true, zoomSnap: 0.25, zoomDelta: 0.5 }).setView([35.685, 139.75], 11);
+  map = L.map("hsg-map", { zoomControl: false, zoomSnap: 0.25, zoomDelta: 0.5 }).setView([35.685, 139.75], 11);
   L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© 国土地理院" }).addTo(map);
   L.control.scale({ imperial: false, position: "bottomleft" }).addTo(map);
 

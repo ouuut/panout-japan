@@ -1076,7 +1076,6 @@ function initMap() {
   const cfg = VARIANTS[currentVariant];
   map = L.map("crm-map", {
     zoomControl: false,
-    preferCanvas: true,
     zoomSnap: 0.25,
     zoomDelta: 0.5
   }).setView([35.685, 139.75], 11);

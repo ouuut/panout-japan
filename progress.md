@@ -447,3 +447,10 @@
 - 根因：Leaflet 的 canvas 渲染器在缩放动画期间给整个 canvas 加 CSS transform 缩放，3px 的选中描边被一起放大（z11→z13 是 4 倍，视觉上十几像素的粗框），动画结束重绘才回到 3px。
 - 改法：`flying` 标志 —— 程序化飞入（点击/搜索定位）开始时把选中要素的 `weight` 置 0，`moveend` 后恢复；另有 1.4s 兜底定时器防止 moveend 丢失。手动滚轮缩放不受影响（只有一帧级别放大，看不出来）。
 - 住宅 `styleTown`/`styleWard`、犯罪 `muniLayer`/`chomeLayer`/`parentBoundaryLayer` 都走同一套 `restyleSel()`。
+
+## 2026-10-22 · M4.19k-6 地图渲染换 SVG（卡顿根因）
+
+- 实测：canvas 渲染器下，一次带动画的缩放主线程空转 200–300ms，点击飞入 700–1100ms（rAF 出现 1s 空洞）；事件处理器本身只有 13–15ms，说明卡在绘制/合成，不是 JS。
+- 根因：Leaflet 的 canvas 是一整张 3300×2168 位图，缩放动画期间整体 CSS 缩放，Chrome 要重栅格化这张大位图；面积越大越卡（视口 3300×2168 → 708ms，2280×1508 → 264ms）。
+- 改法：住宅/犯罪都去掉 `preferCanvas: true`，改用 Leaflet 默认 SVG 渲染。实测同一操作：住宅飞入 48ms（原 700+），单步缩放 42ms（原 299）；犯罪飞入 167ms、单步缩放 113ms（5,198 条路径，仍远好于 canvas）。
+- 附带：`flying` 描边抑制继续有效（SVG 同样在动画期间被缩放）。
