@@ -1115,7 +1115,7 @@ function initMap() {
         muniLayer.setStyle(muniLayer.options.style);
         lastAnchor = e.latlng;
         showToast(f.properties.ward_ja, "ward");
-        flyToFeature(layer, 12);
+        flyToFeature(layer, 11.75);
       });
     }
   });
@@ -1149,7 +1149,7 @@ function initMap() {
         highlightParentBoundary(f.properties.ward);
         lastAnchor = e.latlng;
         showToast(f.properties.name, "chome");
-        flyToFeature(layer, 15.25);
+        flyToFeature(layer, 13.5);
       });
     }
   });
@@ -1303,7 +1303,7 @@ function selectChomeByName(name, shouldFly = false, silent = false) {
   if (shouldFly && window.innerWidth > 900) {
     const pt = PTS.find(p => p.n === name);
     if (pt && pt.lat) {
-      map.setView([pt.lat, pt.lng], 14, { animate: true });
+      map.setView([pt.lat, pt.lng], 13.5, { animate: true });
       map.once("moveend", () => { lastAnchor = L.latLng(pt.lat, pt.lng); showToast(name, "chome"); });
     } else if (f.geometry) {
       map.fitBounds(L.geoJSON(f).getBounds(), { padding: [50, 50] });

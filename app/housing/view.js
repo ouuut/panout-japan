@@ -608,7 +608,7 @@ function selectTown(i, fly, anchor) {
   renderCard();
   const x = TOWNS[i];
   if (x.n) moveHistCursor(townVal(x), townName(x));
-  if (fly) flyToBounds(townBounds(i), 14);
+  if (fly) flyToBounds(townBounds(i), 13);
   if (anchor || fly) {
     const b = townBounds(i);
     showCallout(townName(x), "chome", x.n ? townVal(x) : null, anchor || (b && b.getCenter()));
@@ -623,7 +623,7 @@ function selectWardByName(name, anchor) {
   renderCard();
   const v = wardVal(name);
   if (v != null) moveHistCursor(v, name);
-  flyToBounds(wardBounds(name), 12);
+  flyToBounds(wardBounds(name), 11.75);
   const wb = wardBounds(name);
   showCallout(name, "ward", v, anchor || (wb && wb.getCenter()));
 }
