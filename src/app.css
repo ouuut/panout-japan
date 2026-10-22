@@ -258,8 +258,8 @@ html[data-theme="sage"] #v-quake-viewport {
   --text-muted: #56635A !important;
   --text-faint: #7d8a80 !important;
   --line-main: rgba(20, 26, 21, 0.14) !important;
-  --panel-bg: rgba(233, 237, 227, 0.88) !important;
-  --panel-bg-soft: rgba(233, 237, 227, 0.72) !important;
+  --panel-bg: #E9EDE3 !important;
+  --panel-bg-soft: #E9EDE3 !important;
   --panel-shadow: rgba(0, 0, 0, 0.08) !important;
   --bottom-grad: transparent !important;
   --eq-coast: #1A251C !important;
@@ -281,8 +281,8 @@ html[data-theme="dark"] #v-quake-viewport {
   --text-muted: #A09E96 !important;
   --text-faint: #6f6d66 !important;
   --line-main: rgba(237, 235, 228, 0.12) !important;
-  --panel-bg: rgba(14, 14, 12, 0.88) !important;
-  --panel-bg-soft: rgba(14, 14, 12, 0.72) !important;
+  --panel-bg: #0E0E0C !important;
+  --panel-bg-soft: #0E0E0C !important;
   --panel-shadow: none !important;
   --bottom-grad: transparent !important;
   --eq-coast: #EDEBE4 !important;
@@ -1205,7 +1205,8 @@ html[lang="ja"] .prose h2, html[lang="zh"] .prose h2 { font-size: var(--fs-secti
 html body #crm-root[data-crm-variant="editorial"] {
   --bg-page: var(--bg);
   --bg-map: var(--bg);
-  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card: var(--bg);
+  --card-glass: none;
   --bg-card-sub: var(--surface);
   --text-main: var(--ink);
   --text-muted: var(--muted);
@@ -1219,7 +1220,8 @@ html body #crm-root[data-crm-variant="editorial"] {
 html body #crm-root[data-crm-variant="tactical"] {
   --bg-page: var(--bg);
   --bg-map: var(--bg);
-  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card: var(--bg);
+  --card-glass: none;
   --bg-card-sub: var(--surface);
   --text-main: var(--ink);
   --text-muted: var(--muted);
@@ -1243,9 +1245,7 @@ html body #crm-root #crm-ctl-host {
   padding: 6px 8px;
   /* 全站是 2px 按钮 / 4px 卡片的小圆角，工具条不能是胶囊 */
   border-radius: 4px;
-  background: color-mix(in srgb, var(--bg) 84%, transparent);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
+  background: var(--bg);
 }
 html body #crm-root #crm-ctl-host .crm-ctl { gap: 8px; }
 /* 窄屏：整组筛选收进一个抽屉按钮，不再占两行压在图上 */
@@ -1418,7 +1418,7 @@ html body #crm-root .panel-card { border-radius: 4px !important; }
 /* ---- 内阁右侧多卡片面板深浅主题自适应 ---- */
 /* 零投影 + 零结构线：只靠底色区分层级，圆角沿用全站 4px / 2px */
 html[data-theme="dark"] .cab-panel .panel-card {
-  background: rgba(18, 18, 16, 0.88) !important;
+  background: #121210 !important;
   border: 0 !important;
   box-shadow: none !important;
 }
@@ -1432,7 +1432,7 @@ html[data-theme="dark"] .cab-panel .back-btn {
   color: #edebe4 !important;
 }
 html[data-theme="sage"] .cab-panel .panel-card {
-  background: rgba(233, 237, 227, 0.90) !important;
+  background: #E9EDE3 !important;
   border: 0 !important;
   box-shadow: none !important;
 }
@@ -1527,3 +1527,14 @@ button, input, select, .cab-zoom button, .eq-sq, .seg button, .card-badge {
 }
 
 /*__FONT_FACES__*/
+
+/* ---- 实心面板：quake / cabinet 也不再用毛玻璃（面板不透明后模糊无意义） ---- */
+#v-quake-viewport .eq-famous-panel,
+#v-quake-viewport .eq-menu-items {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.cab-panel .panel-card {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}

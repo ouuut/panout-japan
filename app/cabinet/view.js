@@ -119,9 +119,7 @@ const CAB_CSS = `
 
 .cab-panel .panel-card {
   flex-shrink: 0;
-  background: var(--bg-card, rgba(233, 237, 227, 0.88));
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  background: var(--bg-card, #E9EDE3);
   border: 0;
   border-radius: var(--radius, 4px);
   padding: 16px 18px;

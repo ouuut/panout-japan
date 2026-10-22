@@ -142,7 +142,7 @@
   --bg-page: var(--bg);
   --bg-glass: color-mix(in srgb, var(--bg) 45%, transparent);
   --bg-map: var(--bg);
-  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card: var(--bg);
   --bg-card-sub: var(--surface);
   --bg-hover: color-mix(in srgb, var(--ink) 6%, transparent);
   --text-main: var(--ink);
@@ -153,7 +153,7 @@
   --accent: #2F6B4F;
   --accent-soft: rgba(47, 107, 79, .08);
   --shadow-card: none;
-  --card-glass: blur(26px) saturate(1.4);
+  --card-glass: none;
   --capsule-bg: color-mix(in srgb, var(--surface) 94%, transparent);
   --capsule-line: color-mix(in srgb, var(--ink) 14%, transparent);
 }
@@ -164,7 +164,7 @@
   --bg-page: var(--bg);
   --bg-glass: color-mix(in srgb, var(--bg) 55%, transparent);
   --bg-map: var(--bg);
-  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card: var(--bg);
   --bg-card-sub: var(--surface);
   --bg-hover: color-mix(in srgb, var(--ink) 8%, transparent);
   --text-main: var(--ink);
@@ -175,7 +175,7 @@
   --accent: #FF6A3D;
   --accent-soft: rgba(255, 106, 61, .12);
   --shadow-card: none;
-  --card-glass: blur(26px) saturate(1.4);
+  --card-glass: none;
   --capsule-bg: color-mix(in srgb, var(--surface) 94%, transparent);
   --capsule-line: color-mix(in srgb, var(--ink) 14%, transparent);
 }
@@ -1229,7 +1229,7 @@ html body #hsg-root #hsg-ctl-host .hsg-q { border-radius: var(--btn-radius, 2px)
   --accent-soft: rgba(47, 107, 79, .08);
   --zoom-accent: #2F6B4F;
   --zoom-accent-soft: rgba(47, 107, 79, .08);
-  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card: var(--bg);
   --bg-card-sub: var(--surface);
   --line-main: transparent;
   --shadow-card: none;
@@ -1239,7 +1239,7 @@ html body #hsg-root #hsg-ctl-host .hsg-q { border-radius: var(--btn-radius, 2px)
   --accent-soft: rgba(255, 106, 61, .12);
   --zoom-accent: #FF6A3D;
   --zoom-accent-soft: rgba(255, 106, 61, .12);
-  --bg-card: color-mix(in srgb, var(--surface) 55%, transparent);
+  --bg-card: var(--bg);
   --bg-card-sub: var(--surface);
   --line-main: transparent;
   --shadow-card: none;
@@ -1284,4 +1284,11 @@ html body #hsg-root #hsg-ctl-host .dd-opt.on { background: var(--accent); color:
 #hsg-root .inst-period {
   font-family: var(--font-num); font-size: 10.5px; letter-spacing: .03em;
   color: var(--text-muted); margin: 1px 0 5px;
+}
+
+/* ---------------- 深色（tactical）实心面板：卡片 / 分布仪 / 工具条都不再透地图 ---------------- */
+html body #hsg-root #hsg-ctl-host {
+  background: var(--bg);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }

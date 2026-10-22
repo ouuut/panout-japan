@@ -427,3 +427,11 @@
 - 犯罪率工具条三个原生控件（`<select>` 指标 + 令和年份按钮组 + 区市町村/町丁目按钮组）全部换成自绘下拉，和住宅章同一套观感：按钮显示当前值 + 旋转箭头，菜单实心底、选中项 accent、点外部/Esc 关闭。
 - 宽度 691 → 515px。年份、指标、粒度切换后色阶、图例、卡片同步刷新；语言切换时三个下拉的按钮文字与选项文字一起更新。
 - 删掉 `#crm-metric` 的 select 重建逻辑与 `.seg` 绑定，改为 `syncCrmDd()` 统一同步。
+
+## 2026-10-22 · M4.19k-3 实心面板（深色/浅色都去毛玻璃）
+
+- 根因：面板底色走 `--bg-card = color-mix(surface 55%, transparent)` + `--card-glass = blur(26px)`，地图从半透明里透出来，所以看着还是老样子。覆盖不生效是因为 `src/app.css` 里 `html body #crm-root[data-crm-variant=…]` 的特异性高于页面内联样式。
+- 改法：两个变体统一 `--bg-card: var(--bg)`、`--card-glass: none`；犯罪章令牌在 `src/app.css`，住宅章在 `app/housing/app.css`（两处重复块都改）。
+- 工具条：`#hsg-ctl-host` / `#crm-ctl-host` 去掉 `blur(14px)` 与 84% 半透明，改实心底。
+- 内阁：`.panel-card` 去 `blur(16px)`，深色 `#121210`、浅色 `#E9EDE3`（原来 88%/90% 透明）。
+- 地震：`--panel-bg` / `--panel-bg-soft` 由 88%/72% 透明改实心 `#0E0E0C` / `#E9EDE3`，`.eq-famous-panel` 去 `blur(26px)`。
