@@ -98,7 +98,8 @@ let L = null;
 let map = null;
 let rootEl = null, controlsRoot = null;
 let townsDoc = null, TOWNS = [], MUNI_POLY = null, BY_WARD = {}, BY_NAME = {};
-let townLayer = null, wardLayer = null, labelLayer = null, parentLayer = null;
+let townLayer = null, wardLayer = null, labelLayer = null, parentLayer = null, selOutline = null;
+let lastAnchor = null;
 let userNavigated = false; // 用户已主动点选：延迟的首次 fit 不要再把视角拽回全局
 let curLang = "ja", curVariant = "editorial";
 let metric = "unit", mode = "chome";
@@ -214,8 +215,8 @@ function styleTown(f) {
   const sel = selTown === p.i;
   const hasSel = selTown != null;
   return {
-    color: sel ? accentColor() : (curVariant === "tactical" ? "rgba(255,244,232,0.10)" : "rgba(24,22,20,0.10)"),
-    weight: sel ? 3 : 0.55,
+    color: sel ? "transparent" : (curVariant === "tactical" ? "rgba(255,244,232,0.10)" : "rgba(24,22,20,0.10)"),
+    weight: sel ? 0 : 0.55,
     fillColor: colorFor(v),
     fillOpacity: sel ? 1 : (hasSel ? 0.52 : 0.9),
   };
@@ -245,7 +246,7 @@ function initMap() {
     onEachFeature: (f, layer) => {
       layer.on("mouseover", () => { const x = TOWNS[f.properties.i]; if (x && x.n) moveHistCursor(townVal(x), townName(x)); });
       layer.on("mouseout", () => { if (!selTown) hideHistCursor(); });
-      layer.on("click", (e) => { selectTown(f.properties.i, true); L.DomEvent.stopPropagation(e); });
+      layer.on("click", (e) => { selectTown(f.properties.i, true, e.latlng); L.DomEvent.stopPropagation(e); });
     },
   });
 
@@ -254,7 +255,7 @@ function initMap() {
     onEachFeature: (f, layer) => {
       layer.on("mouseover", () => { const v = wardVal(f.properties.ward_ja); if (v != null) moveHistCursor(v, f.properties.ward_ja); });
       layer.on("mouseout", () => { if (!selWard) hideHistCursor(); });
-      layer.on("click", (e) => { selectWardByName(f.properties.ward_ja); L.DomEvent.stopPropagation(e); });
+      layer.on("click", (e) => { selectWardByName(f.properties.ward_ja, e.latlng); L.DomEvent.stopPropagation(e); });
     },
   });
 
@@ -272,6 +273,7 @@ function initMap() {
       if (want && !map.hasLayer(labelLayer)) labelLayer.addTo(map);
       else if (!want && map.hasLayer(labelLayer)) map.removeLayer(labelLayer); } catch (e) {} };
   map.on("zoomend", gate); gate();
+  map.on("move zoom", refreshCallout);
 
   applyMode();
   fitTokyo23();
@@ -557,28 +559,103 @@ function wardBounds(name) {
   return f ? L.geoJSON(f).getBounds() : null;
 }
 
-function selectTown(i, fly) {
+const CAPSULE_LIFT = 84;
+const RM_MOTION = (typeof window !== "undefined" && window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false);
+
+// 选中气泡：锚点圆 + 三环长脉冲 + 上浮胶囊（与犯罪率章同款）
+function showCallout(name, tag, value, anchor) {
+  const svg = $el("hsg-lx-svg"), cap = $el("hsg-lx-capsule");
+  if (!svg || !cap || !name || !map) return;
+  if (anchor) lastAnchor = anchor;
+  if (!lastAnchor) return;
+  const pt = map.latLngToContainerPoint(lastAnchor);
+  const vw = window.innerWidth, vh = window.innerHeight;
+  svg.setAttribute("width", vw); svg.setAttribute("height", vh);
+  svg.setAttribute("viewBox", `0 0 ${vw} ${vh}`);
+  const RING = RM_MOTION ? "" :
+    `<circle class="lx-ring" cx="${pt.x}" cy="${pt.y}" r="6"/>` +
+    `<circle class="lx-ring" cx="${pt.x}" cy="${pt.y}" r="6"/>` +
+    `<circle class="lx-ring" cx="${pt.x}" cy="${pt.y}" r="6"/>`;
+  svg.innerHTML = `<circle class="lx-dot" cx="${pt.x}" cy="${pt.y}" r="4"/>` + RING;
+  const t0 = t();
+  const lvl = tag === "ward" ? t0.levelWard : t0.levelChome;
+  const num = value != null ? fmt(value, 1) : "—";
+  cap.dataset.lvlKey = tag;
+  cap.dataset.placeName = name;
+  cap.innerHTML = `<span class="lx-lvl">${esc(lvl)}</span>` +
+    `<span class="lx-name">${esc(name)}</span>` +
+    `<span class="lx-num"><span class="lx-val">${num}</span><span class="lx-unit">${esc(t0.unitRate)}</span></span>`;
+  cap.setAttribute("role", "status");
+  cap.style.left = pt.x + "px";
+  cap.style.top = (pt.y - CAPSULE_LIFT) + "px";
+  cap.classList.remove("on");
+  if (RM_MOTION) { cap.classList.add("on"); return; }
+  void cap.offsetWidth;
+  svg.querySelectorAll(".lx-ring").forEach((c, i) => {
+    c.animate([{ opacity: 0.85, r: 6 }, { opacity: 0, r: 108 }],
+      { duration: 2000, delay: i * 620, iterations: 3, easing: "cubic-bezier(.2,.7,.3,1)", fill: "forwards" });
+  });
+  requestAnimationFrame(() => cap.classList.add("on"));
+}
+// 地图视野变化时标注跟随
+function refreshCallout() {
+  const svg = $el("hsg-lx-svg"), cap = $el("hsg-lx-capsule");
+  if (!svg || !cap || !lastAnchor || !map) return;
+  if (!cap.classList.contains("on")) return;
+  const pt = map.latLngToContainerPoint(lastAnchor);
+  svg.querySelectorAll("circle").forEach((c) => { c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); });
+  cap.style.left = pt.x + "px";
+  cap.style.top = (pt.y - CAPSULE_LIFT) + "px";
+}
+
+// 选中块的外轮廓：只取外环，避免合并町丁留下的缝被描成一堆乱线
+function exteriorPolygons(feature) {
+  const g = feature && feature.geometry;
+  if (!g) return null;
+  const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+  return polys.map((poly) => [poly[0].map(([lng, lat]) => [lat, lng])]);
+}
+function drawSelOutline(feature) {
+  if (selOutline) { try { map.removeLayer(selOutline); } catch (e) {} selOutline = null; }
+  if (!feature) return;
+  const polys = exteriorPolygons(feature);
+  if (!polys || !polys.length) return;
+  selOutline = L.polygon(polys, {
+    color: accentColor(), weight: 3, opacity: 1, fill: false, interactive: false, lineJoin: "round",
+  }).addTo(map);
+}
+
+function selectTown(i, fly, anchor) {
   selTown = i; selWard = null; mode = "chome";
   $qa("[data-hsg-mode]").forEach((b) => b.classList.toggle("on", b.getAttribute("data-hsg-mode") === "chome"));
   applyMode();
   townLayer.setStyle(styleTown);
   highlightParent(TOWNS[i].ward);
+  const tf = townsDoc && townsDoc.geo.features.find((y) => y.properties.i === i);
+  drawSelOutline(tf);
   renderCard();
   const x = TOWNS[i];
   if (x.n) moveHistCursor(townVal(x), townName(x));
   if (fly) flyToBounds(townBounds(i), 14);
+  if (anchor || fly) {
+    const b = townBounds(i);
+    showCallout(townName(x), "chome", x.n ? townVal(x) : null, anchor || (b && b.getCenter()));
+  }
 }
 
-function selectWardByName(name) {
+function selectWardByName(name, anchor) {
   selWard = name; selTown = null; mode = "muni";
   $qa("[data-hsg-mode]").forEach((b) => b.classList.toggle("on", b.getAttribute("data-hsg-mode") === "muni"));
   applyMode();
   wardLayer.setStyle(styleWard);
   if (parentLayer) { map.removeLayer(parentLayer); parentLayer = null; }
+  if (selOutline) { try { map.removeLayer(selOutline); } catch (e) {} selOutline = null; }
   renderCard();
   const v = wardVal(name);
   if (v != null) moveHistCursor(v, name);
   flyToBounds(wardBounds(name), 12);
+  const wb = wardBounds(name);
+  showCallout(name, "ward", v, anchor || (wb && wb.getCenter()));
 }
 
 // ---- controls -----------------------------------------------------------
@@ -740,7 +817,7 @@ export function unmountHousing() {
   bootSeq++;
   if (aborter) { try { aborter.abort(); } catch (e) {} aborter = null; }
   try { if (map) { map.remove(); } } catch (e) {}
-  map = null; townLayer = null; wardLayer = null; labelLayer = null; parentLayer = null; userNavigated = false;
+  map = null; townLayer = null; wardLayer = null; labelLayer = null; parentLayer = null; selOutline = null; lastAnchor = null; userNavigated = false;
   if (rootEl) { try { rootEl.innerHTML = ""; } catch (e) {} }
   const st = document.getElementById("hsg-style"); if (st) st.remove();
   const lk = document.getElementById("hsg-leaflet-css"); if (lk) lk.remove();

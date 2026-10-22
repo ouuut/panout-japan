@@ -18,7 +18,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from shapely.geometry import mapping, shape
+from shapely.geometry import MultiPolygon, Polygon, mapping, shape
 from shapely.ops import unary_union
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -122,7 +122,14 @@ def main():
         g = unary_union([x.buffer(0) for x in groups[key]])
         if g.is_empty:
             continue
+        # 合并町丁后残留的细缝会被描成一堆乱线：先闭合小洞，再只留外环
+        eps = args.simplify * 1.5
+        g = g.buffer(eps).buffer(-eps)
         g = g.simplify(args.simplify, preserve_topology=True)
+        if g.geom_type == "Polygon":
+            g = Polygon(g.exterior)
+        elif g.geom_type == "MultiPolygon":
+            g = MultiPolygon([Polygon(x.exterior) for x in g.geoms])
         feats.append({
             "type": "Feature",
             "properties": {"i": i},
