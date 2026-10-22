@@ -214,7 +214,7 @@
 
   display: inline-block; font-size: 12.5px; font-weight: 350; letter-spacing: 0.5px;
 
-  color: var(--text-muted); opacity: 0.85;
+  color: var(--text-muted);
 
   text-shadow: 0 0 4px var(--bg-map), 0 0 2px var(--bg-map), 0 1px 2px var(--bg-map);
 
@@ -259,6 +259,12 @@
   font-size: 12.5px; margin-bottom: 5px; gap: 8px;
 
 }
+
+/* 英文读数比日文长 2 倍：标题让位，读数优先完整（此前 en 下被压到 66px，73% 不可见） */
+
+.inst-header .inst-title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+.inst-header .inst-readout { flex: 0 0 auto; max-width: 72%; }
 
 .inst-title {
 
@@ -601,6 +607,8 @@
 }
 
 #hsg-drop div:hover { background: var(--bg-hover); }
+#hsg-drop .drop-empty { cursor: default; color: var(--text-muted); }
+#hsg-drop .drop-empty:hover { background: transparent; }
 
 
 
@@ -1171,6 +1179,14 @@
 
   #hsg-map { overflow: hidden; }
 
+  /* 底卡占 38%：比例尺直接隐藏，版权行抬到底卡上方，别再被压住半行 */
+
+  #hsg-map .leaflet-control-scale { display: none; }
+
+  #hsg-map .leaflet-top.leaflet-left { top: 60px; }
+
+  #hsg-map .leaflet-bottom { bottom: calc(38% + 8px); }
+
 }
 
 
@@ -1185,11 +1201,12 @@ html body #hsg-root #hsg-ctl-host {
   padding: 6px 8px;
   /* 全站是 2px 按钮 / 4px 卡片的小圆角，工具条不能是胶囊 */
   border-radius: 4px;
-  background: color-mix(in srgb, var(--bg) 84%, transparent);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
+  background: var(--bg);
 }
 html body #hsg-root #hsg-ctl-host { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+/* 比例尺在左上角、工具条正下方 */
+#hsg-map .leaflet-top.leaflet-left { top: 60px; }
+#hsg-map .leaflet-control-scale-line { background: color-mix(in srgb, var(--bg) 92%, transparent); color: var(--text-muted); border-color: var(--line-main); }
 html body #hsg-root #hsg-ctl-host .hsg-ctl { gap: 8px; }
 /* 窄屏：整组筛选收进一个抽屉按钮，不再占两行压在图上 */
 html body #hsg-root #hsg-ctl-host .hsg-ctl-toggle {

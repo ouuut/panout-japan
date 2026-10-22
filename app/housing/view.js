@@ -10,7 +10,7 @@ const SKELETON = `
 <div id="hsg-app-loader" role="progressbar" aria-label="loading"><div class="loader-inner"><div class="loader-radar"><div class="radar-sweep"></div><div class="radar-dot"></div></div><div class="loader-title" id="hsg-loader-title"></div><div class="loader-status" id="hsg-loader-status"></div></div></div>
 <div id="hsg-map"></div>
 <div id="hsg-drop"></div>
-<div id="hsg-zoom-slider"><span class="zs-cap" id="hsg-zsPlus" title="+">+</span><div class="zs-track" id="hsg-zsTrack"><div class="zs-fill" id="hsg-zsFill"></div><div class="zs-thumb" id="hsg-zsThumb"></div></div><span class="zs-cap" id="hsg-zsMinus" title="-">-</span></div>
+<div id="hsg-zoom-slider"><span class="zs-cap" id="hsg-zsPlus" role="button" tabindex="0" title="+" aria-label="+">+</span><div class="zs-track" id="hsg-zsTrack"><div class="zs-fill" id="hsg-zsFill"></div><div class="zs-thumb" id="hsg-zsThumb"></div></div><span class="zs-cap" id="hsg-zsMinus" role="button" tabindex="0" title="-" aria-label="-">-</span></div>
 <aside id="hsg-legend-instrument"><div class="inst-header"><span class="inst-title" id="hsg-inst-title"></span><span class="inst-readout" id="hsg-inst-readout"></span></div><div class="inst-period" id="hsg-inst-period"></div><div class="inst-hist-wrap"><svg id="hsg-hist-svg" viewBox="0 0 332 22" preserveAspectRatio="none"></svg><div id="hsg-hist-cursor"></div></div><div class="inst-bar" id="hsg-legendBarDiv"></div><div class="inst-ticks" id="hsg-legendTicks"></div></aside>
 <aside id="hsg-card"></aside>
 <svg id="hsg-lx-svg"></svg><div id="hsg-lx-capsule"></div>`;
@@ -26,7 +26,8 @@ const I18N = {
     deals: "成約件数", meanTotal: "平均成約価格", meanUnit: "平均㎡単価",
     breakdown: "内訳", backTo: "← 戻る", top5TownTitle: "区内で高い町", top5WardTitle: "東京で高い区市町村",
     byValueDesc: (m) => `${m}の高い順`, noTownData: "データなし",
-    instTitle: "町名の分布", instMedian: "東京中央値", instMax: "以上",
+    instTitle: "町名の分布", instTitleMuni: "区市町村の分布", instMedian: "東京中央値", instMax: "以上",
+    zoomIn: "拡大", zoomOut: "縮小", noResults: "該当なし", loadFailed: "データを読み込めませんでした。再読み込みしてください。",
     rankExtreme: "最高水準", rankHigh: "高水準", rankNormal: "標準",
     period: "2025Q2–2026Q1 成約", periodTip: "直近4四半期（2025年4月–2026年3月）の成約価格。それより新しい四半期はまだ公表されていません。",
     metaPeriod: "対象期間 2025Q2–2026Q1（直近4四半期）",
@@ -49,7 +50,8 @@ const I18N = {
     deals: "成交笔数", meanTotal: "平均成交价", meanUnit: "平均㎡单价",
     breakdown: "明细", backTo: "← 返回", top5TownTitle: "区内最贵的町", top5WardTitle: "东京最贵的区市町村",
     byValueDesc: (m) => `按${m}排序`, noTownData: "无数据",
-    instTitle: "町名分布", instMedian: "东京中位数", instMax: "以上",
+    instTitle: "町名分布", instTitleMuni: "区市町村分布", instMedian: "东京中位数", instMax: "以上",
+    zoomIn: "放大", zoomOut: "缩小", noResults: "没有匹配的町名", loadFailed: "数据加载失败，请刷新重试。",
     rankExtreme: "最高档", rankHigh: "高档", rankNormal: "标准",
     period: "2025Q2–2026Q1 成交", periodTip: "最近四个季度（2025年4月–2026年3月）的成交价；更新的季度尚未公布。",
     metaPeriod: "时间范围 2025Q2–2026Q1（最近四个季度）",
@@ -72,7 +74,8 @@ const I18N = {
     deals: "Deals", meanTotal: "Mean sale price", meanUnit: "Mean price/m²",
     breakdown: "Breakdown", backTo: "← Back", top5TownTitle: "Priciest towns in ward", top5WardTitle: "Priciest municipalities",
     byValueDesc: (m) => `by ${m}`, noTownData: "No data",
-    instTitle: "Town distribution", instMedian: "Tokyo median", instMax: "+",
+    instTitle: "Town distribution", instTitleMuni: "Municipality distribution", instMedian: "Tokyo median", instMax: "+",
+    zoomIn: "Zoom in", zoomOut: "Zoom out", noResults: "No match", loadFailed: "Could not load the data. Please reload.",
     rankExtreme: "top tier", rankHigh: "high", rankNormal: "typical",
     period: "2025Q2–2026Q1 closed", periodTip: "Latest four quarters (Apr 2025 – Mar 2026) of closed prices; newer quarters are not published yet.",
     metaPeriod: "Period: 2025Q2–2026Q1 (latest four quarters)",
@@ -239,15 +242,16 @@ function styleWard(f) {
 
 function initMap() {
   map = L.map("hsg-map", { zoomControl: false, zoomSnap: 0.25, zoomDelta: 0.5 }).setView([35.685, 139.75], 11);
-  L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© 国土地理院" }).addTo(map);
-  L.control.scale({ imperial: false, position: "bottomleft" }).addTo(map);
+  L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png", { maxZoom: 18, maxNativeZoom: 14, attribution: "© 国土地理院" }).addTo(map);
+  // 比例尺挪到左上工具条下方：左下角被图例面板整块盖住，右下角被卡片盖住
+  L.control.scale({ imperial: false, position: "topleft" }).addTo(map);
 
   const feats = townsDoc.geo.features.filter((f) => (TOWNS[f.properties.i] || {}).n > 0);
   townLayer = L.geoJSON({ type: "FeatureCollection", features: feats }, {
     style: styleTown,
     onEachFeature: (f, layer) => {
       layer.on("mouseover", () => { const x = TOWNS[f.properties.i]; if (x && x.n) moveHistCursor(townVal(x), townName(x)); });
-      layer.on("mouseout", () => { if (!selTown) hideHistCursor(); });
+      layer.on("mouseout", () => resetReadout());
       layer.on("click", (e) => { selectTown(f.properties.i, true, e.latlng); L.DomEvent.stopPropagation(e); });
     },
   });
@@ -256,7 +260,7 @@ function initMap() {
     style: styleWard,
     onEachFeature: (f, layer) => {
       layer.on("mouseover", () => { const v = wardVal(f.properties.ward_ja); if (v != null) moveHistCursor(v, f.properties.ward_ja); });
-      layer.on("mouseout", () => { if (!selWard) hideHistCursor(); });
+      layer.on("mouseout", () => resetReadout());
       layer.on("click", (e) => { selectWardByName(f.properties.ward_ja, e.latlng); L.DomEvent.stopPropagation(e); });
     },
   });
@@ -319,8 +323,16 @@ function initZoomSlider() {
   track.addEventListener("pointerup", stop);
   track.addEventListener("pointercancel", stop);
   const plus = $el("hsg-zsPlus"), minus = $el("hsg-zsMinus");
-  if (plus) plus.addEventListener("click", () => map.zoomIn());
-  if (minus) minus.addEventListener("click", () => map.zoomOut());
+  if (plus) {
+    plus.setAttribute("aria-label", t().zoomIn);
+    plus.addEventListener("click", () => map.zoomIn());
+    plus.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); map.zoomIn(); } });
+  }
+  if (minus) {
+    minus.setAttribute("aria-label", t().zoomOut);
+    minus.addEventListener("click", () => map.zoomOut());
+    minus.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); map.zoomOut(); } });
+  }
   map.on("zoom zoomend", render);
   render();
 }
@@ -356,16 +368,31 @@ function updateHistogram() {
   const svg = $el("hsg-hist-svg");
   if (svg) svg.innerHTML = bars;
   const title = $el("hsg-inst-title");
-  if (title) title.textContent = `${t().metrics[metric]} · ${t().instTitle}`;
+  if (title) title.textContent = `${t().metrics[metric]} · ${mode === "muni" ? (t().instTitleMuni || t().instTitle) : t().instTitle}`;
   resetReadout();
 }
 
+function medianOf(vals) {
+  const n = vals.length;
+  if (!n) return null;
+  return n % 2 ? vals[(n - 1) / 2] : (vals[n / 2 - 1] + vals[n / 2]) / 2;
+}
+
+// 读数默认显示「中位数」；有选中对象时显示选中值。悬停移出必须回到这里（旧版 if(!selTown) 守卫让它永远不复位）
 function resetReadout() {
   if (!SCALE) return;
   const el = $el("hsg-inst-readout");
   if (!el) return;
-  const med = SCALE.vals[Math.floor(SCALE.vals.length / 2)];
-  el.textContent = `${t().instMedian}: ${fmt(med, 1)} ${metric === "unit" ? t().unitRate : t().unitTotal}`;
+  const unit = metric === "unit" ? t().unitRate : t().unitTotal;
+  let label = null, val = null;
+  if (mode === "muni") {
+    if (selWard) { label = selWard; val = wardVal(selWard); }
+  } else if (selTown != null) {
+    const x = TOWNS[selTown];
+    if (x) { label = townName(x); val = x.n ? townVal(x) : null; }
+  }
+  if (val != null) el.textContent = `${label} · ${fmt(val, 1)} ${unit}`;
+  else el.textContent = `${t().instMedian}: ${fmt(medianOf(SCALE.vals), 1)} ${unit}`;
 }
 
 function moveHistCursor(val, label) {
@@ -407,6 +434,7 @@ function rowsHtml(rows) {
 
 function townCardHtml(i) {
   const x = TOWNS[i];
+  const isUnit = metric === "unit";
   const v = x.n ? townVal(x) : null;
   const wv = wardVal(x.ward);
   return `
@@ -420,19 +448,19 @@ function townCardHtml(i) {
     </div>
     <div class="metric-grid-2col">
       <div class="mg-col">
-        <div class="mg-val big-val">${v != null ? fmt(v, metric === "unit" ? 0 : 0) : "—"}</div>
-        <div class="mg-lbl">${t().meanUnit}</div>
+        <div class="mg-val big-val">${v != null ? fmt(v, 1) : "—"}</div>
+        <div class="mg-lbl">${isUnit ? t().meanUnit : t().meanTotal} (${isUnit ? t().unitRate : t().unitTotal})</div>
       </div>
       <div class="mg-col">
-        <div class="mg-val">${x.total ? fmt(x.total) : "—"}</div>
-        <div class="mg-lbl">${t().meanTotal} (${t().unitTotal})</div>
+        <div class="mg-val">${isUnit ? fmt(x.total) : (x.n ? fmt(x.unit / 1e4, 1) : "—")}</div>
+        <div class="mg-lbl">${isUnit ? t().meanTotal + " (" + t().unitTotal + ")" : t().meanUnit + " (" + t().unitRate + ")"}</div>
       </div>
     </div>
     <div class="breakdown-section">
       <div class="section-title">${t().breakdown}</div>
       ${rowsHtml([
-        { n: t().meanUnit, v: v, s: `${fmt(v, 1)} ${t().unitRate}` },
-        { n: t().meanTotal, v: x.total, s: `${fmt(x.total)} ${t().unitTotal}` },
+        { n: isUnit ? t().meanUnit : t().meanTotal, v: isUnit ? v : x.total, s: isUnit ? `${fmt(v, 1)} ${t().unitRate}` : `${fmt(x.total)} ${t().unitTotal}` },
+        { n: isUnit ? t().meanTotal : t().meanUnit, v: isUnit ? x.total : (x.n ? x.unit / 1e4 : null), s: isUnit ? `${fmt(x.total)} ${t().unitTotal}` : `${fmt(x.n ? x.unit / 1e4 : null, 1)} ${t().unitRate}` },
         { n: t().deals, v: x.n, s: `${fmt(x.n)}` },
       ])}
     </div>
@@ -485,7 +513,7 @@ function rankingHtml() {
       </div>
       <div class="rank-card-list">
         ${list.map((x, i) => `
-          <div class="rank-card-item" data-hsg-ward="${esc(x.ward)}">
+          <div class="rank-card-item" role="button" tabindex="0" data-hsg-ward="${esc(x.ward)}">
             <span class="rci-idx">0${i + 1}</span>
             <span class="rci-name">${esc(x.ward)}</span>
             <div class="rci-bar-wrap"><div class="rci-bar-fill" style="width:${Math.round((x.v / max) * 100)}%"></div></div>
@@ -588,10 +616,9 @@ function showCallout(name, tag, value, anchor) {
   cap.dataset.placeName = name;
   cap.innerHTML = `<span class="lx-lvl">${esc(lvl)}</span>` +
     `<span class="lx-name">${esc(name)}</span>` +
-    `<span class="lx-num"><span class="lx-val">${num}</span><span class="lx-unit">${esc(t0.unitRate)}</span></span>`;
+    `<span class="lx-num"><span class="lx-val">${num}</span><span class="lx-unit">${esc(metric === "unit" ? t0.unitRate : t0.unitTotal)}</span></span>`;
   cap.setAttribute("role", "status");
-  cap.style.left = pt.x + "px";
-  cap.style.top = (pt.y - CAPSULE_LIFT) + "px";
+  placeCapsule(pt);
   cap.classList.remove("on");
   if (RM_MOTION) { cap.classList.add("on"); return; }
   void cap.offsetWidth;
@@ -608,8 +635,19 @@ function refreshCallout() {
   if (!cap.classList.contains("on")) return;
   const pt = map.latLngToContainerPoint(lastAnchor);
   svg.querySelectorAll("circle").forEach((c) => { c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y); });
-  cap.style.left = pt.x + "px";
+  placeCapsule(pt);
+}
+
+// 气泡按锚点居中，但必须夹在视口内——窄屏贴边时旧实现会整块出屏（390 宽实测左右各裁 93px）
+function placeCapsule(pt) {
+  const cap = $el("hsg-lx-capsule");
+  if (!cap) return;
+  const vw = window.innerWidth || document.documentElement.clientWidth;
+  const half = (cap.offsetWidth || 200) / 2;
+  const x = Math.max(half + 8, Math.min(vw - half - 8, pt.x));
+  cap.style.left = x + "px";
   cap.style.top = (pt.y - CAPSULE_LIFT) + "px";
+  cap.dataset.anchorX = String(Math.round(pt.x - x));
 }
 
 function selectTown(i, fly, anchor) {
@@ -737,8 +775,15 @@ function onSearch(e) {
   if (!drop) return;
   if (!q) { drop.style.display = "none"; return; }
   const hits = TOWNS.filter((x) => x.n && (townName(x).includes(q) || x.town.includes(q))).slice(0, 10);
-  if (!hits.length) { drop.style.display = "none"; return; }
   const host = rootEl.getBoundingClientRect(), ri = e.target.getBoundingClientRect();
+  if (!hits.length) {
+    drop.style.left = ri.left - host.left + "px";
+    drop.style.top = ri.bottom - host.top + 4 + "px";
+    drop.style.width = ri.width + "px";
+    drop.style.display = "block";
+    drop.innerHTML = `<div class="drop-empty">${esc(t().noResults)}</div>`;
+    return;
+  }
   drop.style.left = ri.left - host.left + "px";
   drop.style.top = ri.bottom - host.top + 4 + "px";
   drop.style.width = ri.width + "px";
@@ -831,6 +876,7 @@ export async function mountHousing(el, opts) {
     return true;
   } catch (e) {
     if (ldr) { ldr.classList.add("fade-out"); setTimeout(() => { if (ldr.parentNode) ldr.remove(); }, 500); }
+    try { if (window.pjStageFailed) window.pjStageFailed(rootEl, t().loadFailed); } catch (_) {}
     throw e;
   }
 }

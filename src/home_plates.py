@@ -287,7 +287,8 @@ def housing_svg(wards, muni_poly, w=1000, h=760, deals=None, towns=None):
 
     if deals:
         tx, ty = proj.xy(139.735, 35.660)
-        label = f'{towns:,} 町 / {deals:,} 件' if towns else f'{deals:,} 件'
+        # 卡片抬头是「23 WARDS 21,848」，这里必须写明是都全域口径，否则同一张图两个总数
+        label = f'東京全域 {towns:,} 町 / {deals:,} 件' if towns else f'{deals:,} 件'
         out.append(f'<text x="{tx:.1f}" y="{ty:.1f}" text-anchor="middle" class="note halo ink">'
                    f'{label}</text>')
 

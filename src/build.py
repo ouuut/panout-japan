@@ -39,6 +39,61 @@ BUILD_STAMP = datetime.now().strftime("%Y-%m-%d %H:%M")
 # ---------------------------------------------------------------- data
 Q = json.loads((ROOT / "app/quake/data/quakes.json").read_text(encoding="utf-8"))
 OUTLINE = json.loads((ROOT / "app/quake/data/japan-outline.json").read_text(encoding="utf-8"))
+
+# 站点上所有地震数字都从同一份目录算出来（此前 40,079 是旧快照的硬编码，与地图实际数据不符）
+Q_N = len(Q)
+Q_END = max(e["time"] for e in Q)
+Q_END_MONTH = Q_END[:7]
+Q_END_JA = f"{Q_END[0:4]}年{int(Q_END[5:7])}月"
+Q_END_DOT = Q_END_MONTH.replace("-", ".")
+Q_END_DAY_JA = f"{Q_END[0:4]}年{int(Q_END[5:7])}月{int(Q_END[8:10])}日"
+_Q_E = sum(10 ** (1.5 * e["mag"]) for e in Q)
+PCT_2011_N = round(100 * sum(1 for e in Q if e["time"][:4] == "2011") / Q_N, 1)
+PCT_2011_E = round(100 * sum(10 ** (1.5 * e["mag"]) for e in Q if e["time"][:4] == "2011") / _Q_E, 1)
+
+# 每页三语 title/description：静态 HTML 里只有 ja，shell 在切语言时替换 head
+PAGE_META = {
+    "home": {
+        "ja": (f"{BRAND} — 日本を、四つの尺度で見る",
+               f"{f"{Q_N:,}"}の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格。四つの入口から直接起動する。"),
+        "zh": (f"{BRAND} — 用四个尺度看日本",
+               f"{f"{Q_N:,}"} 个震源、5,234 个町丁、331 个月的內閣支持率、23 区住宅价格。四个入口直接启动。"),
+        "en": (f"{BRAND} — Japan in four scales",
+               f"{f"{Q_N:,}"} hypocentres, 5,234 neighbourhoods, 331 months of cabinet approval, 23-ward housing prices. Four direct entry points."),
+    },
+    "quake": {
+        "ja": (f"地震 — {f"{Q_N:,}"}の震源 | {BRAND}",
+               f"2000年から{Q_END_JA}までのM4以上震源{f"{Q_N:,}"}点。年別・月別・深さ・エネルギーで見る。"),
+        "zh": (f"地震 — {f"{Q_N:,}"} 个震源 | {BRAND}",
+               f"2000 年至 {Q_END_JA}，M4 以上震源 {f"{Q_N:,}"} 点。按年份、月份、深度与能量查看。"),
+        "en": (f"Earthquakes — {f"{Q_N:,}"} hypocentres | {BRAND}",
+               f"{f"{Q_N:,}"} M4+ hypocentres from 2000 to {Q_END_JA}. By year, month, depth and energy."),
+    },
+    "crime": {
+        "ja": (f"犯罪 — 5,234の町丁 | {BRAND}",
+               "2025年の東京都内5,234町丁の認知件数。人口あたりの率で62区市町村を並べる。"),
+        "zh": (f"犯罪 — 5,234 个町丁 | {BRAND}",
+               "2025 年东京都内 5,234 个町丁的立案数，按人均发案率排列 62 个区市町村。"),
+        "en": (f"Crime — 5,234 neighbourhoods | {BRAND}",
+               "Recorded offences for 5,234 neighbourhoods across Tokyo in 2025, ranked per capita across 62 municipalities."),
+    },
+    "cabinet": {
+        "ja": (f"内閣 — 331か月の支持率 | {BRAND}",
+               "1998年から2026年までの内閣支持率644調査。月次平均331か月、14内閣。"),
+        "zh": (f"内阁 — 331 个月的支持率 | {BRAND}",
+               "1998 年至 2026 年的 644 次内阁支持率调查，月度均值 331 个月、14 届内阁。"),
+        "en": (f"Cabinet — 331 months of approval | {BRAND}",
+               "644 approval polls from 1998 to 2026: 331 monthly means across 14 cabinets."),
+    },
+    "housing": {
+        "ja": (f"住宅 — 町名の価格 | {BRAND}",
+               "東京の中古マンション成約価格。直近4四半期（2025Q2–2026Q1）を町名（地区名）ごとの平均㎡単価で塗った地図。国交省データを加工。"),
+        "zh": (f"住宅 — 町名房价 | {BRAND}",
+               "东京二手房成交价：把最近四个季度（2025Q2–2026Q1）按町名的平均㎡单价涂成地图，数据来自国土交通省。"),
+        "en": (f"Housing — town-level prices | {BRAND}",
+               "Closed condo prices in Tokyo for the latest four quarters (2025Q2–2026Q1), mapped as mean price per m² by town. Derived from MLIT data."),
+    },
+}
 CAB = json.loads((ROOT / "app/cabinet/data.json").read_text(encoding="utf-8"))
 MUNI = json.loads((ROOT / "app/crime/data/muni.json").read_text(encoding="utf-8"))
 POINTS = json.loads((ROOT / "app/crime/data/points.json").read_text(encoding="utf-8"))
@@ -422,9 +477,9 @@ COPY = {
     "cover.scale.housing": ("住宅 · 23区", "住宅 · 23区", "Housing · 23 wards"),
     "card.quake.unit": ("M4+ 震源 / 27年", "M4+ 震源 / 27年", "M4+ events / 27 yrs"),
     "card.quake.title": ("引いて見る", "拉远看", "Pull back"),
-    "card.quake.claim": ("2011年は回数で14.6%、エネルギーで86.7%。",
-                         "2011年按次数占14.6%，按能量占86.7%。",
-                         "In 2011: 14.6% of events, 86.7% of energy."),
+    "card.quake.claim": (f"2011年は回数で{PCT_2011_N}%、エネルギーで{PCT_2011_E}%。",
+                         f"2011年按次数占{PCT_2011_N}%，按能量占{PCT_2011_E}%。",
+                         f"In 2011: {PCT_2011_N}% of events, {PCT_2011_E}% of energy."),
     "card.crime.unit": ("町丁 / 1年（都内）", "町丁 / 1年（都内）", "Neighbourhoods / 1 yr (Tokyo)"),
     "card.crime.title": ("寄って見る", "凑近看", "Zoom in"),
     "card.crime.claim": ("都内5,234町丁。中央値4.4‰、最大1,332‰。",
@@ -442,10 +497,10 @@ COPY = {
                            f"Latest four quarters of closed prices, mean per m² by town: {HOUSE_TOWNS:,} towns, {HOUSE_N:,} deals."),
 
     "q.eyebrow": ("01 / 引いて見る", "01 / 拉远看", "01 / Pull back"),
-    "q.h1": ("地震 — <em>40,079</em>の震源", "地震 — <em>40,079</em>个震源", "Earthquakes — <em>40,079</em> hypocentres"),
-    "q.lede": ("2000年から2026年7月まで、M4以上の震源を一点ずつ。年を切ると、同じ海が別の顔になる。",
-               "2000年至2026年7月，M4以上震源逐点记录。按年切开，同一片海换了面孔。",
-               "Every M4+ hypocentre from 2000 to July 2026, one point at a time. Cut by year, the same sea changes face."),
+    "q.h1": (f"地震 — <em>{n(Q_N)}</em>の震源", f"地震 — <em>{n(Q_N)}</em>个震源", f"Earthquakes — <em>{n(Q_N)}</em> hypocentres"),
+    "q.lede": (f"2000年から{Q_END_JA}まで、M4以上の震源を一点ずつ。年を切ると、同じ海が別の顔になる。",
+               f"2000年至{Q_END_JA}，M4以上震源逐点记录。按年切开，同一片海换了面孔。",
+               f"Every M4+ hypocentre from 2000 to {Q_END_JA.replace('年', '/').replace('月', '')}, one point at a time. Cut by year, the same sea changes face."),
     "q.stat.count": ("震源数", "震源数", "Hypocentres"),
     "q.stat.strong": ("M6以上", "M6以上", "M6+"),
     "q.stat.max": ("最大", "最大", "Largest"),
@@ -565,9 +620,9 @@ COPY = {
                "Numbers change meaning with the counting rule. Every rule is written here."),
     "m.data.h": ("データ", "数据", "Data"),
     "m.q.h": ("地震", "地震", "Earthquakes"),
-    "m.q.p": ("USGS ANSS Comprehensive Catalog（ComCat）から、2000年1月1日—2026年7月15日、日本周辺（東経122–150度、北緯20–50度）、M4.0以上の震源40,079点。",
-              "取自 USGS ANSS Comprehensive Catalog（ComCat），2000年1月1日—2026年7月15日，日本周边（东经122–150度、北纬20–50度），M4.0以上震源40,079点。",
-              "USGS ANSS Comprehensive Catalog (ComCat), 1 Jan 2000 – 15 Jul 2026, Japan region (122–150°E, 20–50°N), M4.0+, 40,079 hypocentres."),
+    "m.q.p": (f"USGS ANSS Comprehensive Catalog（ComCat）から、2000年1月1日—{Q_END_DAY_JA}、日本周辺（東経120–150度、北緯20–50度）、M4.0以上の震源{n(Q_N)}点。",
+              f"取自 USGS ANSS Comprehensive Catalog（ComCat），2000年1月1日—{Q_END_DAY_JA}，日本周边（东经120–150度、北纬20–50度），M4.0以上震源{n(Q_N)}点。",
+              f"USGS ANSS Comprehensive Catalog (ComCat), 1 Jan 2000 – {Q_END_DAY_JA}, Japan region (120–150°E, 20–50°N), M4.0+, {n(Q_N)} hypocentres."),
     "m.c.h": ("犯罪", "犯罪", "Crime"),
     "m.c.p": ("警視庁「区市町村の町丁別、罪種別及び手口別認知件数」令和7年（2025）年計、および令和8年月次累計。人口は住民基本台帳（令和8年1月1日）。東京都内5,234町丁、62区市町村。",
               "警视厅《区市町村町丁别、罪种别及手口别认知件数》令和7年（2025）全年及令和8年月度累计。人口取自住民基本台帐（令和8年1月1日）。东京都内5,234个町丁、62个区市町村。",
@@ -793,8 +848,8 @@ def build_home_preview():
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
 
     rows = [
-        ("quake", "01", "/quake/", "card.quake.title", "nav.quake", "40,079",
-         "card.quake.unit", "card.quake.claim", "USGS ComCat · 2000—2026.07",
+        ("quake", "01", "/quake/", "card.quake.title", "nav.quake", n(Q_N),
+         "card.quake.unit", "card.quake.claim", f"USGS ComCat · 2000—{Q_END_DOT}",
          HP.quake_svg(Q, OUTLINE, YEARS)),
         ("crime", "02", "/crime/", "card.crime.title", "nav.crime", "5,234",
          "card.crime.unit", "card.crime.claim", "警視庁 · 2025",
@@ -836,8 +891,7 @@ def build_home_preview():
 </section>
 </main>"""
 
-    return page("/", f"{BRAND} — 日本を、四つの尺度で見る",
-                "40,079の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格。四つの入口から直接起動する。",
+    return page("/", PAGE_META["home"]["ja"][0], PAGE_META["home"]["ja"][1],
                 body, "", None, register=True,
                 head_extra='<style>\n' + css + '\n</style>')
 
@@ -863,7 +917,7 @@ def build_quake():
 <p class="sr-only"{tattr('q.lede')}>{ja('q.lede')}</p>
 <div class="stage" data-live="0" data-stage-auto="quake" data-view="quake">
 <div class="stage-poster">{quake_poster()}</div>
-<p class="stage-caption">M4+ · {n(len(Q))} hypocentres · 2000–2026.07 · USGS ComCat</p>
+<p class="stage-caption">M4+ · {n(Q_N)} hypocentres · 2000–{Q_END_DOT} · USGS ComCat</p>
 <div class="stage-live" id="v-quake-viewport"></div>
 </div>
 </main>"""
@@ -877,8 +931,7 @@ def build_quake():
         "creator": {"@type": "Organization", "name": "USGS"},
         "url": SITE_URL + "/quake/",
     }
-    return page("/quake/", f"地震 — 40,079の震源 | {BRAND}",
-                "2000年から2026年7月までのM4以上震源40,079点。年別・月別・深さ・エネルギーで見る。",
+    return page("/quake/", PAGE_META["quake"]["ja"][0], PAGE_META["quake"]["ja"][1],
                 body, "quake", jsonld, fullscreen=True)
 
 
@@ -902,8 +955,7 @@ def build_crime():
         "creator": {"@type": "Organization", "name": "警視庁"},
         "url": SITE_URL + "/crime/",
     }
-    return page("/crime/", f"犯罪 — 5,234の町丁 | {BRAND}",
-                "2025年の東京都内5,234町丁の認知件数。人口あたりの率で62区市町村を並べる。",
+    return page("/crime/", PAGE_META["crime"]["ja"][0], PAGE_META["crime"]["ja"][1],
                 body, "crime", jsonld, fullscreen=True)
 
 
@@ -916,6 +968,7 @@ def build_cabinet():
 <h1 class="sr-only"{tattr('b.h1')}>{ja('b.h1')}</h1>
 <p class="sr-only"{tattr('b.lede')}>{ja('b.lede')}</p>
 <div class="stage stage-cabinet" data-live="0" data-stage-auto="cabinet" data-view="cabinet">
+<noscript><style>#cab-app-veil{{display:none !important}}</style></noscript>
 <div class="cab-veil" id="cab-app-veil" role="progressbar" aria-label="Loading cabinet approval data">
   <div class="cab-veil-inner">
     <div class="cab-veil-pulse">
@@ -947,8 +1000,7 @@ def build_cabinet():
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "url": SITE_URL + "/cabinet/",
     }
-    return page("/cabinet/", f"内閣 — 331か月の支持率 | {BRAND}",
-                "1998年から2026年までの内閣支持率644調査。月次平均331か月、14内閣。",
+    return page("/cabinet/", PAGE_META["cabinet"]["ja"][0], PAGE_META["cabinet"]["ja"][1],
                 body, "cabinet", jsonld, head_extra=head_extra, fullscreen=True)
 
 
@@ -972,8 +1024,7 @@ def build_housing():
         "creator": {"@type": "Organization", "name": "国土交通省 不動産情報ライブラリ"},
         "url": SITE_URL + "/housing/",
     }
-    return page("/housing/", f"住宅 — 町名の価格 | {BRAND}",
-                "東京の中古マンション成約価格。直近4四半期（2025Q2–2026Q1）を町名（地区名）ごとの平均㎡単価で塗った地図。国交省データを加工。",
+    return page("/housing/", PAGE_META["housing"]["ja"][0], PAGE_META["housing"]["ja"][1],
                 body, "housing", jsonld, fullscreen=True)
 
 
@@ -998,6 +1049,9 @@ def main():
     # i18n dictionary (only the three languages; ja already in HTML)
     dic = {k: {"ja": fill_copy(v[0]), "zh": fill_copy(v[1]), "en": fill_copy(v[2])}
            for k, v in COPY.items()}
+    for _pk, _pv in PAGE_META.items():
+        dic[f"meta.{_pk}.title"] = {lg: _pv[lg][0] for lg in ("ja", "zh", "en")}
+        dic[f"meta.{_pk}.desc"] = {lg: _pv[lg][1] for lg in ("ja", "zh", "en")}
     i18n_json = json.dumps(dic, ensure_ascii=False, separators=(",", ":"))
     files["/assets/i18n.json"] = i18n_json
 

@@ -993,6 +993,21 @@ html[lang="ja"] .chapter-head .lede, html[lang="zh"] .chapter-head .lede { font-
 .stage-live > * { height: 100%; min-height: 0; }
 .stage-crime { height: clamp(380px, 52vw, 660px); }
 .stage-failed .stage-caption { display: block; }
+/* 数据失败时的兜底：恢复 poster 之上给一句人话 + 重试，而不是空白舞台 */
+.pj-fail {
+  position: absolute; inset: 0; z-index: 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; padding: 24px; text-align: center;
+  background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.6;
+}
+.pj-fail p { margin: 0; max-width: 34em; }
+.pj-fail-retry {
+  font: inherit; font-size: 13px; padding: 8px 16px; cursor: pointer;
+  border: 1px solid var(--line); border-radius: var(--btn-radius, 4px);
+  background: var(--bg); color: var(--ink);
+}
+.pj-fail-retry:hover { border-color: var(--ink); }
+#crm-drop .drop-empty { padding: 7px 12px; font-size: 13px; color: var(--muted); cursor: default; }
 
 /* ---------------- prose blocks ---------------- */
 .beats {
@@ -1538,3 +1553,7 @@ button, input, select, .cab-zoom button, .eq-sq, .seg button, .card-badge {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
+/* 对比度（WCAG AA）：quake 页脚 3.95:1、模式条选中态 4.27:1 提到 ≥4.5 */
+#v-quake-viewport .eq-footer { color: var(--muted) !important; }
+#v-quake-viewport .eq-mode-btn.is-active { color: #245741 !important; background: rgba(47, 107, 79, .2) !important; }
+html[data-theme="dark"] #v-quake-viewport .eq-mode-btn.is-active { color: #FF8A63 !important; background: rgba(255, 106, 61, .22) !important; }

@@ -161,9 +161,23 @@ async function boot(token) {
   setQuakeTheme(currentTheme);
   summary = readSummaryFromDom();
   localizeDock();
+  localizeChrome();
   [600, 1800].forEach(function (ms) {
-    setTimeout(function () { if (token === bootToken && mounted) localizeDock(); }, ms);
+    setTimeout(function () { if (token === bootToken && mounted) { localizeDock(); localizeChrome(); } }, ms);
   });
+  // 名震列表/详情是点击后才渲染的，渲染完再补一次震名
+  try {
+    const vp = viewportEl;
+    if (vp && !vp.__qkFamousBound) {
+      vp.__qkFamousBound = true;
+      vp.addEventListener('click', function (e) {
+        const t = e.target;
+        if (!t || !t.closest) return;
+        if (t.closest('#eq-mode-famous') || t.closest('#eq-famous-list')) setTimeout(patchFamousNames, 0);
+        if (t.closest('#eq-mode-review')) setTimeout(localizeChrome, 0);
+      }, true);
+    }
+  } catch (e) {}
   if (!summary || !summary.canvas) {
     console.error('[quake] vendor ran but #eq-canvas missing');
     try { const v = hostEl && hostEl.querySelector('.qk-veil'); if (v && v.parentNode) v.parentNode.removeChild(v); } catch (e) {}
@@ -368,12 +382,131 @@ function localizeDock() {
   if (pwa) pwa.style.display = 'none';
 }
 
+// 名震：vendor 里震名/简介是简体中文，ja/en 页面上会直接露出来。
+// 这里只做「外壳 + 震名」的本地化，中文长简介在 ja/en 下隐藏（内容不可翻译时不硬造）。
+const FAMOUS_NAMES = {
+  '3·11 东北': { ja: '東北地方太平洋沖地震（東日本大震災）', en: 'Tōhoku 2011 (Great East Japan Earthquake)' },
+  '关东 1923': { ja: '関東大震災', en: 'Great Kantō earthquake, 1923' },
+  '浓尾 1891': { ja: '濃尾地震', en: 'Nōbi earthquake, 1891' },
+  '宫城 1978': { ja: '宮城県沖地震', en: 'Miyagi-oki earthquake, 1978' },
+  '新潟中越': { ja: '新潟県中越地震', en: 'Niigata Chūetsu earthquake, 2004' },
+  '熊本 2016': { ja: '熊本地震', en: 'Kumamoto earthquakes, 2016' },
+  '福井 1948': { ja: '福井地震', en: 'Fukui earthquake, 1948' },
+  '福岛冲 2022': { ja: '福島県沖地震', en: 'Fukushima-oki earthquake, 2022' },
+  '胆振东部': { ja: '胆振東部地震', en: 'Iburi East earthquake, 2018' },
+  '能登 2007': { ja: '能登半島地震', en: 'Noto Peninsula earthquake, 2007' },
+  '能登 2024': { ja: '能登半島地震', en: 'Noto Peninsula earthquake, 2024' },
+  '阪神·淡路': { ja: '阪神・淡路大震災', en: 'Great Hanshin-Awaji earthquake, 1995' },
+  '集集 921': { ja: '集集地震', en: 'Chi-Chi earthquake, 1999' },
+  '唐山 1976': { ja: '唐山地震', en: 'Tangshan earthquake, 1976' },
+  '南西冲 1993': { ja: '北海道南西沖地震', en: 'Hokkaido southwest earthquake, 1993' },
+};
+
+const FAMOUS_FULL = {
+  '东北地方太平洋冲地震（东日本大震灾）': { ja: '東北地方太平洋沖地震（東日本大震災）', en: '2011 Tōhoku earthquake and tsunami' },
+  '阪神·淡路大地震': { ja: '阪神・淡路大震災', en: 'Great Hanshin-Awaji earthquake, 1995' },
+  '令和6年能登半岛地震': { ja: '令和6年能登半島地震', en: '2024 Noto Peninsula earthquake' },
+  '熊本地震（2016）': { ja: '熊本地震（2016）', en: '2016 Kumamoto earthquakes' },
+  '关东大地震': { ja: '関東大震災', en: 'Great Kantō earthquake, 1923' },
+  '北海道胆振东部地震': { ja: '北海道胆振東部地震', en: '2018 Hokkaido Eastern Iburi earthquake' },
+  '新潟县中越地震': { ja: '新潟県中越地震', en: '2004 Chūetsu earthquake' },
+  '能登半岛地震（2007）': { ja: '能登半島地震（2007）', en: '2007 Noto Peninsula earthquake' },
+  '北海道南西冲地震': { ja: '北海道南西沖地震', en: '1993 Hokkaido southwest earthquake' },
+  '宫城县冲地震（1978）': { ja: '宮城県沖地震（1978）', en: '1978 Miyagi-oki earthquake' },
+  '福井地震': { ja: '福井地震', en: '1948 Fukui earthquake' },
+  '浓尾地震': { ja: '濃尾地震', en: '1891 Nōbi earthquake' },
+  '集集大地震（台湾 921）': { ja: '集集地震（台湾 921）', en: '1999 Chi-Chi earthquake, Taiwan' },
+  '唐山大地震': { ja: '唐山地震', en: '1976 Tangshan earthquake' },
+  '福岛县冲地震（2022）': { ja: '福島県沖地震（2022）', en: '2022 Fukushima-oki earthquake' },
+};
+
+const CHROME = {
+  'eq-mode-history': { ja: ['履歴', '世界の履歴カタログ（2000年→現在、1970年まで遡及）'], en: ['History', 'Global catalogue (2000→now, back to 1970)'] },
+  'eq-mode-live': { ja: ['直近30日', '直近30日の USGS 公開カタログ'], en: ['Live', 'USGS last-30-days catalogue'] },
+  'eq-mode-famous': { ja: ['著名', '過去の著名地震'], en: ['Famous', 'Historic major earthquakes'] },
+  'eq-mode-review': { ja: ['年次', '1970年から年ごとに震源を積み上げる'], en: ['Review', 'Stack hypocentres year by year since 1970'] },
+  'eq-shot': { ja: ['画像を保存', '画像を保存'], en: ['Save image', 'Save image'] },
+  'eq-reset': { ja: [null, '初期の視点に戻す'], en: [null, 'Back to the initial view'] },
+  'eq-minimap': { ja: [null, 'ミニ地球：位置と方位。クリックで真北へ'], en: [null, 'Mini globe: position and heading. Click to face north'] },
+  'eq-domain-reload': { ja: [null, 'ページを再読み込み'], en: [null, 'Reload the page'] },
+  'eq-review-player': { ja: [null, '年次レビューの再生'], en: [null, 'Play the yearly review'] },
+  'eq-review-scrub': { ja: [null, '年をスクラブ'], en: [null, 'Scrub the year'] },
+  'eq-review-close': { ja: [null, '年次レビューを閉じる'], en: [null, 'Close the yearly review'] },
+  'eq-famous-reopen': { ja: ['著名地震リスト', '著名地震リストを開く'], en: ['Notable list', 'Open the notable earthquake list'] },
+  'eq-btn-year': { ja: [null, '著名地震モードでは固定の選定イベントを使用'], en: [null, 'Famous mode uses a fixed set of events'] },
+};
+
+function localizeChrome() {
+  if (!viewportEl || currentLang === 'zh') return;
+  const L = currentLang;
+  for (const id of Object.keys(CHROME)) {
+    const el = viewportEl.querySelector('#' + id);
+    if (!el) continue;
+    const [text, tip] = CHROME[id][L] || [null, null];
+    if (text) el.textContent = text;
+    if (tip) { el.title = tip; el.setAttribute('aria-label', tip); }
+  }
+  const drawerTitle = viewportEl.querySelector('.eq-famous-drawer-title');
+  if (drawerTitle) drawerTitle.textContent = L === 'ja' ? '著名地震' : 'Notable earthquakes';
+  const hint = viewportEl.querySelector('.eq-famous-drawer-hint');
+  if (hint) hint.textContent = L === 'ja' ? '一つ選ぶと本震＋翌7日の余震だけを表示' : 'Pick one: mainshock plus the next 7 days of aftershocks';
+  const list = viewportEl.querySelector('#eq-famous-list');
+  if (list) list.setAttribute('aria-label', L === 'ja' ? '著名地震の一覧' : 'Notable earthquake list');
+  const closeIds = ['eq-famous-drawer-close', 'eq-famous-panel-close'];
+  for (const id of closeIds) {
+    const el = viewportEl.querySelector('#' + id);
+    if (el) { const s = L === 'ja' ? '閉じる' : 'Close'; el.title = s; el.setAttribute('aria-label', s); }
+  }
+  const note = viewportEl.querySelector('.eq-famous-panel-note');
+  if (note) note.textContent = L === 'ja' ? '読み物としての解説 · 予報ではありません' : 'Background reading only · not a forecast';
+  const wiki = viewportEl.querySelector('#eq-famous-wiki');
+  if (wiki) wiki.textContent = L === 'ja' ? 'Wikipedia →' : 'Wikipedia →';
+  patchFamousNames();
+}
+
+function patchFamousNames() {
+  if (!viewportEl || currentLang === 'zh') return;
+  const L = currentLang;
+  viewportEl.querySelectorAll('.eq-famous-item-name').forEach((el) => {
+    const zh = el.getAttribute('data-zh') || el.textContent.trim();
+    el.setAttribute('data-zh', zh);
+    const hit = FAMOUS_NAMES[zh];
+    if (hit && el.textContent !== hit[L]) el.textContent = hit[L];
+  });
+  const nameEl = viewportEl.querySelector('#eq-famous-panel-name');
+  if (nameEl) {
+    const zh = nameEl.getAttribute('data-zh') || nameEl.textContent.trim();
+    nameEl.setAttribute('data-zh', zh);
+    const full = FAMOUS_FULL[zh];
+    if (full) { if (nameEl.textContent !== full[L]) nameEl.textContent = full[L]; }
+    else {
+      const key = Object.keys(FAMOUS_NAMES).find((k) => zh.indexOf(k.replace(/\s.*$/, '')) >= 0);
+      if (key && nameEl.textContent !== FAMOUS_NAMES[key][L]) nameEl.textContent = FAMOUS_NAMES[key][L];
+    }
+  }
+  // 中文长简介/伤亡口径在 ja/en 下不硬翻，直接收起
+  ['#eq-famous-panel-summary', '#eq-famous-panel-deaths'].forEach((sel) => {
+    const el = viewportEl.querySelector(sel);
+    if (el) el.style.display = 'none';
+  });
+  const wiki = viewportEl.querySelector('#eq-famous-wiki');
+  if (wiki) {
+    const nameEl2 = viewportEl.querySelector('#eq-famous-panel-name');
+    const nm = nameEl2 ? nameEl2.textContent.trim() : '';
+    if (nm) {
+      const host = L === 'ja' ? 'ja.wikipedia.org' : 'en.wikipedia.org';
+      wiki.href = 'https://' + host + '/wiki/' + encodeURIComponent(nm.replace(/ /g, '_'));
+    }
+  }
+}
+
 function setQuakeLang(l) {
   if (l !== 'ja' && l !== 'zh' && l !== 'en') return false;
   currentLang = l;
   try { localStorage.setItem('eq-lang', l); } catch (e) {}
-  // Vendor UI is zh-first and frozen; localize the visible dock labels here.
+  // Vendor UI is zh-first and frozen; localize the visible labels here.
   localizeDock();
+  localizeChrome();
   return true;
 }
 

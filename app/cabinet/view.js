@@ -63,12 +63,10 @@ const CAB_CSS = `
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  background: var(--bg);
   padding: 2px;
   border-radius: var(--radius, 4px);
   border: 0;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 .cab-zoom button {
   height: 26px;
@@ -91,7 +89,7 @@ const CAB_CSS = `
 }
 .cab-zoom button.on {
   background: var(--accent);
-  color: #fff;
+  color: var(--bg);
   font-weight: 350;
 }
 
@@ -341,7 +339,7 @@ const CAB_PROFILES = {
     "originJa": "石川県能美市出身・早稲田大学商学部",
     "originEn": "Ishikawa Pref. · Waseda University",
     "bioZh": "小渊突发脑梗后，由自民党干事长野中广务等五位实力派大佬在东京酒店闭门密室选定继任。执政期间虽大力推动信息技术立国，但因屡次发表不慎失言引发舆论强烈反弹，内阁支持率一路坠跌至日本宪政历史最低点 7.0%。",
-    "bioJa": "小渕首相の急病に伴い「自民党五人組」の密室協議により就任。「IT基本法」制定などIT立国を掲げ成果を上げたが、「神の国発言」やえひめ丸事故時のゴルフ継続など度重なる舌禍事件で支持率は憲政史上最低水准の7%台まで暴落した。",
+    "bioJa": "小渕首相の急病に伴い「自民党五人組」の密室協議により就任。「IT基本法」制定などIT立国を掲げ成果を上げたが、「神の国発言」やえひめ丸事故時のゴルフ継続など度重なる舌禍事件で支持率は憲政史上最低水準の7%台まで暴落した。",
     "bioEn": "Selected in a backroom deal by five party heavyweights after Obuchi's sudden illness. Despite pushing the IT Basic Act, serial gaffes (calling Japan a 'divine nation') and golfing during the Ehime Maru submarine disaster plunged his support to an all-time low of 7.0%.",
     "policiesZh": [
       {
@@ -1299,6 +1297,8 @@ function detectInitialVariant() {
 const I18N = {
   ja: {
     htmlLang: 'ja',
+    loadFailed: '世論調査データを読み込めませんでした。再読み込みしてください。',
+    reload: '再読み込み',
     ranges: { '3m': '3ヶ月', '1y': '1年', '2y': '2年', '5y': '5年', '10y': '10年', 'all': '全期間' },
     yName: '支持率 (%)',
     months: 'か月',
@@ -1315,6 +1315,8 @@ const I18N = {
   },
   zh: {
     htmlLang: 'zh-CN',
+    loadFailed: '民调数据加载失败，请刷新重试。',
+    reload: '刷新',
     ranges: { '3m': '3个月', '1y': '1年', '2y': '2年', '5y': '5年', '10y': '10年', 'all': '全期间' },
     yName: '支持率 (%)',
     months: '个月',
@@ -1331,6 +1333,8 @@ const I18N = {
   },
   en: {
     htmlLang: 'en',
+    loadFailed: 'Could not load the polling data. Please reload.',
+    reload: 'Reload',
     ranges: { '3m': '3M', '1y': '1Y', '2y': '2Y', '5y': '5Y', '10y': '10Y', 'all': 'ALL' },
     yName: 'Approval (%)',
     months: 'months',
@@ -1548,7 +1552,7 @@ function renderPanel(targetCabId) {
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">
             <span>${langKey==='zh'?'最短短命 · 鸠山由纪夫':langKey==='en'?'Shortest: Yukio Hatoyama':'最短退任：鳩山由紀夫'}</span>
-            <span style="font-size:14px;font-weight:250;color:#C84B31">266 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (9${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
+            <span style="font-size:14px;font-weight:250;color:#A83A24">266 ${langKey==='zh'?'天':langKey==='en'?'days':'日'} (9${langKey==='zh'?'个月':langKey==='en'?'mo':'ヶ月'})</span>
           </div>
         </div>
       </div>
@@ -1557,7 +1561,7 @@ function renderPanel(targetCabId) {
       <div class="panel-card" style="background:transparent;border:1px dashed var(--line-main, rgba(0,0,0,0.15));box-shadow:none">
         <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);line-height:1.5">
           <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" style="flex-shrink:0"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7v4M8 4.5h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <span>${langKey==='zh'?'鼠标在左侧图表移动可查看每位首相的详尽生平、政绩与支持率档案；点击可固定锁定。':langKey==='en'?'Hover over the chart to inspect any Prime Minister profile and historical milestones. Click to pin.':'グラフ上にマウスを移動すると、各首相の生平・主要政策・危機詳細が閲覧できます。クリックで固定。'}</span>
+          <span>${langKey==='zh'?'鼠标在左侧图表移动可查看每位首相的详尽生平、政绩与支持率档案；点击可固定锁定。':langKey==='en'?'Hover over the chart to inspect any Prime Minister profile and historical milestones. Click to pin.':'グラフ上にマウスを移動すると、各首相の経歴・主要政策・危機詳細が閲覧できます。クリックで固定。'}</span>
         </div>
       </div>
     `;
@@ -1639,7 +1643,7 @@ function renderPanel(targetCabId) {
     <div class="panel-card">
       <div style="font-size:13.5px;font-weight:300;letter-spacing:0.3px;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;gap:6px">
         <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm2 1H6a4 4 0 00-4 4v1h12v-1a4 4 0 00-4-4z"/></svg>
-        ${langKey==='zh'?'生平档案与政治派阀':langKey==='en'?'BIOGRAPHY & BACKGROUND':'生平・政治的出自'}
+        ${langKey==='zh'?'生平档案与政治派阀':langKey==='en'?'BIOGRAPHY & BACKGROUND':'経歴・政治的出自'}
       </div>
       ${originTitle ? `<div style="font-size:13px;color:var(--ink);font-weight:300;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed var(--line-main, rgba(0,0,0,0.08))">${originTitle}</div>` : ''}
       <div style="font-size:13px;line-height:1.7;color:var(--ink);font-weight:350">
@@ -1668,7 +1672,7 @@ function renderPanel(targetCabId) {
     <!-- 卡片 4: 辞职转折危机与操作栏 -->
     <div class="panel-card" style="padding:14px 16px">
       ${crisisTitle ? `
-        <div style="font-size:13.5px;font-weight:300;color:#C84B31;margin-bottom:4px;display:flex;align-items:center;gap:6px">
+        <div style="font-size:13.5px;font-weight:300;color:#A83A24;margin-bottom:4px;display:flex;align-items:center;gap:6px">
           <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M8 2l6 12H2L8 2zm0 3.5a.75.75 0 00-.75.75v3.5a.75.75 0 001.5 0v-3.5A.75.75 0 008 5.5zm0 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/></svg>
           ${langKey==='zh'?'政权转折与辞任危机':langKey==='en'?'TURNING POINT & EXIT':'退陣・政権交代の契機'}
         </div>
@@ -2076,7 +2080,7 @@ function renderChart() {
         if (avg !== null) {
           html += '<div style="display:flex;align-items:baseline;gap:6px;margin:6px 0 10px 0">';
           html += '<span style="font-size:28px;font-weight:200;line-height:1;color:' + col + ';font-family:' + fontSans + ';letter-spacing:-0.5px">' + avg.toFixed(1) + '<span style="font-size:16px;font-weight:300">%</span></span>';
-          html += '<span style="font-size:12px;font-weight:350;color:' + (currentVariant === 'editorial' ? '#56635A' : '#A09E96') + '">' + n + (lang==='en'?' polls avg':'社平均') + '</span>';
+          html += '<span style="font-size:12px;font-weight:350;color:' + (currentVariant === 'editorial' ? '#56635A' : '#A09E96') + '">' + n + (lang==='en'?' polls avg':lang==='zh'?' 家平均':'社平均') + '</span>';
           html += '</div>';
         }
 
@@ -2218,6 +2222,10 @@ async function boot(token) {
     }
     if (!rawData) {
       console.error('data.json load failed', lastErr);
+      // hostEl 是 .stage-live，遮罩是它的兄弟节点：必须取 .stage 才能恢复 poster
+      const stageEl = (hostEl && hostEl.closest ? hostEl.closest('.stage') : null) || document.querySelector('.stage');
+      const tt = I18N[currentLang] || I18N.ja;
+      try { if (window.pjStageFailed) window.pjStageFailed(stageEl, tt.loadFailed || 'Data failed to load. Please reload.', tt.reload || 'Reload'); } catch (e) {}
       return null;
     }
   }

@@ -57,8 +57,59 @@
     } else {
       updateTextEls(l);
     }
+    applyMeta(l);
+    syncUrlLang(l);
     var live = document.querySelector('.stage[data-live="1"] .stage-live');
     if (live && live._setVendorLang) live._setVendorLang(l);
+  }
+
+  // 静态 HTML 只有 ja 的 head；三语版本在切换时同步 title/description/OG/canonical。
+  // canonical 必须自指到 ?lang=，否则 zh/en 会被合并回 ja、hreflang 白写。
+  function pageKey() {
+    var p = location.pathname.replace(/index\.html$/, '');
+    var m = p.match(/^\/(housing|crime|cabinet|quake)\//);
+    return m ? m[1] : 'home';
+  }
+
+  function applyMeta(l) {
+    if (!dic) return;
+    var k = pageKey();
+    var tv = (dic['meta.' + k + '.title'] || {})[l];
+    var dv = (dic['meta.' + k + '.desc'] || {})[l];
+    if (tv) document.title = tv;
+    if (dv) {
+      var md = document.querySelector('meta[name="description"]');
+      if (md) md.setAttribute('content', dv);
+      var od = document.querySelector('meta[property="og:description"]');
+      if (od) od.setAttribute('content', dv);
+    }
+    if (tv) {
+      var ot = document.querySelector('meta[property="og:title"]');
+      if (ot) ot.setAttribute('content', tv);
+    }
+    var ol = document.querySelector('meta[property="og:locale"]');
+    if (ol) ol.setAttribute('content', l === 'zh' ? 'zh_CN' : l === 'en' ? 'en_US' : 'ja_JP');
+    var can = document.querySelector('link[rel="canonical"]');
+    if (can) {
+      try {
+        var u = new URL(can.getAttribute('href'), location.origin);
+        if (l === 'ja') u.searchParams.delete('lang'); else u.searchParams.set('lang', l);
+        can.setAttribute('href', u.toString());
+        var ou = document.querySelector('meta[property="og:url"]');
+        if (ou) ou.setAttribute('content', u.toString());
+      } catch (e) {}
+    }
+  }
+
+  // 手动切语言后改写 URL 里的 lang，否则刷新会被 ?lang= 拉回去
+  function syncUrlLang(l) {
+    try {
+      var u = new URL(location.href);
+      if (!u.searchParams.has('lang')) return;
+      if (u.searchParams.get('lang') === l) return;
+      if (l === 'ja') u.searchParams.delete('lang'); else u.searchParams.set('lang', l);
+      history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+    } catch (e) {}
   }
 
   function loadDic() {
@@ -116,6 +167,33 @@
     loadDic().then(function () { setLang(lang()); });
   }
 
+  // 数据层失败（fetch 挂了）也要能降级：恢复静态 poster + 一句可读的错误 + 重试。
+  // 旧实现只有 import() 失败才加 .stage-failed，数据失败等于整块舞台空白。
+  window.pjStageFailed = function (el, msg, retryLabel) {
+    var stage = el && el.closest ? el.closest('.stage') : null;
+    if (!stage) return;
+    stage.dataset.live = '0';
+    delete stage.dataset.busy;
+    stage.classList.add('stage-failed');
+    var box = stage.querySelector('.pj-fail');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'pj-fail';
+      box.setAttribute('role', 'alert');
+      stage.appendChild(box);
+    }
+    box.textContent = '';
+    var p = document.createElement('p');
+    p.textContent = msg || 'Data failed to load.';
+    box.appendChild(p);
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pj-fail-retry';
+    b.textContent = retryLabel || 'Reload';
+    b.addEventListener('click', function () { location.reload(); });
+    box.appendChild(b);
+  };
+
   function mountStage(stage, ch) {
     if (!stage || stage.dataset.busy || stage.dataset.live === '1') return;
     var live = stage.querySelector('.stage-live');
@@ -125,10 +203,16 @@
     var url = '/app/' + ch + '/view.js' + (VER ? '?v=' + VER : '');
     import(url).then(function (mod) {
       var opts = { base: '/', lang: lang(), theme: doc.dataset.theme || 'sage' };
-      if (ch === 'quake') mod.mountQuake(live, opts);
-      else if (ch === 'crime') mod.mountCrime(live, opts);
-      else if (ch === 'cabinet') mod.mountCabinet(live, opts);
-      else if (ch === 'housing') mod.mountHousing(live, opts);
+      // 挂载是 async：必须等它 resolve 才算 live，否则数据层失败会留下「live=1 + 空舞台」
+      var mountP;
+      if (ch === 'quake') mountP = mod.mountQuake(live, opts);
+      else if (ch === 'crime') mountP = mod.mountCrime(live, opts);
+      else if (ch === 'cabinet') mountP = mod.mountCabinet(live, opts);
+      else if (ch === 'housing') mountP = mod.mountHousing(live, opts);
+      return Promise.resolve(mountP).then(function (ok) {
+        if (ok === false) throw new Error('mount ' + ch + ' returned false');
+        // 模块自己已经降级（数据层失败）时，别再把 data-live 抬回 1 把 poster 藏掉
+        if (stage.classList.contains('stage-failed')) return;
 
       live._setVendorLang = function (l) {
         try {
@@ -151,6 +235,8 @@
 
       stage.dataset.live = '1';
       stage.classList.remove('stage-failed');
+      var failBox = stage.querySelector('.pj-fail');
+      if (failBox) failBox.remove();
       delete stage.dataset.busy;
       if (!document.body.classList.contains('chapter-app')) {
         [60, 350, 900, 2400].forEach(function (ms) {
@@ -158,11 +244,14 @@
         });
       }
       try { window.dispatchEvent(new CustomEvent('pj:stage-mounted', { detail: { ch: ch } })); } catch (e) {}
+      });
     }).catch(function (err) {
       console.error(err);
-      stage.dataset.live = '0';
       delete stage.dataset.busy;
-      stage.classList.add('stage-failed');
+      var msg = { ja: 'データを読み込めませんでした。再読み込みしてください。', zh: '数据加载失败，请刷新重试。', en: 'Could not load the data. Please reload.' };
+      var lbl = { ja: '再読み込み', zh: '刷新', en: 'Reload' };
+      var lg = doc.lang || 'ja';
+      window.pjStageFailed(stage, msg[lg] || msg.ja, lbl[lg] || lbl.ja);
       try { window.dispatchEvent(new CustomEvent('pj:stage-error', { detail: { ch: ch } })); } catch (e) {}
     });
   }

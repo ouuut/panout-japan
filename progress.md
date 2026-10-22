@@ -467,3 +467,10 @@
 - 现象：住宅选中气泡在浅色模式下几乎透明，底图「あだち区 / 足立区」注记透上来压住气泡文字。
 - 根因：`--capsule-bg: color-mix(in srgb, var(--surface) 94%, transparent)`，而站点 `--surface` 本身只有 4.5% 不透明度（是 tint，不是面），混出来≈4%。犯罪章那条本来写死 `rgba(255,253,249,.95)` / `rgba(18,16,14,.94)`，所以只有住宅出问题。
 - 修法：住宅两套变体都改成 `--capsule-bg: var(--bg)`（实心）；犯罪两套也去尾数改 `#FFFDF9` / `#12100E`。实测 computed：住宅 `rgb(233,237,227)`、犯罪 `rgb(255,253,249)`。
+
+## 2026-10-22 · 六切片全站审计 → 一次性修复
+
+- 六个只读分身（交互 / 静态接线 / 布局视觉 / 数据 / 降级 / i18n·SEO）共 32 条 P1、45 条 P2，全部 P1 当轮修完；明细见 `.review/audit/FIXED.md`，原始报告 A–F 同目录。
+- 关键修复：住宅指标单位串台、悬停读数不复位、气泡/卡片键盘不可达、窄屏气泡出屏；犯罪粒度切换残留选中态、瓦片 404、`--font-mono` 未定义；内阁无限加载与中文串味；地震中文 UI 与「40,079/2026-07」数据口径（改为由瓦片重建的 40,145/2026-08，新增 `tools/rebuild_quake_catalog.py`）；三语 head（title/description/og:locale/canonical）此前完全没有本地化。
+- 新增降级路径：数据请求失败时恢复静态 poster + 本地化错误 + 重试（`window.pjStageFailed`），并修掉 `stage-live` 早于挂载 promise 置 1 导致失败被覆盖的问题。
+- 未修：死 CSS 17KB / 死 export / 404 页 / og:image / quake 中文长简介翻译（见 FIXED.md「未修」）。
