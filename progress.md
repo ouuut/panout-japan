@@ -408,3 +408,9 @@
 - 面板：`#hsg-card` 内的 `--bg-card` / `--bg-card-sub` 改实色（`var(--bg)` 与 `ink 7% + bg`），`--card-glass: none`，`.panel-card` 去掉 backdrop-filter。满屏橙色时毛玻璃会把整块面板染成橙色，也是点选时重绘卡顿的一大来源。
 - 飞入手感：`duration 0.9→0.65`、`easeLinearity 0.2→0.45`（原来的 0.2 起步太慢，看着像「先卡一下再冲出去」）；`flyToBounds` 用双 rAF 推迟一帧，让点击产生的卡片/描边先落屏再启动动画。
 - 量过：click→flyToBounds 只差 5ms，`setStyle` 986 层 2ms，canvas `_redraw` 1ms —— 说明卡顿不是同步 JS，主要来自毛玻璃合成与动画起步曲线。
+
+## 2026-10-22 · M4.19j 去重影 + 分布仪实心底
+
+- 双线根因：选中町的描边（来自町丁合并几何）+ 父级区高亮（来自 MUNI_POLY 几何）两套边界数据在区界处错开几十米，看着就是「画了两遍」。父级区高亮整段删掉（`highlightParent` / `parentLayer` 一并清理），只留町自己的 3px 描边；区的信息由右侧卡片给。
+- 左下分布仪改成实心底（`var(--bg)`、去 backdrop-filter），与工具条、右侧面板统一。
+- 另外确认：数据里千石是单环 19 点、无洞，所以之前的重影不是数据问题。

@@ -98,7 +98,7 @@ let L = null;
 let map = null;
 let rootEl = null, controlsRoot = null;
 let townsDoc = null, TOWNS = [], MUNI_POLY = null, BY_WARD = {}, BY_NAME = {};
-let townLayer = null, wardLayer = null, labelLayer = null, parentLayer = null, selOutline = null;
+let townLayer = null, wardLayer = null, labelLayer = null;
 let lastAnchor = null;
 let userNavigated = false; // 用户已主动点选：延迟的首次 fit 不要再把视角拽回全局
 let curLang = "ja", curVariant = "editorial";
@@ -215,8 +215,8 @@ function styleTown(f) {
   const sel = selTown === p.i;
   const hasSel = selTown != null;
   return {
-    color: sel ? "transparent" : (curVariant === "tactical" ? "rgba(255,244,232,0.10)" : "rgba(24,22,20,0.10)"),
-    weight: sel ? 0 : 0.55,
+    color: sel ? accentColor() : (curVariant === "tactical" ? "rgba(255,244,232,0.10)" : "rgba(24,22,20,0.10)"),
+    weight: sel ? 3 : 0.55,
     fillColor: colorFor(v),
     fillOpacity: sel ? 1 : (hasSel ? 0.52 : 0.9),
   };
@@ -300,16 +300,6 @@ function applyMode() {
   }
 }
 
-function highlightParent(ward) {
-  if (parentLayer) { map.removeLayer(parentLayer); parentLayer = null; }
-  const feat = MUNI_POLY.features.find((f) => f.properties.ward_ja === ward);
-  if (!feat) return;
-  const stroke = getComputedStyle(rootEl || document.documentElement).getPropertyValue("--accent").trim() || "#FF6A3D";
-  parentLayer = L.geoJSON(feat, {
-    style: { color: stroke, weight: 3, fill: true, fillColor: stroke, fillOpacity: 0.06, opacity: 0.9, className: "sel-parent-glow" },
-    interactive: false,
-  }).addTo(map);
-}
 
 // ---- zoom slider --------------------------------------------------------
 const ZMIN = 9, ZMAX = 18;
@@ -610,31 +600,11 @@ function refreshCallout() {
   cap.style.top = (pt.y - CAPSULE_LIFT) + "px";
 }
 
-// 选中块的外轮廓：只取外环，避免合并町丁留下的缝被描成一堆乱线
-function exteriorPolygons(feature) {
-  const g = feature && feature.geometry;
-  if (!g) return null;
-  const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
-  return polys.map((poly) => [poly[0].map(([lng, lat]) => [lat, lng])]);
-}
-function drawSelOutline(feature) {
-  if (selOutline) { try { map.removeLayer(selOutline); } catch (e) {} selOutline = null; }
-  if (!feature) return;
-  const polys = exteriorPolygons(feature);
-  if (!polys || !polys.length) return;
-  selOutline = L.polygon(polys, {
-    color: accentColor(), weight: 3, opacity: 1, fill: false, interactive: false, lineJoin: "round",
-  }).addTo(map);
-}
-
 function selectTown(i, fly, anchor) {
   selTown = i; selWard = null; mode = "chome";
   $qa("[data-hsg-mode]").forEach((b) => b.classList.toggle("on", b.getAttribute("data-hsg-mode") === "chome"));
   applyMode();
   townLayer.setStyle(styleTown);
-  highlightParent(TOWNS[i].ward);
-  const tf = townsDoc && townsDoc.geo.features.find((y) => y.properties.i === i);
-  drawSelOutline(tf);
   renderCard();
   const x = TOWNS[i];
   if (x.n) moveHistCursor(townVal(x), townName(x));
@@ -650,8 +620,6 @@ function selectWardByName(name, anchor) {
   $qa("[data-hsg-mode]").forEach((b) => b.classList.toggle("on", b.getAttribute("data-hsg-mode") === "muni"));
   applyMode();
   wardLayer.setStyle(styleWard);
-  if (parentLayer) { map.removeLayer(parentLayer); parentLayer = null; }
-  if (selOutline) { try { map.removeLayer(selOutline); } catch (e) {} selOutline = null; }
   renderCard();
   const v = wardVal(name);
   if (v != null) moveHistCursor(v, name);
@@ -747,7 +715,6 @@ function applyVariant(v) {
     buildScale(); updateLegendBar(); updateHistogram();
     if (townLayer) townLayer.setStyle(styleTown);
     if (wardLayer) wardLayer.setStyle(styleWard);
-    if (parentLayer) parentLayer.setStyle({ color: accentColor(), fillColor: accentColor() });
   }
 }
 
@@ -819,7 +786,7 @@ export function unmountHousing() {
   bootSeq++;
   if (aborter) { try { aborter.abort(); } catch (e) {} aborter = null; }
   try { if (map) { map.remove(); } } catch (e) {}
-  map = null; townLayer = null; wardLayer = null; labelLayer = null; parentLayer = null; selOutline = null; lastAnchor = null; userNavigated = false;
+  map = null; townLayer = null; wardLayer = null; labelLayer = null; lastAnchor = null; userNavigated = false;
   if (rootEl) { try { rootEl.innerHTML = ""; } catch (e) {} }
   const st = document.getElementById("hsg-style"); if (st) st.remove();
   const lk = document.getElementById("hsg-leaflet-css"); if (lk) lk.remove();

@@ -1276,3 +1276,10 @@ html body #hsg-root #hsg-ctl-host .hsg-period {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
+/* 左下分布仪也用实心底，和工具条、右侧面板统一 */
+#hsg-root #hsg-legend-instrument {
+  background: var(--bg);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
