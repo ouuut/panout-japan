@@ -154,7 +154,8 @@
   --accent-soft: rgba(47, 107, 79, .08);
   --shadow-card: none;
   --card-glass: none;
-  --capsule-bg: color-mix(in srgb, var(--surface) 94%, transparent);
+  /* 选中气泡必须是实心：旧的 color-mix(--surface, transparent) 只有 ~4% 不透明度，地图注记会透上来压住文字 */
+  --capsule-bg: var(--bg);
   --capsule-line: color-mix(in srgb, var(--ink) 14%, transparent);
 }
 
@@ -176,7 +177,8 @@
   --accent-soft: rgba(255, 106, 61, .12);
   --shadow-card: none;
   --card-glass: none;
-  --capsule-bg: color-mix(in srgb, var(--surface) 94%, transparent);
+  /* 选中气泡必须是实心：旧的 color-mix(--surface, transparent) 只有 ~4% 不透明度，地图注记会透上来压住文字 */
+  --capsule-bg: var(--bg);
   --capsule-line: color-mix(in srgb, var(--ink) 14%, transparent);
 }
 
