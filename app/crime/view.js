@@ -598,6 +598,8 @@ let map = null, muniLayer = null, chomeLayer = null, labelLayer = null, parentBo
 let userNavigated = false; // 用户已主动点选：延迟的首次 fit 不要再把视角拽回全局
 let zoomSliderRender = null;
 let curSelected = null;
+// 程序化飞入期间隐藏选中描边：canvas 在缩放动画里被整体缩放，描边会跟着放大成粗块
+let flying = false;
 let PTS = [], POLY, MUNI_POLY, MUNI;
 let curMetric = "total", curT = "R7", selWard = null;
 let mode = "chome";
@@ -1095,7 +1097,7 @@ function initMap() {
       const isSel = selWard === f.properties.ward_ja;
       return {
         color: isSel ? cfg.selLine : cfg.lineColor,
-        weight: isSel ? 2 : 1,
+        weight: isSel ? (flying ? 0 : 2) : 1,
         fillColor: colorForRate(r),
         fillOpacity: isSel ? 0.95 : 0.85
       };
@@ -1130,7 +1132,7 @@ function initMap() {
       const opacity = isSel ? 1 : (hasSel ? (inSelWard ? 0.92 : 0.68) : 0.88);
       return {
         color: isSel ? cfg.selLine : (currentVariant === "tactical" ? "rgba(255,244,232,0.12)" : "rgba(24,22,20,0.12)"),
-        weight: isSel ? 2.5 : 0.6,
+        weight: isSel ? (flying ? 0 : 2.5) : 0.6,
         fillColor: colorForChome(r),
         fillOpacity: opacity
       };
@@ -1198,9 +1200,24 @@ function highlightParentBoundary(wardName) {
 }
 
 // 点击区域后平滑飞到该区域：留出右侧卡片/底部抽屉的余量，缩放到刚好装下
+function restyleSel() {
+  if (muniLayer) muniLayer.setStyle(muniLayer.options.style);
+  if (chomeLayer) chomeLayer.setStyle(chomeLayer.options.style);
+  if (parentBoundaryLayer && parentBoundaryLayer.setStyle) parentBoundaryLayer.setStyle({ weight: flying ? 0 : 3 });
+}
+function endFly() { if (!flying) return; flying = false; restyleSel(); }
+function beginFly() {
+  if (flying) return;
+  flying = true;
+  restyleSel();
+  map.once("moveend", endFly);
+  setTimeout(endFly, 1400);
+}
 function flyToFeature(layer, maxZoom) {
   if (!map || !layer || !layer.getBounds) return;
   userNavigated = true;
+  // 飞入期间先撤掉选中描边（缩放动画会把描边放大成粗块），落定再补回
+  beginFly();
   let b = null;
   try { b = layer.getBounds(); } catch (e) { return; }
   if (!b || (b.isValid && !b.isValid())) return;
@@ -1303,6 +1320,7 @@ function selectChomeByName(name, shouldFly = false, silent = false) {
   if (shouldFly && window.innerWidth > 900) {
     const pt = PTS.find(p => p.n === name);
     if (pt && pt.lat) {
+      beginFly();
       map.setView([pt.lat, pt.lng], 13.5, { animate: true });
       map.once("moveend", () => { lastAnchor = L.latLng(pt.lat, pt.lng); showToast(name, "chome"); });
     } else if (f.geometry) {

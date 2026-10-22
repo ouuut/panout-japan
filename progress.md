@@ -441,3 +441,9 @@
 - 原因：点击后走 `flyToBounds(bounds, maxZoom)`，maxZoom 给到 14（町）/ 15.25（町丁目），而底图是 GSI 白地図、没有街道级细节，放大后只剩巨块色块，町名标签也在 z13 以上被关掉，等于「放大即失联」。
 - 住宅：町 14 → 13，区 11.75；犯罪：町丁目 15.25 → 13.5，区 11.75，搜索定位同步 13.5。
 - 手机端仍是 `maxZoom - 1`，不会比桌面更近。
+
+## 2026-10-22 · M4.19k-5 飞入时的粗描边
+
+- 根因：Leaflet 的 canvas 渲染器在缩放动画期间给整个 canvas 加 CSS transform 缩放，3px 的选中描边被一起放大（z11→z13 是 4 倍，视觉上十几像素的粗框），动画结束重绘才回到 3px。
+- 改法：`flying` 标志 —— 程序化飞入（点击/搜索定位）开始时把选中要素的 `weight` 置 0，`moveend` 后恢复；另有 1.4s 兜底定时器防止 moveend 丢失。手动滚轮缩放不受影响（只有一帧级别放大，看不出来）。
+- 住宅 `styleTown`/`styleWard`、犯罪 `muniLayer`/`chomeLayer`/`parentBoundaryLayer` 都走同一套 `restyleSel()`。

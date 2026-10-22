@@ -104,6 +104,8 @@ let userNavigated = false; // 用户已主动点选：延迟的首次 fit 不要
 let curLang = "ja", curVariant = "editorial";
 let metric = "unit", mode = "chome";
 let selTown = null, selWard = null;
+// 程序化飞入期间隐藏选中描边：canvas 在缩放动画里被整体缩放，3px 描边会跟着放大成粗块
+let flying = false;
 let SCALE = null;
 let mounted = false, bootSeq = 0, aborter = null;
 let zsDragging = false;
@@ -216,7 +218,7 @@ function styleTown(f) {
   const hasSel = selTown != null;
   return {
     color: sel ? accentColor() : (curVariant === "tactical" ? "rgba(255,244,232,0.10)" : "rgba(24,22,20,0.10)"),
-    weight: sel ? 3 : 0.55,
+    weight: sel ? (flying ? 0 : 3) : 0.55,
     fillColor: colorFor(v),
     fillOpacity: sel ? 1 : (hasSel ? 0.52 : 0.9),
   };
@@ -229,7 +231,7 @@ function styleWard(f) {
   const hasSel = !!selWard;
   return {
     color: sel ? accentColor() : (curVariant === "tactical" ? "rgba(255,244,232,0.14)" : "rgba(24,22,20,0.14)"),
-    weight: sel ? 2.6 : 0.8,
+    weight: sel ? (flying ? 0 : 2.6) : 0.8,
     fillColor: colorFor(v),
     fillOpacity: sel ? 0.98 : (hasSel ? 0.6 : 0.88),
   };
@@ -522,9 +524,19 @@ function renderCard() {
 }
 
 // 点击区域后平滑飞到该区域：留出右侧卡片/底部抽屉的余量，缩放到刚好装下
+function restyleSel() {
+  if (townLayer) townLayer.setStyle(styleTown);
+  if (wardLayer) wardLayer.setStyle(styleWard);
+}
+function endFly() { if (!flying) return; flying = false; restyleSel(); }
 function flyToBounds(b, maxZoom) {
   if (!map || !b || (b.isValid && !b.isValid())) return;
   userNavigated = true;
+  // 飞入期间先撤掉选中描边（缩放动画会把 3px 放大成十几像素的粗框），落定再补回
+  flying = true;
+  restyleSel();
+  map.once("moveend", endFly);
+  setTimeout(endFly, 1400);
   const size = map.getSize();
   const desktop = size.x >= 900;
   const opts = {
