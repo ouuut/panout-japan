@@ -11,6 +11,19 @@
 'use strict';
 const crmStore = { getItem(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, setItem(k, val) { try { localStorage.setItem(k, val); } catch (e) {} }, removeItem(k) { try { localStorage.removeItem(k); } catch (e) {} } };
 const CRM_CSS = "/* 首屏极简雷达加载器 (第一毫秒绘制，平滑淡出) */\r\n#crm-app-loader {\r\n  position: absolute; inset: 0; z-index: 9999;\r\n  background: var(--bg-page, #E9EDE3);\r\n  display: flex; align-items: center; justify-content: center;\r\n  transition: opacity .4s var(--ease, ease), visibility .4s var(--ease, ease);\r\n}\r\n#crm-app-loader.fade-out {\r\n  opacity: 0; visibility: hidden; pointer-events: none;\r\n}\r\n.loader-inner {\r\n  display: flex; flex-direction: column; align-items: center; gap: 14px;\r\n  text-align: center; user-select: none;\r\n}\r\n.loader-radar {\r\n  position: relative; width: 48px; height: 48px; border-radius: 50%;\r\n  border: 1.5px solid color-mix(in srgb, var(--accent) 25%, transparent);\r\n  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 15%, transparent);\r\n  overflow: hidden;\r\n}\r\n.loader-radar::before {\r\n  content: \"\"; position: absolute; inset: 8px; border-radius: 50%;\r\n  border: 1px dashed color-mix(in srgb, var(--accent) 35%, transparent);\r\n}\r\n.radar-sweep {\r\n  position: absolute; inset: 0; border-radius: 50%;\r\n  background: conic-gradient(from 0deg, color-mix(in srgb, var(--accent) 45%, transparent) 0deg, transparent 90deg, transparent 360deg);\r\n  animation: radarRotate 1.2s linear infinite;\r\n}\r\n.radar-dot {\r\n  position: absolute; left: 50%; top: 50%; width: 6px; height: 6px;\r\n  background: var(--accent); border-radius: 50%; transform: translate(-50%, -50%);\r\n  box-shadow: 0 0 8px var(--accent);\r\n}\r\n@keyframes radarRotate {\r\n  from { transform: rotate(0deg); }\r\n  to { transform: rotate(360deg); }\r\n}\r\n.loader-title {\r\n  font-size: 15px; font-weight: 350; letter-spacing: 1px; color: #f5f0e8;\r\n  font-family: var(--font-sans);\r\n}\r\n.loader-status {\r\n  font-size: 11.5px; color: #a89d8d; font-family: var(--font-sans);\r\n  letter-spacing: 0.5px;\r\n}\r\n/* =====================================================================\r\n   1. 设计系统基础变量 (严格色彩克制与统一度规)\r\n   ===================================================================== */\r\n#crm-root {\r\n  --trans: 0.2s cubic-bezier(0.16, 1, 0.3, 1);\r\n  --hh: 54px; /* 紧凑单行顶栏 */\r\n  --radius-ui: 6px;    /* 统一步调：所有控件严格 6px */\r\n  --radius-inner: 4px; /* 内嵌药丸/徽章严格 4px */\r\n  --radius-card: 8px;  /* 卡片外框严格 8px */\r\n  --zoom-accent: var(--accent); /* 缩放拖动条跟随当前全局重点色 */\r\n  --zoom-accent-soft: var(--accent-soft);\r\n  /* ---- 全站统一字体：无衬线极细（MiSans VF，可变字重 150–700） ---- */\r\n  --font-sans: \"MiSans VF\", \"MiSans\", \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif;\r\n  --font-num: var(--font-sans);\r\n  --title-font: var(--font-sans);\r\n  --fw-xs: 350;      /* ≤12px 小字（再细会笔画溶解） */\r\n  --fw-sm: 330;      /* 12.5–13.5px 控件/正文 */\r\n  --fw-body: 310;    /* 15px+ */\r\n  --fw-mid: 250;     /* 19–20px 标题 */\r\n  --fw-display: 180; /* ≥34px 大字 */\r\n}\r\n\r\n/* ---- 方案 A：大报典范 · 纸感白 (Editorial Newsroom / Parchment) ---- */\r\n#crm-root[data-crm-variant=\"editorial\"] {\r\n  color-scheme: light;\r\n  --bg-page: #faf8f5;\r\n  --bg-glass: rgba(250, 248, 245, 0.45);\r\n  --bg-map: #f4efe6;\r\n  --bg-card: rgba(255, 255, 255, 0.60);\r\n  --bg-card-sub: rgba(255, 255, 255, 0.38);\r\n  --text-main: #181614;\r\n  --text-muted: #6e675c;\r\n  --text-faint: #9c9486;\r\n  --line-main: #e2ddd3;\r\n  --line-strong: #181614;\r\n  --accent: #9f3c2c; /* 传统朱印墨 */\r\n  --accent-soft: rgba(159, 60, 44, 0.08);\r\n  --shadow-card: 0 4px 20px rgba(24, 22, 20, 0.08), 0 0 0 1px rgba(24, 22, 20, 0.05);\r\n  --card-glass: blur(26px) saturate(1.9);\r\n  --capsule-bg: rgba(255, 253, 249, 0.95);\r\n  --capsule-line: rgba(24, 22, 20, 0.14);\r\n}\r\n\r\n/* ---- 方案 B：暖炭黑 (Warm Charcoal / 深色去蓝定稿) ---- */\r\n#crm-root[data-crm-variant=\"tactical\"] {\r\n  color-scheme: dark;\r\n  --bg-page: #141210;\r\n  --bg-glass: rgba(20, 18, 16, 0.55);\r\n  --bg-map: #0d0c0b;\r\n  --bg-card: rgba(27, 25, 23, 0.62);\r\n  --bg-card-sub: rgba(53, 47, 42, 0.42);\r\n  --bg-hover: rgba(255, 244, 232, 0.08);\r\n  --text-main: #f5f0e8;\r\n  --text-muted: #a89d8d;\r\n  --text-faint: #6f675b;\r\n  --line-main: rgba(255, 244, 232, 0.1);\r\n  --line-strong: #f5f0e8;\r\n  --accent: #d0801a; /* 暖琥珀：已调低饱和度，温润内敛，夜间极度舒适 */\r\n  --accent-soft: rgba(208, 128, 26, 0.16);\r\n  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 244, 232, 0.08);\r\n  --card-glass: blur(26px) saturate(1.5);\r\n  --capsule-bg: rgba(18, 16, 14, 0.94);\r\n  --capsule-line: rgba(255, 244, 232, 0.14);\r\n}\r\n\r\n/* =====================================================================\r\n   低饱和优雅重点色系统 (4 套精心调配 · 深浅双模式全域无感热切换)\r\n   ===================================================================== */\r\n/* 1. 焦糖暖橙 (Amber - 柔和暖橙) */\r\n#crm-root[data-crm-accent=\"amber\"] {\r\n  --accent: #d0801a;\r\n  --accent-soft: rgba(208, 128, 26, 0.16);\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"][data-crm-accent=\"amber\"] {\r\n  --accent: #9f3c2c;\r\n  --accent-soft: rgba(159, 60, 44, 0.1);\r\n}\r\n\r\n/* 2. 朱砂绯红 (Crimson - 低饱和冷红，克制不刺目) */\r\n#crm-root[data-crm-accent=\"crimson\"] {\r\n  --accent: #de4848;\r\n  --accent-soft: rgba(222, 72, 72, 0.16);\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"][data-crm-accent=\"crimson\"] {\r\n  --accent: #b91c1c;\r\n  --accent-soft: rgba(185, 28, 28, 0.1);\r\n}\r\n\r\n/* 3. 战术钢蓝 (Steel - 理性战术灰蓝) */\r\n#crm-root[data-crm-accent=\"steel\"] {\r\n  --accent: #4a8bb2;\r\n  --accent-soft: rgba(74, 139, 178, 0.16);\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"][data-crm-accent=\"steel\"] {\r\n  --accent: #2c5e8a;\r\n  --accent-soft: rgba(44, 94, 138, 0.1);\r\n}\r\n\r\n/* =====================================================================\r\n   4. 地图画布与地标注记样式\r\n   ===================================================================== */\r\n/* 地图满屏铺底，顶栏以亚克力毛玻璃覆盖其上（毛玻璃才有真实内容可透） */\r\n#crm-map {\r\n  position: absolute; top: 0; left: 0; right: 0; bottom: 0;\r\n  z-index: 0; background: var(--bg-map); transition: background-color var(--trans);\r\n}\r\n\r\n/* 自带柔和地标/区名浮动标签 (解决地图无文字盲区) */\r\n.map-ward-label {\r\n  background: transparent !important; border: none !important;\r\n  text-align: center; pointer-events: none; white-space: nowrap;\r\n}\r\n.map-ward-label span {\r\n  display: inline-block; font-size: 12.5px; font-weight: 350; letter-spacing: 0.5px;\r\n  color: var(--text-muted); opacity: 0.85;\r\n  text-shadow: 0 0 4px var(--bg-map), 0 0 2px var(--bg-map), 0 1px 2px var(--bg-map);\r\n  font-family: var(--font-sans); transition: color var(--trans);\r\n}\r\n#crm-root[data-crm-variant=\"tactical\"] .map-ward-label span {\r\n  color: #a89d8d;\r\n  text-shadow: 0 0 4px #0d0c0b, 0 0 3px #0d0c0b, 0 1px 2px #0d0c0b;\r\n}\r\n\r\n/* =====================================================================\r\n   5. 左下角「态势分布仪」\r\n   ===================================================================== */\r\n#crm-legend-instrument {\r\n  position: absolute; left: 16px; bottom: 16px; width: 360px; z-index: 1000;\r\n  background: var(--bg-card); -webkit-backdrop-filter: var(--card-glass); backdrop-filter: var(--card-glass);\r\n  border: 1px solid var(--line-main); border-radius: var(--radius-card);\r\n  padding: 10px 14px 8px; box-shadow: var(--shadow-card);\r\n  transition: all var(--trans);\r\n}\r\n.inst-header {\r\n  display: flex; justify-content: space-between; align-items: baseline;\r\n  font-size: 12.5px; margin-bottom: 5px; gap: 8px;\r\n}\r\n.inst-title {\r\n  font-weight: 350; color: var(--text-main); font-size: 12.5px; white-space: nowrap;\r\n}\r\n.inst-readout {\r\n  font-size: 12.5px; font-weight: 350; color: var(--accent); font-family: var(--font-num);\r\n  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right;\r\n}\r\n.inst-hist-wrap {\r\n  position: relative; height: 22px; margin-bottom: 4px;\r\n}\r\n#crm-hist-svg {\r\n  width: 100%; height: 100%; display: block; overflow: visible;\r\n}\r\n.hist-bar {\r\n  fill: var(--text-muted); opacity: 0.25;\r\n}\r\n#crm-root[data-crm-variant=\"tactical\"] .hist-bar {\r\n  fill: #a89d8d; opacity: 0.3;\r\n}\r\n#crm-hist-cursor {\r\n  position: absolute; top: -2px; bottom: 0; width: 2px;\r\n  background: var(--accent); pointer-events: none; opacity: 0;\r\n  transition: left 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s;\r\n  z-index: 10;\r\n}\r\n.inst-bar {\r\n  display: flex; height: 6px; border-radius: 3px; overflow: hidden;\r\n  border: 1px solid var(--line-main);\r\n}\r\n.inst-bar div { flex: 1; }\r\n.inst-ticks {\r\n  display: flex; justify-content: space-between; font-size: 11px; font-weight: var(--fw-xs);\r\n  color: var(--text-muted); margin-top: 3px; font-family: var(--font-num);\r\n}\r\n\r\n/* =====================================================================\r\n   6. 右侧自适应贴合数据面板\r\n   ===================================================================== */\r\n#crm-card {\r\n  position: absolute; right: 16px; top: 16px;\r\n  width: 352px; max-height: calc(100% - 44px);\r\n  overflow-y: auto; overflow-x: hidden; z-index: 1000;\r\n  display: flex; flex-direction: column; gap: 12px;\r\n  background: transparent; border: none; padding: 0; box-shadow: none;\r\n  /* 隐形滚动条：保留滚动能力，不显示灰条 */\r\n  scrollbar-width: none;      /* Firefox */\r\n  -ms-overflow-style: none;   /* 旧 Edge / IE */\r\n}\r\n#crm-card::-webkit-scrollbar { width: 0; height: 0; display: none; } /* Chromium / Safari */\r\n/* 单张数据卡（町丁卡 / 区市卡 各自独立成卡） */\r\n.panel-card {\r\n  flex-shrink: 0;\r\n  background: var(--bg-card); -webkit-backdrop-filter: var(--card-glass); backdrop-filter: var(--card-glass);\r\n  border: 1px solid var(--line-main); border-radius: var(--radius-card);\r\n  padding: 14px 16px; font-size: 15px; box-shadow: var(--shadow-card);\r\n  transition: all var(--trans);\r\n}\r\n/* 层级标签：町丁 / 区市 */\r\n.card-level {\r\n  display: inline-block; font-size: 11px; font-weight: 350; letter-spacing: 1px;\r\n  padding: 1px 5px; border-radius: var(--radius-inner); margin-bottom: 5px;\r\n  font-family: var(--font-num);\r\n}\r\n.card-level.lv-chome {\r\n  background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-soft);\r\n}\r\n.card-level.lv-ward {\r\n  background: rgba(0, 0, 0, 0.05); color: var(--text-muted); border: 1px solid var(--line-main);\r\n}\r\n#crm-root[data-crm-variant=\"tactical\"] .card-level.lv-ward {\r\n  background: rgba(255, 244, 232, 0.06); color: #a89d8d;\r\n}\r\n\r\n.card-head {\r\n  display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;\r\n  margin-bottom: 6px;\r\n}\r\n.card-head h2 {\r\n  margin: 0; font-size: 20px; font-family: var(--title-font); font-weight: var(--fw-mid);\r\n  line-height: 1.25; color: var(--text-main);\r\n}\r\n\r\n.rank-badge {\r\n  font-size: 11.5px; font-weight: 350; padding: 2px 6px; border-radius: var(--radius-inner);\r\n  white-space: nowrap; font-family: var(--font-num);\r\n}\r\n.rank-badge.danger {\r\n  background: var(--accent-soft); color: var(--accent);\r\n  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"] .rank-badge.danger {\r\n  border-color: rgba(159, 60, 44, 0.3);\r\n}\r\n.rank-badge.neutral {\r\n  background: rgba(0, 0, 0, 0.04); color: var(--text-muted);\r\n  border: 1px solid var(--line-main);\r\n}\r\n#crm-root[data-crm-variant=\"tactical\"] .rank-badge.neutral {\r\n  background: rgba(255, 244, 232, 0.05); color: #a89d8d;\r\n  border: 1px solid rgba(255, 244, 232, 0.1);\r\n}\r\n\r\n.metric-hero {\r\n  margin: 8px 0 12px; padding: 10px 12px; border-radius: var(--radius-inner);\r\n  background: var(--bg-card-sub); border: 1px solid var(--line-main);\r\n}\r\n.metric-hero .val-row {\r\n  display: flex; align-items: baseline; gap: 5px;\r\n}\r\n.metric-hero .big-val {\r\n  font-size: 34px; font-weight: var(--fw-display); line-height: 1; font-family: var(--font-num);\r\n  color: var(--text-main); letter-spacing: -0.5px;\r\n}\r\n.metric-hero .unit {\r\n  font-size: 12.5px; color: var(--text-muted); font-weight: 350;\r\n}\r\n.metric-hero .benchmark {\r\n  font-size: 12.5px; color: var(--text-muted); margin-top: 4px; font-weight: var(--fw-xs);\r\n}\r\n\r\n.breakdown-section { margin-top: 10px; }\r\n.section-title {\r\n  font-size: 11.5px; font-weight: 350; text-transform: uppercase; letter-spacing: 0.5px;\r\n  color: var(--text-muted); margin-bottom: 6px; font-family: var(--font-num);\r\n}\r\n.crime-row {\r\n  display: flex; align-items: center; justify-content: space-between; gap: 8px;\r\n  padding: 4px 0; border-bottom: 1px solid var(--line-main); font-size: 12px;\r\n}\r\n.crime-row.active {\r\n  font-weight: 450; color: var(--text-main);\r\n}\r\n.crime-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }\r\n.crime-bar-wrap {\r\n  width: 64px; height: 4px; background: rgba(0, 0, 0, 0.06); border-radius: 2px;\r\n  margin: 0; overflow: hidden; flex-shrink: 0;\r\n}\r\n#crm-root[data-crm-variant=\"tactical\"] .crime-bar-wrap {\r\n  background: rgba(255, 244, 232, 0.08);\r\n}\r\n.crime-bar-fill {\r\n  height: 100%; background: var(--accent); border-radius: 2px;\r\n  transition: width 0.2s ease;\r\n}\r\n.crime-count {\r\n  font-family: var(--font-num); font-weight: 350; min-width: 44px; text-align: right;\r\n  font-size: 12px; flex-shrink: 0;\r\n}\r\n\r\n.tops-box { margin-top: 12px; }\r\n.top-item {\r\n  padding: 5px 6px; border-radius: var(--radius-inner); font-size: 12.5px; cursor: pointer;\r\n  display: flex; justify-content: space-between; align-items: center;\r\n  transition: background 0.15s; border-bottom: 1px dashed var(--line-main);\r\n}\r\n.top-item:hover { background: var(--bg-hover); }\r\n.top-item .tname { color: var(--text-main); }\r\n.top-item .trate {\r\n  font-family: var(--font-num); font-size: 12.5px; color: var(--accent); font-weight: 350;\r\n}\r\n\r\n\r\n#crm-drop {\r\n  position: absolute; z-index: 1500; background: var(--bg-card); -webkit-backdrop-filter: var(--card-glass); backdrop-filter: var(--card-glass);\r\n  color: var(--text-main); border: 1px solid var(--line-main); border-radius: var(--radius-ui);\r\n  max-height: 260px; overflow: auto; display: none; box-shadow: var(--shadow-card);\r\n}\r\n#crm-drop div {\r\n  padding: 7px 12px; font-size: 13.5px; cursor: pointer; border-bottom: 1px solid var(--line-main);\r\n}\r\n#crm-drop div:hover { background: var(--bg-hover); }\r\n\r\n/* =====================================================================\r\n   7. 地图选中标注 (脉冲锚点 → 三环长脉冲 + 上浮地名胶囊)\r\n   ===================================================================== */\r\n#crm-lx-svg { position: absolute; left: 0; top: 0; z-index: 1500; pointer-events: none; display: block; overflow: visible; }\r\n#crm-lx-svg .lx-ring { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0; }\r\n#crm-lx-svg .lx-dot { fill: var(--accent); }\r\n#crm-lx-capsule {\r\n  position: absolute; left: 0; top: 0; z-index: 1501; pointer-events: none;\r\n  display: flex; gap: 14px; align-items: center;\r\n  background: var(--capsule-bg); -webkit-backdrop-filter: var(--card-glass); backdrop-filter: var(--card-glass);\r\n  border: 1px solid var(--capsule-line); border-radius: var(--radius-card);\r\n  box-shadow: var(--shadow-card);\r\n  padding: 10px 18px;\r\n  color: var(--text-main);\r\n  white-space: nowrap; opacity: 0;\r\n  transform: translate(-50%, -100%) translateY(6px);\r\n  transition: opacity 0.2s ease, transform 0.2s ease;\r\n}\r\n#crm-lx-capsule.on { opacity: 1; transform: translate(-50%, -100%) translateY(0); }\r\n#crm-lx-capsule .lx-main { display: flex; gap: 10px; align-items: baseline; }\r\n#crm-lx-capsule .lx-lvl {\r\n  font-size: 13px; font-weight: 700; color: var(--accent);\r\n  font-family: var(--font-num); letter-spacing: 0.5px; flex-shrink: 0;\r\n}\r\n#crm-lx-capsule .lx-name {\r\n  font-size: 22px; font-weight: var(--fw-mid); line-height: 1.25;\r\n  color: var(--text-main); font-family: var(--title-font);\r\n}\r\n#crm-lx-capsule .lx-num { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-variant-numeric: tabular-nums; }\r\n#crm-lx-capsule .lx-val {\r\n  font-size: 26px; font-weight: var(--fw-display); line-height: 1;\r\n  color: var(--text-main); font-family: var(--font-num); letter-spacing: -0.5px;\r\n}\r\n#crm-lx-capsule .lx-unit {\r\n  font-size: 11px; color: var(--text-muted); font-weight: var(--fw-xs); line-height: 1;\r\n  white-space: nowrap;\r\n}\r\n\r\n/* =====================================================================\r\n   8. 左侧竖向缩放拖动条 (橙色 · 替代 Leaflet 默认缩放按钮)\r\n   ===================================================================== */\r\n#crm-zoom-slider {\r\n  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);\r\n  z-index: 1200; display: flex; flex-direction: column; align-items: center; gap: 4px;\r\n  background: var(--bg-card);\r\n  -webkit-backdrop-filter: var(--card-glass);\r\n  backdrop-filter: var(--card-glass);\r\n  border: 1px solid var(--line-main); border-radius: var(--radius-card);\r\n  padding: 7px 6px; box-shadow: var(--shadow-card);\r\n  user-select: none; -webkit-user-select: none;\r\n}\r\n#crm-zoom-slider .zs-cap {\r\n  font-size: 15px; font-weight: 350; line-height: 1; color: var(--text-muted);\r\n  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;\r\n  cursor: pointer; border-radius: var(--radius-inner); transition: color 0.15s, background 0.15s;\r\n  font-family: var(--font-num);\r\n}\r\n#crm-zoom-slider .zs-cap:hover { color: var(--zoom-accent); background: var(--bg-hover); }\r\n.zs-track {\r\n  position: relative; width: 6px; height: 164px; margin: 3px 0;\r\n  background: var(--line-main); border-radius: 3px; cursor: pointer;\r\n  touch-action: none;\r\n}\r\n.zs-fill {\r\n  position: absolute; left: 0; right: 0; bottom: 0; height: 0%;\r\n  background: var(--zoom-accent); border-radius: 3px;\r\n  transition: height 0.12s linear;\r\n}\r\n.zs-thumb {\r\n  position: absolute; left: 50%; bottom: 0%; width: 18px; height: 8px;\r\n  background: var(--zoom-accent); border-radius: var(--radius-inner);\r\n  transform: translate(-50%, 50%);\r\n  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);\r\n  transition: box-shadow 0.15s, bottom 0.12s linear;\r\n}\r\n.zs-track:hover .zs-thumb, .zs-thumb:active {\r\n  box-shadow: 0 0 0 4px var(--zoom-accent-soft), 0 1px 4px rgba(0, 0, 0, 0.35);\r\n}\r\n\r\n@media (max-width: 900px) {\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n  #crm-card {\r\n    left: 12px; right: 12px; top: auto; bottom: 12px; width: auto; max-height: 38%;\r\n    padding: 0; background: transparent; border: none; box-shadow: none;\r\n    overflow-x: clip;\r\n  }\r\n  #crm-card .panel-card { padding: 12px 14px; }\r\n  #crm-lx-capsule { max-width: calc(100vw - 24px); font-size: 14px; }\r\n  #crm-lx-capsule .lx-name { font-size: 16px; }\r\n  #crm-lx-capsule .lx-val { font-size: 20px; }\r\n  #crm-legend-instrument { display: none; }\r\n  /* 手机端缩放条收短、贴近左缘 */\r\n  #crm-zoom-slider { left: 10px; top: 46%; padding: 6px 5px; }\r\n  .zs-track { height: 110px; }\r\n}\r\n/* =====================================================================\r\n   9. 地图左上角 HUD 状态胶囊 (对齐 GPT 专业情报站)\r\n   ===================================================================== */\r\n#crm-hud-capsule {\r\n  position: absolute; left: 16px; top: calc(var(--hh) + 14px); z-index: 1200;\r\n  display: flex; align-items: center; gap: 8px;\r\n  background: var(--bg-card); -webkit-backdrop-filter: var(--card-glass); backdrop-filter: var(--card-glass);\r\n  border: 1px solid var(--line-main); border-radius: var(--radius-ui);\r\n  box-shadow: var(--shadow-card); padding: 5px 12px;\r\n  font-size: 12px; color: var(--text-main); font-family: var(--font-sans);\r\n  pointer-events: auto; user-select: none;\r\n}\r\n.hud-dot {\r\n  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);\r\n  box-shadow: 0 0 6px var(--accent); flex-shrink: 0;\r\n}\r\n.hud-sep { color: var(--text-faint); font-size: 11px; }\r\n.hud-item { font-weight: var(--fw-sm); }\r\n.hud-sub { color: var(--text-muted); font-size: 11.5px; }\r\n#crm-hud-reset {\r\n  margin-left: 4px; background: var(--bg-card-sub); border: 1px solid var(--line-main);\r\n  color: var(--text-main); padding: 2px 7px; border-radius: var(--radius-inner);\r\n  font-size: 11px; cursor: pointer; transition: all 0.15s; font-family: var(--font-sans);\r\n}\r\n#crm-hud-reset:hover { background: var(--bg-hover); color: var(--accent); }\r\n@media (max-width: 768px) {\r\n  #crm-hud-capsule { display: none; }\r\n}\r\n\r\n/* =====================================================================\r\n   10. 双列核心 KPI 与全东京都排名看板\r\n   ===================================================================== */\r\n.metric-grid-2col {\r\n  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;\r\n  margin: 8px 0 10px;\r\n}\r\n.mg-col {\r\n  background: var(--bg-card-sub); border: 0;\r\n  border-radius: var(--radius-inner); padding: 12px 14px;\r\n}\r\n.mg-val {\r\n  font-size: 32px; font-weight: 200; line-height: 1.05;\r\n  font-family: var(--font-sans); color: var(--text-main); letter-spacing: -0.025em;\r\n  font-variant-numeric: tabular-nums;\r\n}\r\n.mg-lbl {\r\n  font-size: 11px; color: var(--text-muted); font-weight: var(--fw-xs); margin-top: 3px;\r\n  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;\r\n}\r\n\r\n.rank-card-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }\r\n.rank-card-item {\r\n  display: flex; align-items: center; gap: 8px; padding: 4px 6px;\r\n  border-radius: var(--radius-inner); font-size: 12px; cursor: pointer;\r\n  transition: background 0.15s; border-bottom: 1px dashed var(--line-main);\r\n}\r\n.rank-card-item:hover { background: var(--bg-hover); }\r\n.rci-idx { font-family: var(--font-num); font-size: 11px; color: var(--text-faint); width: 16px; }\r\n.rci-name { width: 56px; color: var(--text-main); white-space: nowrap; font-size: 12px; }\r\n.rci-bar-wrap { flex: 1; height: 3px; background: rgba(0,0,0,0.06); border-radius: 2px; overflow: hidden; }\r\n#crm-root[data-crm-variant=\"tactical\"] .rci-bar-wrap { background: rgba(255,244,232,0.08); }\r\n.rci-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; }\r\n.rci-val { font-family: var(--font-num); font-size: 12px; color: var(--accent); min-width: 44px; text-align: right; }\r\n\r\n/* 比例尺微调样式 */\r\n.leaflet-control-scale { margin-bottom: 74px !important; margin-left: 16px !important; }\r\n.leaflet-control-scale-line {\r\n  background: var(--bg-card) !important; border: 1px solid var(--line-main) !important;\r\n  border-top: none !important; color: var(--text-muted) !important;\r\n  font-family: var(--font-num) !important; font-size: 11px !important;\r\n  line-height: 1.1 !important; padding: 2px 5px !important;\r\n  -webkit-backdrop-filter: var(--card-glass); backdrop-filter: var(--card-glass);\r\n}\r\n/* 选中父级边界外发光 (对齐 GPT 突出选区质感) */\r\n.sel-parent-glow path {\r\n  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 75%, transparent));\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"] .sel-parent-glow path {\r\n  filter: drop-shadow(0 0 6px rgba(159, 60, 44, 0.45));\r\n}\r\n/* 国土地理院纯净白图滤镜 (免 API Key，黑曜石模式自动转暗黑战术风) */\r\n.leaflet-tile-pane { transition: opacity 0.25s, filter 0.25s; }\r\n#crm-root[data-crm-variant=\"tactical\"] .leaflet-tile-pane {\r\n  filter: invert(100%) hue-rotate(180deg) brightness(70%) contrast(120%);\r\n  opacity: 0.45;\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"] .leaflet-tile-pane {\r\n  filter: brightness(98%) contrast(95%);\r\n  opacity: 0.55;\r\n}\r\n/* 调色盘切换按钮 */\r\n.crm-palette-btn {\r\n  width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;\r\n  border-radius: var(--radius-inner); background: var(--bg-card); border: 1px solid var(--line-main);\r\n  cursor: pointer; transition: all 0.15s ease;\r\n}\r\n.crm-palette-btn:hover { background: var(--bg-hover); }\r\n.palette-swatch-dot {\r\n  width: 14px; height: 14px; border-radius: 50%;\r\n  background: var(--accent);\r\n  box-shadow: 0 0 6px var(--accent-soft), 0 0 0 1.5px var(--bg-card);\r\n  transition: background-color 0.2s ease, box-shadow 0.2s ease;\r\n}\r\n\r\n/* Leaflet 署名小标签磨砂适配 (彻底消灭深色模式下的刺眼白底) */\r\n.leaflet-control-attribution {\r\n  font-family: var(--font-sans) !important;\r\n  font-size: 11px !important;\r\n  border-radius: var(--radius-inner) 0 0 0 !important;\r\n  padding: 3px 8px !important;\r\n  line-height: 1.2 !important;\r\n}\r\n#crm-root[data-crm-variant=\"tactical\"] .leaflet-control-attribution {\r\n  background: rgba(20, 18, 16, 0.78) !important;\r\n  color: #7e7668 !important;\r\n  border-top: 1px solid rgba(255, 244, 232, 0.08) !important;\r\n  border-left: 1px solid rgba(255, 244, 232, 0.08) !important;\r\n  -webkit-backdrop-filter: blur(12px) !important;\r\n  backdrop-filter: blur(12px) !important;\r\n}\r\n#crm-root[data-crm-variant=\"tactical\"] .leaflet-control-attribution a {\r\n  color: #a89d8d !important;\r\n  text-decoration: none !important;\r\n}\r\n#crm-root[data-crm-variant=\"tactical\"] .leaflet-control-attribution a:hover {\r\n  color: var(--accent) !important;\r\n  text-decoration: underline !important;\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"] .leaflet-control-attribution {\r\n  background: rgba(250, 248, 245, 0.78) !important;\r\n  color: #6e675c !important;\r\n  border-top: 1px solid var(--line-main) !important;\r\n  border-left: 1px solid var(--line-main) !important;\r\n  -webkit-backdrop-filter: blur(12px) !important;\r\n  backdrop-filter: blur(12px) !important;\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"] .leaflet-control-attribution a {\r\n  color: #181614 !important;\r\n  text-decoration: none !important;\r\n}\r\n#crm-root[data-crm-variant=\"editorial\"] .leaflet-control-attribution a:hover {\r\n  color: var(--accent) !important;\r\n  text-decoration: underline !important;\r\n}\r\n/* 口径与免责（可见文字，与 FAQPage 结构化数据一致） */\r\n.faq-block { margin-top: 10px; border-top: 1px solid var(--line-main); padding-top: 8px; }\r\n.faq-head { margin-bottom: 4px; }\r\n.faq-title { display: block; font-size: 11.5px; font-weight: var(--fw-mid); color: var(--text-main); letter-spacing: 0.5px; }\r\n.faq-sub { display: block; font-size: 11px; color: var(--text-faint); margin-top: 2px; }\r\n.faq-item { border-bottom: 1px dashed var(--line-main); }\r\n.faq-item summary {\r\n  cursor: pointer; list-style: none; padding: 5px 0;\r\n  font-size: 12px; color: var(--text-main); position: relative; padding-right: 16px;\r\n}\r\n.faq-item summary::-webkit-details-marker { display: none; }\r\n.faq-item summary::after {\r\n  content: \"+\"; position: absolute; right: 2px; top: 4px;\r\n  font-size: 13px; line-height: 1; color: var(--accent); font-family: var(--font-num);\r\n}\r\n.faq-item[open] summary::after { content: \"−\"; }\r\n.faq-item summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }\r\n.faq-a { font-size: 11.5px; color: var(--text-muted); line-height: 1.55; padding: 0 0 8px; }\r\n.faq-source { margin-top: 8px; font-size: 11px; color: var(--text-faint); }\r\n\r\n#crm-site-domain{display:none !important}\n\n#crm-root{position:relative;width:100%;height:100%;min-height:420px;overflow:hidden;background:var(--bg-map);color:var(--text-main);isolation:isolate;z-index:0}\n#crm-root{--stage:var(--bg);--faint:color-mix(in srgb,var(--muted) 72%,transparent);--bg-page:var(--bg);--bg-glass:var(--surface);--bg-map:var(--stage);--bg-card:var(--surface);--bg-card-sub:var(--surface);--bg-hover:var(--surface);--text-main:var(--ink);--text-muted:var(--muted);--text-faint:var(--faint);--line-main:color-mix(in srgb,var(--ink) 14%,transparent);--line-strong:var(--ink);--accent:var(--accent);--accent-soft:var(--accent-soft);--zoom-accent:var(--accent);--zoom-accent-soft:var(--accent-soft);--shadow-card:0 4px 20px rgba(0,0,0,.10);--card-glass:blur(26px) saturate(1.6);--capsule-bg:var(--bg);--capsule-line:color-mix(in srgb,var(--ink) 14%,transparent)}\n.crm-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:10px}\n.crm-sel,.crm-q{height:32px;box-sizing:border-box;background:var(--surface);border:0;border-radius:999px;color:var(--ink);font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;padding:0 14px;outline:none}\n.crm-q{width:190px}\n.crm-sel:focus-visible,.crm-q:focus-visible{outline:2px solid var(--accent);outline-offset:2px}/* MOBILE */\r\n@media (max-width: 640px) {\r\n  #crm-legend-instrument { left: 8px; right: 8px; bottom: 8px; width: auto; }\r\n  #crm-card { left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 38%; }\r\n  #crm-zoom-slider { display: none !important; }\r\n  #crm-map { overflow: hidden; }\r\n}\r\n";
+const CRM_DD_CSS = [
+'#crm-ctl-host .crm-dd{position:relative}',
+'#crm-ctl-host .crm-dd-btn{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 12px;border:0;border-radius:2px;background:var(--surface);color:var(--ink);font-family:var(--font-sans);font-size:13px;font-weight:350;letter-spacing:.01em;cursor:pointer;white-space:nowrap;transition:background .15s ease}',
+'#crm-ctl-host .crm-dd-btn:hover{background:color-mix(in srgb,var(--ink) 10%,var(--bg))}',
+'#crm-ctl-host .crm-dd.open .crm-dd-btn{background:color-mix(in srgb,var(--ink) 16%,var(--bg))}',
+'#crm-ctl-host .crm-dd-btn .dd-caret{opacity:.55;transition:transform .18s ease}',
+'#crm-ctl-host .crm-dd.open .dd-caret{transform:rotate(180deg)}',
+'#crm-ctl-host .crm-dd-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:100%;padding:4px;z-index:1400;background:var(--bg);border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);border-radius:4px;box-shadow:0 14px 32px rgba(0,0,0,.38);display:none}',
+'#crm-ctl-host .crm-dd.open .crm-dd-menu{display:block}',
+'#crm-ctl-host .crm-dd-opt{display:block;width:100%;text-align:left;padding:7px 12px;border:0;border-radius:2px;background:transparent;color:var(--ink);font-family:var(--font-sans);font-size:13px;font-weight:350;cursor:pointer;white-space:nowrap}',
+'#crm-ctl-host .crm-dd-opt:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}',
+'#crm-ctl-host .crm-dd-opt.on{background:var(--accent);color:var(--bg)}'
+].join('\n');
 const CRM_SKELETON = "\n<div id=\"crm-app-loader\" role=\"progressbar\" aria-label=\"loading\"><div class=\"loader-inner\"><div class=\"loader-radar\"><div class=\"radar-sweep\"></div><div class=\"radar-dot\"></div></div><div class=\"loader-title\" id=\"crm-loader-title\"></div><div class=\"loader-status\" id=\"crm-loader-status\"></div></div></div><div id=\"crm-map\"></div><div id=\"crm-drop\"></div><div id=\"crm-zoom-slider\"><span class=\"zs-cap\" id=\"crm-zsPlus\" title=\"+\">+</span><div class=\"zs-track\" id=\"crm-zsTrack\"><div class=\"zs-fill\" id=\"crm-zsFill\"></div><div class=\"zs-thumb\" id=\"crm-zsThumb\"></div></div><span class=\"zs-cap\" id=\"crm-zsMinus\" title=\"-\">-</span></div><aside id=\"crm-legend-instrument\"><div class=\"inst-header\"><span class=\"inst-title\" id=\"crm-inst-title\"></span><span class=\"inst-readout\" id=\"crm-inst-readout\"></span></div><div class=\"inst-hist-wrap\"><svg id=\"crm-hist-svg\" viewBox=\"0 0 332 22\" preserveAspectRatio=\"none\"></svg><div id=\"crm-hist-cursor\"></div></div><div class=\"inst-bar\" id=\"crm-legendBarDiv\"></div><div class=\"inst-ticks\" id=\"crm-legendTicks\"></div></aside><aside id=\"crm-card\"></aside><svg id=\"crm-lx-svg\"></svg><div id=\"crm-lx-capsule\"></div>\n";
 // =====================================================================
 // 0. 三语国际化 (i18n: 日/中/英 · 严格对齐警视厅官方统计原名)
@@ -388,14 +401,11 @@ function setLanguage(lang) {
   const tagEl = $el("crm-hdr-tag");
   if (tagEl) tagEl.textContent = t.edition;
 
-  // 更新指标下拉框
-  const mSelect = $el("crm-metric");
-  if (mSelect) {
-    const curVal = mSelect.value;
-    mSelect.innerHTML = Object.entries(t.metrics).map(([k, name]) =>
-      `<option value="${k}" ${k === curVal ? "selected" : ""}>${name}</option>`
-    ).join("");
-  }
+  // 更新指标下拉选项文字
+  $qa("[data-crm-metric]").forEach(b => {
+    const k = b.getAttribute("data-crm-metric");
+    if (t.metrics[k]) b.textContent = t.metrics[k];
+  });
 
   // 更新时间切换按钮文字
   $qa("[data-crm-t]").forEach(b => {
@@ -406,6 +416,9 @@ function setLanguage(lang) {
   $qa("[data-crm-mode]").forEach(b => {
     if (t.modes[b.getAttribute("data-crm-mode")]) b.textContent = t.modes[b.getAttribute("data-crm-mode")];
   });
+  syncCrmDd("metric", t.metrics[curMetric]);
+  syncCrmDd("time", t.times[curT]);
+  syncCrmDd("mode", t.modes[mode]);
 
   // 搜索框 placeholder
   const qInput = $el("crm-q");
@@ -440,7 +453,7 @@ function setLanguage(lang) {
     const el = document.querySelector(sel);
     if (el) { el.title = tip; el.setAttribute("aria-label", tip); }
   };
-  setTip("#crm-metric", t.tooltipMetric);
+  setTip('.crm-dd[data-dd="metric"] .crm-dd-btn', t.tooltipMetric);
   setTip(".crm-lang-group", t.tooltipLangGroup);
   setTip("#crm-zsPlus", t.tooltipZoomIn);
   setTip("#crm-zsMinus", t.tooltipZoomOut);
@@ -1273,6 +1286,7 @@ function selectChomeByName(name, shouldFly = false, silent = false) {
   $qa("[data-crm-mode]").forEach(b => {
     b.classList.toggle("on", b.getAttribute("data-crm-mode") === "chome");
   });
+  syncCrmDd("mode", (I18N[currentLang] || I18N.zh).modes.chome);
   applyMode();
   renderChomeCard(f);
   chomeLayer.setStyle(chomeLayer.options.style);
@@ -1304,6 +1318,7 @@ function selectWardByName(name) {
   $qa("[data-crm-mode]").forEach(b => {
     b.classList.toggle("on", b.getAttribute("data-crm-mode") === "muni");
   });
+  syncCrmDd("mode", (I18N[currentLang] || I18N.zh).modes.muni);
   applyMode();
   renderWardCard(name);
   muniLayer.setStyle(muniLayer.options.style);
@@ -1335,7 +1350,7 @@ function $q(sel) { try { const a = controlsRoot && controlsRoot.querySelector ? 
 function $qa(sel) { const out = []; try { const rs = [controlsRoot, rootEl, (typeof document !== 'undefined' ? document : null)]; for (const r of rs) { if (!r || !r.querySelectorAll) continue; r.querySelectorAll(sel).forEach(e => { if (out.indexOf(e) < 0) out.push(e); }); } } catch (e) {} return out; }
 function ensureCrmCss() {
   if (!document.getElementById('crm-style')) {
-    const st = document.createElement('style'); st.id = 'crm-style'; st.textContent = CRM_CSS; document.head.appendChild(st);
+    const st = document.createElement('style'); st.id = 'crm-style'; st.textContent = CRM_CSS + '\n' + CRM_DD_CSS; document.head.appendChild(st);
   }
 }
 async function loadLeaflet() {
@@ -1371,13 +1386,46 @@ async function fetchCrmJson(name, signal) {
   for (const b of bases) { try { const r = await fetch(b + name, { signal }); if (!r.ok) throw new Error(name + ' ' + r.status); return await r.json(); } catch (e) { lastErr = e; } }
   throw lastErr || new Error('fetch failed: ' + name);
 }
+const CRM_CARET = '<svg class="dd-caret" viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>';
+
+function crmDd(key, current, items, attr) {
+  const label = (items.find(x => x[0] === current) || items[0])[1];
+  const opts = items.map(([k, n]) =>
+    '<button type="button" class="crm-dd-opt' + (k === current ? ' on' : '') + '" ' + attr + '="' + k + '" role="option" aria-selected="' + (k === current) + '">' + n + '</button>').join('');
+  return '<div class="crm-dd" data-dd="' + key + '">'
+    + '<button type="button" class="crm-dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="crm-dd-label">' + label + '</span>' + CRM_CARET + '</button>'
+    + '<div class="crm-dd-menu" role="listbox">' + opts + '</div></div>';
+}
+
 function crimeControlsHtml(t) {
-  const mOpts = Object.entries(t.metrics).map(([k, name]) => '<option value="' + k + '"' + (k === curMetric ? ' selected' : '') + '>' + name + '</option>').join('');
-  return '<select id="crm-metric" class="crm-sel" title="' + (t.tooltipMetric || '') + '">' + mOpts + '</select>'
-    + '<div class="seg" role="group"><button data-crm-t="R7" class="' + (curT === 'R7' ? 'on' : '') + '">' + t.times.R7 + '</button><button data-crm-t="R8" class="' + (curT === 'R8' ? 'on' : '') + '">' + t.times.R8 + '</button></div>'
-    + '<div class="seg" role="group"><button data-crm-mode="muni" class="' + (mode === 'muni' ? 'on' : '') + '">' + t.modes.muni + '</button><button data-crm-mode="chome" class="' + (mode === 'chome' ? 'on' : '') + '">' + t.modes.chome + '</button></div>'
+  return crmDd('metric', curMetric, Object.entries(t.metrics), 'data-crm-metric')
+    + crmDd('time', curT, Object.entries(t.times), 'data-crm-t')
+    + crmDd('mode', mode, Object.entries(t.modes), 'data-crm-mode')
     + (searchInputEl ? '' : '<input id="crm-q" class="crm-q" type="search" placeholder="' + (t.searchPh || '') + '" autocomplete="off">');
 }
+
+function syncCrmDd(key, label) {
+  const dd = $q('.crm-dd[data-dd="' + key + '"]');
+  if (!dd) return;
+  const lab = dd.querySelector('.crm-dd-label');
+  if (lab && label != null) lab.textContent = label;
+  const cur = key === 'metric' ? curMetric : (key === 'time' ? curT : mode);
+  dd.querySelectorAll('.crm-dd-opt').forEach(o => {
+    const on = o.getAttribute(key === 'metric' ? 'data-crm-metric' : (key === 'time' ? 'data-crm-t' : 'data-crm-mode')) === cur;
+    o.classList.toggle('on', on);
+    o.setAttribute('aria-selected', String(on));
+  });
+}
+
+function closeCrmDd(except) {
+  $qa('.crm-dd.open').forEach(dd => {
+    if (dd === except) return;
+    dd.classList.remove('open');
+    const b = dd.querySelector('.crm-dd-btn');
+    if (b) b.setAttribute('aria-expanded', 'false');
+  });
+}
+
 function onCrimeSearchInput(ev) {
   const input = ev.target; const drop = $el('crm-drop'); if (!drop) return;
   const q = (input.value || '').trim().toLowerCase();
@@ -1400,20 +1448,48 @@ function onCardClick(e) {
   if (c) selectChomeByName(c.getAttribute('data-crm-chome'), true);
 }
 function bindControls() {
-  const m = $el('crm-metric');
-  if (m && !m.__crmBound) {
-    m.__crmBound = true;
-    m.addEventListener('change', e => {
-      curMetric = e.target.value; buildScales(); updateLegendBar(); updateHistogram();
+  $qa('.crm-dd').forEach(dd => {
+    const btn = dd.querySelector('.crm-dd-btn');
+    if (!btn || btn.__crmDdBound) return;
+    btn.__crmDdBound = true;
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = !dd.classList.contains('open');
+      closeCrmDd(dd);
+      dd.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    });
+  });
+  if (!window.__crmDdBound) {
+    window.__crmDdBound = true;
+    document.addEventListener('click', () => closeCrmDd(null));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCrmDd(null); });
+  }
+  $qa('[data-crm-metric]').forEach(b => {
+    if (b.__crmBound) return; b.__crmBound = true;
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      closeCrmDd(null);
+      const v = b.getAttribute('data-crm-metric');
+      if (v === curMetric) return;
+      curMetric = v;
+      syncCrmDd('metric', I18N[currentLang].metrics[v]);
+      buildScales(); updateLegendBar(); updateHistogram();
       if (mode === 'muni') { if (muniLayer) muniLayer.setStyle(muniLayer.options.style); }
       else if (chomeLayer) chomeLayer.setStyle(chomeLayer.options.style);
       if (curSelected) { if (mode === 'chome') renderChomeCard(curSelected); else renderWardCard(curSelected); }
     });
-  }
+  });
   $qa('[data-crm-t]').forEach(b => {
     if (b.__crmBound) return; b.__crmBound = true;
-    b.addEventListener('click', () => {
-      $qa('[data-crm-t]').forEach(x => x.classList.remove('on')); b.classList.add('on'); curT = b.getAttribute('data-crm-t');
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      closeCrmDd(null);
+      const v = b.getAttribute('data-crm-t');
+      if (v === curT) return;
+      $qa('[data-crm-t]').forEach(x => x.classList.remove('on'));
+      b.classList.add('on'); curT = v;
+      syncCrmDd('time', I18N[currentLang].times[v]);
       buildScales(); updateLegendBar(); updateHistogram();
       if (mode === 'muni') { if (muniLayer) muniLayer.setStyle(muniLayer.options.style); }
       else if (chomeLayer) chomeLayer.setStyle(chomeLayer.options.style);
@@ -1421,9 +1497,15 @@ function bindControls() {
   });
   $qa('[data-crm-mode]').forEach(b => {
     if (b.__crmBound) return; b.__crmBound = true;
-    b.addEventListener('click', () => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      closeCrmDd(null);
       if (!map || !muniLayer || !chomeLayer) return;
-      $qa('[data-crm-mode]').forEach(x => x.classList.remove('on')); b.classList.add('on'); mode = b.getAttribute('data-crm-mode');
+      const v = b.getAttribute('data-crm-mode');
+      if (v === mode) return;
+      $qa('[data-crm-mode]').forEach(x => x.classList.remove('on'));
+      b.classList.add('on'); mode = v;
+      syncCrmDd('mode', I18N[currentLang].modes[v]);
       if (mode === 'muni' && parentBoundaryLayer) { map.removeLayer(parentBoundaryLayer); parentBoundaryLayer = null; }
       applyMode();
       buildScales(); updateLegendBar(); updateHistogram();
