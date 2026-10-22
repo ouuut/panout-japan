@@ -22,7 +22,10 @@ const CRM_DD_CSS = [
 '#crm-ctl-host .crm-dd.open .crm-dd-menu{display:block}',
 '#crm-ctl-host .crm-dd-opt{display:block;width:100%;text-align:left;padding:7px 12px;border:0;border-radius:2px;background:transparent;color:var(--ink);font-family:var(--font-sans);font-size:13px;font-weight:350;cursor:pointer;white-space:nowrap}',
 '#crm-ctl-host .crm-dd-opt:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}',
-'#crm-ctl-host .crm-dd-opt.on{background:var(--accent);color:var(--bg)}'
+'#crm-ctl-host .crm-dd-opt.on{background:var(--accent);color:var(--bg)}',
+'#crm-map .crm-dim .crm-chome:not(.is-sel){opacity:.62}',
+'#crm-map .crm-chome.is-sel{stroke:var(--text-main);stroke-width:2.5px;opacity:1}',
+'#crm-map .crm-flying .crm-chome.is-sel{stroke-width:0}'
 ].join('\n');
 const CRM_SKELETON = "\n<div id=\"crm-app-loader\" role=\"progressbar\" aria-label=\"loading\"><div class=\"loader-inner\"><div class=\"loader-radar\"><div class=\"radar-sweep\"></div><div class=\"radar-dot\"></div></div><div class=\"loader-title\" id=\"crm-loader-title\"></div><div class=\"loader-status\" id=\"crm-loader-status\"></div></div></div><div id=\"crm-map\"></div><div id=\"crm-drop\"></div><div id=\"crm-zoom-slider\"><span class=\"zs-cap\" id=\"crm-zsPlus\" title=\"+\">+</span><div class=\"zs-track\" id=\"crm-zsTrack\"><div class=\"zs-fill\" id=\"crm-zsFill\"></div><div class=\"zs-thumb\" id=\"crm-zsThumb\"></div></div><span class=\"zs-cap\" id=\"crm-zsMinus\" title=\"-\">-</span></div><aside id=\"crm-legend-instrument\"><div class=\"inst-header\"><span class=\"inst-title\" id=\"crm-inst-title\"></span><span class=\"inst-readout\" id=\"crm-inst-readout\"></span></div><div class=\"inst-hist-wrap\"><svg id=\"crm-hist-svg\" viewBox=\"0 0 332 22\" preserveAspectRatio=\"none\"></svg><div id=\"crm-hist-cursor\"></div></div><div class=\"inst-bar\" id=\"crm-legendBarDiv\"></div><div class=\"inst-ticks\" id=\"crm-legendTicks\"></div></aside><aside id=\"crm-card\"></aside><svg id=\"crm-lx-svg\"></svg><div id=\"crm-lx-capsule\"></div>\n";
 // =====================================================================
@@ -598,6 +601,8 @@ let map = null, muniLayer = null, chomeLayer = null, labelLayer = null, parentBo
 let userNavigated = false; // 用户已主动点选：延迟的首次 fit 不要再把视角拽回全局
 let zoomSliderRender = null;
 let curSelected = null;
+let chomeByName = new Map();
+let selChomeEl = null;
 // 程序化飞入期间隐藏选中描边：canvas 在缩放动画里被整体缩放，描边会跟着放大成粗块
 let flying = false;
 let PTS = [], POLY, MUNI_POLY, MUNI;
@@ -992,6 +997,7 @@ function updateHudCapsule(placeName, metricText) {
 
 function renderChomeCard(f) {
   curSelected = f; try { window.__panoutCrimeSelected = f; } catch (e) {}
+  syncChomeSel();
   const p = f.properties;
   const rate = chomeRateOf(p);
 
@@ -1122,21 +1128,21 @@ function initMap() {
   });
 
   chomeLayer = L.geoJSON(POLY, {
+    // 5,234 条路径，按屏幕像素做几何简化：缩放时栅格化量显著下降，肉眼看不出差别
+    smoothFactor: 2.2,
+    // 选中态不再走 setStyle（5,198 条路径全量重绘 ≈65ms），改用 CSS 类：.crm-dim 压暗、.is-sel 提亮描边
     style: f => {
-      const cfg = VARIANTS[currentVariant];
       const r = chomeRateOf(f.properties);
-      const isSel = curSelected && curSelected.properties && curSelected.properties.name === f.properties.name;
-      const inSelWard = curSelected && curSelected.properties && curSelected.properties.ward === f.properties.ward;
-      const hasSel = !!(curSelected && curSelected.properties);
-      const opacity = isSel ? 1 : (hasSel ? (inSelWard ? 0.92 : 0.68) : 0.88);
       return {
-        color: isSel ? cfg.selLine : (currentVariant === "tactical" ? "rgba(255,244,232,0.12)" : "rgba(24,22,20,0.12)"),
-        weight: isSel ? (flying ? 0 : 2.5) : 0.6,
+        color: currentVariant === "tactical" ? "rgba(255,244,232,0.12)" : "rgba(24,22,20,0.12)",
+        weight: 0.6,
         fillColor: colorForChome(r),
-        fillOpacity: opacity
+        fillOpacity: 0.88,
+        className: "crm-chome"
       };
     },
     onEachFeature: (f, layer) => {
+      chomeByName.set(f.properties.name, layer);
       layer.on("mouseover", () => {
         const r = chomeRateOf(f.properties);
         if (r != null) moveHistCursor(r, f.properties.name);
@@ -1146,7 +1152,6 @@ function initMap() {
       });
       layer.on("click", (e) => {
         renderChomeCard(f);
-        chomeLayer.setStyle(chomeLayer.options.style);
         highlightParentBoundary(f.properties.ward);
         lastAnchor = e.latlng;
         showToast(f.properties.name, "chome");
@@ -1199,10 +1204,26 @@ function highlightParentBoundary(wardName) {
 }
 
 // 点击区域后平滑飞到该区域：留出右侧卡片/底部抽屉的余量，缩放到刚好装下
+function syncChomeSel() {
+  const f = curSelected && curSelected.properties ? curSelected : null;
+  const layer = f ? chomeByName.get(f.properties.name) : null;
+  const el = layer && layer.getElement ? layer.getElement() : null;
+  if (selChomeEl && selChomeEl !== el) selChomeEl.classList.remove("is-sel");
+  if (el) {
+    el.classList.add("is-sel");
+    const g = el.parentNode;
+    if (g && g.classList) g.classList.add("crm-dim");
+  } else if (selChomeEl && selChomeEl.parentNode) {
+    selChomeEl.parentNode.classList.remove("crm-dim");
+  }
+  selChomeEl = el || null;
+}
+
 function restyleSel() {
   if (muniLayer) muniLayer.setStyle(muniLayer.options.style);
-  if (chomeLayer) chomeLayer.setStyle(chomeLayer.options.style);
   if (parentBoundaryLayer && parentBoundaryLayer.setStyle) parentBoundaryLayer.setStyle({ weight: flying ? 0 : 3 });
+  const g = selChomeEl && selChomeEl.parentNode;
+  if (g && g.classList) g.classList.toggle("crm-flying", flying);
 }
 function endFly() { if (!flying) return; flying = false; restyleSel(); }
 function beginFly() {
@@ -1293,6 +1314,8 @@ function applyMode() {
     if (map.hasLayer(muniLayer)) map.removeLayer(muniLayer);
     if (!map.hasLayer(chomeLayer)) map.addLayer(chomeLayer);
   }
+  // 图层被移除/重建后 path 元素会换新，选中类要重新挂一次
+  syncChomeSel();
 }
 
 function selectChomeByName(name, shouldFly = false, silent = false) {
@@ -1305,7 +1328,7 @@ function selectChomeByName(name, shouldFly = false, silent = false) {
   syncCrmDd("mode", (I18N[currentLang] || I18N.zh).modes.chome);
   applyMode();
   renderChomeCard(f);
-  chomeLayer.setStyle(chomeLayer.options.style);
+  syncChomeSel();
   highlightParentBoundary(f.properties.ward);
   if (!silent && !shouldFly) showToast(name, "chome");
 

@@ -454,3 +454,10 @@
 - 根因：Leaflet 的 canvas 是一整张 3300×2168 位图，缩放动画期间整体 CSS 缩放，Chrome 要重栅格化这张大位图；面积越大越卡（视口 3300×2168 → 708ms，2280×1508 → 264ms）。
 - 改法：住宅/犯罪都去掉 `preferCanvas: true`，改用 Leaflet 默认 SVG 渲染。实测同一操作：住宅飞入 48ms（原 700+），单步缩放 42ms（原 299）；犯罪飞入 167ms、单步缩放 113ms（5,198 条路径，仍远好于 canvas）。
 - 附带：`flying` 描边抑制继续有效（SVG 同样在动画期间被缩放）。
+
+## 2026-10-22 · M4.19k-7 犯罪章选中态改 CSS 类（去掉全量 setStyle）
+
+- 实测点击处理器：犯罪 61–78ms（5,198 条路径全量 setStyle）→ 改类后 11–23ms。
+- 做法：chome 图层样式固定，加 `className:"crm-chome"`；选中时只给对应 path 加 `.is-sel`、给父 `<g>` 加 `.crm-dim`（CSS 压暗其余到 .62）；飞入时 `.crm-flying` 把描边置 0。`syncChomeSel()` 在 `renderChomeCard`/`applyMode` 后重挂，O(1)。
+- 另加 `smoothFactor: 2.2`（对栅格化帮助有限，保留无副作用）。
+- 结果（线上 1600×1000）：住宅点击飞入最大帧 8–38ms；犯罪 212–232ms（5,234 个多边形的 SVG 栅格化，冷启动首击 ~600ms 是瓦片加载）。
