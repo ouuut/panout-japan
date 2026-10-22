@@ -470,7 +470,7 @@ html[lang="zh"] .foot, html[lang="zh"] .pager {
 }
 .wordmark:hover { color: var(--accent); opacity: .82; }
 .wordmark .wm-main { font-size: 1em; letter-spacing: -.015em; }
-.wordmark .wm-tld { font-size: .45em; letter-spacing: 0; font-weight: 800; }
+.wordmark .wm-tld { font-size: 1em; letter-spacing: -.015em; font-weight: 800; }
 
 .chapters {
   display: flex;
@@ -824,7 +824,7 @@ html[lang="zh"] .spine-lbl { font-family: var(--zh-sans); }
   white-space: nowrap;
 }
 .hero-wordmark-text .wm-main { font-size: 1em; letter-spacing: -.015em; }
-.hero-wordmark-text .wm-tld { font-size: .45em; letter-spacing: 0; }
+.hero-wordmark-text .wm-tld { font-size: 1em; letter-spacing: -.015em; }
 
 /* ---------------- chapter index rows ---------------- */
 .products-sec { padding-block: var(--sec-y); }
