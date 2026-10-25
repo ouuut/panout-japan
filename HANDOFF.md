@@ -4,14 +4,14 @@
 
 - Production source: `F:/projects/panout-japan`; GitHub `ouuut/panout-japan`, Gitea mirror. Brand/domain: `japan.ouuut.com`.
 - Local milestone, 2026-10-25: C+A homepage closing now carries an integrated author signature inside `.hp-statement` (after the single H1), plus a five-second animated masthead wordmark shared by all five pages.
-- Author content: 中本蔡 / NAKAMOTO SAI; public bio: a Shanghai-born, Tokyo-based Chinese-language writer and independent AI creator. Links: `https://ouuut.com/` labelled independent projects, `https://saaaai.com/` labelled personal site, `mailto:sai@saaaai.com`, `https://x.com/saaaaicom`. No age, visa, family or other private biography.
+- Author content: 中本蔡 / NAKAMOTO SAI; public bio: a Shanghai-born, Tokyo-based Chinese-language writer and independent AI creator. Links: `https://ouuut.com/` labelled independent projects, `https://saaaai.com/` neutrally labelled main site (live browser title is セイシン株式会社｜AIプロダクト・スタジオ, so it is not called a personal homepage), `mailto:sai@saaaai.com`, `https://x.com/saaaaicom`. No age, visa, family or other private biography.
 - Masthead: accessible link name remains `japan.ouuut.com`. Visual layers alternate every 5000ms: domain glyphs appear left-to-right and fade, then `六种尺度看日本` does the same, then the domain returns. Pure CSS, opacity only; the stage reserves the old wordmark width. Reduced motion and no-JS show the static domain. The footer wordmark is static.
 - `site/` is generated and never edited directly. Local preview: `http://127.0.0.1:8900/?lang=zh`. Old four-option lab: `F:/archive/20261025-ca-hybrid-panout/`. Pre-author backups and domain-card snapshots: `F:/archive/20261025-author-wordmark-panout/`.
 - No production deployment or remote push has been made for this change.
 
 ## Commands run
 
-- `python src/build.py` → 5 pages, CSS `86ad3e34`, JS `664b7e9d`, fonts `f2d2c9ae`, charset 2193.
+- `python src/build.py` → 5 pages, CSS `3eba3c3c`, JS `664b7e9d`, fonts `d7a1a926`, charset 2192.
 - `python -m py_compile src/build.py`, `node --check src/shell.js`, design-lock JSON parse, `git diff --check` → passed.
 - Headed ego-browser, 27 width/language combinations (1440/1280/1000/768/640/390/375/360/320 × JA/ZH/EN): zero failures; one statement line, one H1, six cards, four chapter links, four source links, no document/body overflow, all author links inside their column.
 - Frozen animation sampling: duration 5000ms; domain visible glyphs 0 at 0ms, 15 at 650ms, 0 at 2450ms; CJK 7 at 3000ms, 0 at 4800ms, 0 at 5000ms; tools shift 0px, wordmark width shift 0px.
@@ -26,7 +26,7 @@
 
 ## Next safe action
 
-- Independent read-only review of the author copy, links, masthead timing and fallbacks, then user approval before deployment. Do not publish merely because the local page is ready.
+- First independent review found no implementation defect but flagged the stale `saaaai.com` label; browser recheck confirmed a studio/company landing page, so the label is now neutral「主站」and the review correction is rebuilt. Second read-only review of that correction, then user approval before deployment. Do not publish merely because the local page is ready.
 
 ## Rollback
 
