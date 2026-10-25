@@ -18,6 +18,8 @@
 - Shared masthead checked on `/`, `/quake/`, `/crime/`, `/cabinet/`, `/housing/` at 1440/768/390: 15 combinations, zero failures. Reduced-motion and JavaScript-disabled: static domain visible, stage hidden, no animation. Actual mobile EN→ZH switch passed.
 - Contrast after theme transition: sage minimum 5.3:1, dark minimum 6.74:1. 320px: no horizontal overflow. Contact destinations returned 200 for ouuut.com, saaaai.com and x.com/saaaaicom.
 - Evidence: `F:/projects/panout-japan/.review/author-wordmark/report.json` and screenshots alongside it.
+- Independent review, first pass: no implementation defect; it flagged the stale `saaaai.com` personal-homepage label. Cache-disabled browser check confirmed the live title is「セイシン株式会社｜AIプロダクト・スタジオ」with visible H1 `nakamoto sai`. Commit `92811f4` changes the label to 主站 / Main site / メインサイト and makes the Shanghai-born detail consistent across all three bios.
+- Independent review, second pass on `92811f4`: no defects. It verified nine 320/390/1440 × JA/ZH/EN combinations, four correct destinations, one H1 with the author block after it, no overflow, no animation regression, and served asset hashes CSS `3eba3c3c`, JS `664b7e9d`, fonts `d7a1a926`.
 
 ## Not verified
 
@@ -26,7 +28,7 @@
 
 ## Next safe action
 
-- First independent review found no implementation defect but flagged the stale `saaaai.com` label; browser recheck confirmed a studio/company landing page, so the label is now neutral「主站」and the review correction is rebuilt. Second read-only review of that correction, then user approval before deployment. Do not publish merely because the local page is ready.
+- Both independent reviews are complete and the second pass on `92811f4` found no defects. The only remaining action is user approval before deployment. Do not publish merely because the local page is ready.
 
 ## Rollback
 
