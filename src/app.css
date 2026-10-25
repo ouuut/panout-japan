@@ -472,6 +472,45 @@ html[lang="zh"] .foot, html[lang="zh"] .pager {
 .wordmark .wm-main { font-size: 1em; letter-spacing: -.015em; }
 .wordmark .wm-tld { font-size: 1em; letter-spacing: -.015em; font-weight: 800; }
 
+/* Shared five-second wordmark cycle: plain text stays the accessible name.
+   Absolute layers reserve the old link's width; no script or layout animation. */
+.wordmark-cycle { position: relative; }
+.wordmark-cycle .wm-static { display: inline-flex; align-items: baseline; }
+.wordmark-cycle .wm-stage { display: none; position: absolute; inset: 0; pointer-events: none; }
+.wm-cycle { position: absolute; inset: 0 auto auto 0; display: flex; align-items: baseline; height: 100%; }
+.wm-cycle > span { opacity: 0; }
+.wm-cjk {
+  font-family: var(--ja-sans);
+  font-size: .86em;
+  font-weight: 500;
+  letter-spacing: .035em;
+}
+html[lang="zh"] .wm-cjk { font-family: var(--zh-sans); }
+@media (prefers-reduced-motion: no-preference) {
+  html.js .wordmark-cycle .wm-static { opacity: 0; }
+  html.js .wordmark-cycle .wm-stage { display: block; }
+  .wm-domain { animation: wm-domain-window 5s linear infinite; }
+  .wm-cjk { animation: wm-cjk-window 5s linear infinite; }
+  .wm-cycle > span {
+    animation: wm-letter-cycle 5s cubic-bezier(.4, 0, .2, 1) infinite;
+    animation-delay: calc(var(--i) * .028s - 5s);
+  }
+  .wm-cjk > span { animation-delay: calc(2.5s + var(--i) * .05s - 5s); }
+}
+@keyframes wm-letter-cycle {
+  0% { opacity: 0; }
+  5%, 33% { opacity: 1; }
+  40%, 100% { opacity: 0; }
+}
+@keyframes wm-domain-window {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes wm-cjk-window {
+  0%, 49% { opacity: 0; }
+  50%, 100% { opacity: 1; }
+}
+
 .chapters {
   display: flex;
   gap: 28px;

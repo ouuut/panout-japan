@@ -3,31 +3,36 @@
 ## Current
 
 - Production source: `F:/projects/panout-japan`; GitHub `ouuut/panout-japan`, Gitea mirror. Brand/domain: `japan.ouuut.com`.
-- Current local milestone: the user selected C+A for the homepage closing on 2026-10-25. `src/build.py` generates six cards → C provenance → A single-line statement → compact footer; `src/home-preview.css` holds the closing styles. Only「六种尺度」in「六种尺度看日本。」is accent-coloured. JA/EN use equivalent one-line titles.
-- `site/` is generated, not tracked and never edited directly. Local preview: `http://127.0.0.1:8900/?lang=zh`. The retired four-option lab and source backups are at `F:/archive/20261025-ca-hybrid-panout/`.
-- No production deployment or remote push has been made for this change. Production status remains the separately recorded Cloudflare Pages release, not this local work.
+- Local milestone, 2026-10-25: C+A homepage closing now carries an integrated author signature inside `.hp-statement` (after the single H1), plus a five-second animated masthead wordmark shared by all five pages.
+- Author content: 中本蔡 / NAKAMOTO SAI; public bio: a Shanghai-born, Tokyo-based Chinese-language writer and independent AI creator. Links: `https://ouuut.com/` labelled independent projects, `https://saaaai.com/` labelled personal site, `mailto:sai@saaaai.com`, `https://x.com/saaaaicom`. No age, visa, family or other private biography.
+- Masthead: accessible link name remains `japan.ouuut.com`. Visual layers alternate every 5000ms: domain glyphs appear left-to-right and fade, then `六种尺度看日本` does the same, then the domain returns. Pure CSS, opacity only; the stage reserves the old wordmark width. Reduced motion and no-JS show the static domain. The footer wordmark is static.
+- `site/` is generated and never edited directly. Local preview: `http://127.0.0.1:8900/?lang=zh`. Old four-option lab: `F:/archive/20261025-ca-hybrid-panout/`. Pre-author backups and domain-card snapshots: `F:/archive/20261025-author-wordmark-panout/`.
+- No production deployment or remote push has been made for this change.
 
 ## Commands run
 
-- `python src/build.py` → latest run passed: 5 pages, CSS `0a49e2d9`, JS `06db0ba6`, 2189 charset characters.
-- Headed ego-browser at `http://127.0.0.1:8900/`: 27 width/language combinations (1440/1280/1000/768/640/390/375/360/320 × JA/ZH/EN), one statement line and zero document/body overflow in every case; 6 cards / 4 chapter links / 4 source links / 1 H1; full masthead controls fit.
-- Keyboard `<details>` close/reopen → content visibility false/true; actual mobile EN/ZH switch passed; dark accent `#FF6A3D` passed; JS-disabled static JA provenance and title remain visible. Report: `F:/projects/panout-japan/.review/ca-hybrid/report.json`; screenshots alongside it.
-- `python -m py_compile src/build.py`, design-lock JSON parse, `git diff --check` → passed. C+A retain readback doc `a3c64fb2`.
+- `python src/build.py` → 5 pages, CSS `86ad3e34`, JS `664b7e9d`, fonts `f2d2c9ae`, charset 2193.
+- `python -m py_compile src/build.py`, `node --check src/shell.js`, design-lock JSON parse, `git diff --check` → passed.
+- Headed ego-browser, 27 width/language combinations (1440/1280/1000/768/640/390/375/360/320 × JA/ZH/EN): zero failures; one statement line, one H1, six cards, four chapter links, four source links, no document/body overflow, all author links inside their column.
+- Frozen animation sampling: duration 5000ms; domain visible glyphs 0 at 0ms, 15 at 650ms, 0 at 2450ms; CJK 7 at 3000ms, 0 at 4800ms, 0 at 5000ms; tools shift 0px, wordmark width shift 0px.
+- Shared masthead checked on `/`, `/quake/`, `/crime/`, `/cabinet/`, `/housing/` at 1440/768/390: 15 combinations, zero failures. Reduced-motion and JavaScript-disabled: static domain visible, stage hidden, no animation. Actual mobile EN→ZH switch passed.
+- Contrast after theme transition: sage minimum 5.3:1, dark minimum 6.74:1. 320px: no horizontal overflow. Contact destinations returned 200 for ouuut.com, saaaai.com and x.com/saaaaicom.
+- Evidence: `F:/projects/panout-japan/.review/author-wordmark/report.json` and screenshots alongside it.
 
 ## Not verified
 
-- Full-site legacy accessibility/axe audit, all non-home chapter regressions, and cross-browser rendering were not run; the closing's measured contrast and keyboard/JS-disabled checks are not a substitute for a full audit.
-- Cloudflare production, cache purge, remote branch parity and deployment checklist were not run.
+- Full-site axe/legacy accessibility audit and cross-browser rendering were not run; this round covers the changed masthead, homepage author block, two themes, three languages, reduced motion and no-JS.
+- Cloudflare production, cache purge, remote branch parity and deployment checklist were not run. External destination status proves reachability, not their content.
 
 ## Next safe action
 
-- Independent `ClosingHybridReview` returned findings 0 / correct for commit 310cb97. It independently checked source, generated HTML, i18n, the six-card contract, title/highlight, provenance, masthead and archival; it did not claim its own pixel-level browser run. Its reported uncertainty about report tail labels was checked against the current report: there is no 280px label; 360 and 320 rows have matching `viewport`, sizes and widths. Source was not changed.
-- Let the user approve deployment when ready. Do not publish merely because the local page is ready.
+- Independent read-only review of the author copy, links, masthead timing and fallbacks, then user approval before deployment. Do not publish merely because the local page is ready.
 
 ## Rollback
 
-- Pre-change `src/build.py`, `src/home-preview.css`, `src/app.css`, `site/index.html`, README/design lock and this handoff are backed up at `F:/archive/20261025-ca-hybrid-panout/`. The previous four-option preview is preserved there as `closing-options/`.
+- Last known good before this round: commit `58abed1`. Revert the source/doc commit and rebuild `python src/build.py`; `site/` is generated.
+- Previous handoff and domain cards: `F:/archive/20261025-author-wordmark-panout/`. Previous closing implementation backup: `F:/archive/20261025-ca-hybrid-panout/`.
 
 ## Confidence
 
-4/5 — actual generated page and real headed interactions were exercised locally; independent review and production deployment are separate.
+4/5 — real generated pages and headed browser interactions were exercised at desktop, tablet and mobile; independent review and production deployment remain separate.

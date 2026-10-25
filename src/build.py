@@ -33,6 +33,19 @@ SRC = ROOT / "src"
 SITE_URL = "https://japan.ouuut.com"
 BRAND = "japan.ouuut.com"
 WM = '<span class="wm-main">japan</span><span class="wm-tld">.ouuut.com</span>'
+
+
+def animated_wordmark():
+    """The plain domain is the static/no-JS and accessible name; layers are visual."""
+    layers = []
+    for group, text in (("domain", BRAND), ("cjk", "六种尺度看日本")):
+        glyphs = "".join(f'<span aria-hidden="true" style="--i:{i}">{c}</span>'
+                         for i, c in enumerate(text))
+        layers.append(f'<span class="wm-cycle wm-{group}" aria-hidden="true">{glyphs}</span>')
+    return ('<span class="wm-static">' + WM + '</span>'
+            '<span class="wm-stage" aria-hidden="true">' + "".join(layers) + '</span>')
+
+
 BUILD_DATE = "2026-10-25"
 BUILD_STAMP = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -457,6 +470,16 @@ COPY = {
     "crumb.home": ("表紙", "封面", "Cover"),
 
     "cover.title": ("日本を、<em>六つの尺度</em>で見る。", "<em>六种尺度</em>看日本。", "Japan through <em>six scales</em>."),
+    "author.role": ("文・制作", "写作与制作", "Written & built by"),
+    "author.bio": (
+        "東京を拠点にする中国語ライター・AIクリエイター。日本での暮らしや社会を観察し、資料を読めるかたちに編集している。",
+        "在东京的上海人，自由 AI 创作者。写日本生活与社会观察，也把资料做成可读的页面。",
+        "A Chinese-language writer and independent AI creator based in Tokyo, writing about Japanese life and society and turning source material into readable pages.",
+    ),
+    "author.projects": ("公開プロジェクト", "独立项目", "Independent projects"),
+    "author.personal": ("個人サイト", "个人主页", "Personal site"),
+    "author.contact": ("連絡先", "联系作者", "Contact"),
+    "author.links": ("作者・関連リンク", "作者与联系链接", "Author and contact links"),
     "ui.theme.sage": ("Sage", "浅色", "Sage"),
     "ui.theme.dark": ("Dark", "深色", "Dark"),
     "home.c.lede": (
@@ -789,7 +812,7 @@ def mast(active=""):
         return f'<a href="{href}"{cur}{tattr(key)}>{ja(key)}</a>'
 
     return f"""<header class="masthead"><div class="wrap masthead-in">
-<a class="wordmark" href="/" aria-label="{BRAND}">{WM}</a>
+<a class="wordmark wordmark-cycle" href="/" aria-label="{BRAND}">{animated_wordmark()}</a>
 <nav class="chapters" aria-label="Chapters">
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
@@ -941,8 +964,24 @@ def build_home_preview():
 </div>
 </div>
 </section>
-<section class="wrap hp-statement">
-<h1 data-t="cover.title">{ja('cover.title')}</h1>
+<section class="wrap hp-statement" aria-labelledby="home-statement-title">
+<h1 id="home-statement-title" data-t="cover.title">{ja('cover.title')}</h1>
+<div class="hp-author">
+<div class="hp-author-intro">
+<p class="hp-author-role" data-t="author.role">{ja('author.role')}</p>
+<p class="hp-author-name">中本蔡 <span lang="en">NAKAMOTO SAI</span></p>
+<p class="hp-author-bio" data-t="author.bio">{ja('author.bio')}</p>
+</div>
+<nav class="hp-author-links" aria-label="Author and contact links" data-t-aria="author.links">
+<a href="https://ouuut.com/"><strong>ouuut.com</strong><small data-t="author.projects">{ja('author.projects')}</small><span aria-hidden="true">↗</span></a>
+<a href="https://saaaai.com/"><strong>saaaai.com</strong><small data-t="author.personal">{ja('author.personal')}</small><span aria-hidden="true">↗</span></a>
+<div class="hp-author-contact">
+<span class="hp-author-contact-label" data-t="author.contact">{ja('author.contact')}</span>
+<a href="mailto:sai@saaaai.com">sai@saaaai.com</a>
+<a href="https://x.com/saaaaicom" rel="me">X <span class="hp-author-handle">@saaaaicom</span></a>
+</div>
+</nav>
+</div>
 </section>
 </main>"""
 

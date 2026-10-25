@@ -545,3 +545,11 @@
 - 已提交 `310cb97 home: combine C provenance with A closing statement`，并派 `ClosingHybridReview` 只读核验；源码冻结等待结果。
 - `ClosingHybridReview` 返回 **findings 0 / correct**：独立核对六卡结构、DOM 顺序、三语标题与唯一高亮、真实出典、住宅双口径、无 JS、顶栏发行 CSS 与旧方案归档。未起浏览器做像素复测，故不额外声称独立像素级验收。
 - 报告证据复核：它提到的 `report.json` 尾部疑似 320/280 标签错位，**当前文件不存在 280 标签**；尾部为 360 与 320，各含 zh/ja/en，320 的 titleSize 分别 26.24/21.44/22px、viewport 均为 320。按当前证据不作页面缺陷处理，也不据其范围外的 ≤290px 推断扩大合同。源码未因此改动。
+
+## 2026-10-25 · 作者落款与 5 秒字标循环
+
+- 用户要求从记忆挖公开作者信息、把两个域名与联系方式融入 A 大字，并把左上角 `japan.ouuut.com` 做成「域名逐字出现→渐隐→六种尺度看日本逐字出现→渐隐→域名」的 5 秒无限循环。公开信息只取 `sai` 记忆已核实的身份与站点定位：中本蔡 / NAKAMOTO SAI，在东京的上海人、自由 AI 创作者；`ouuut.com` 是独立项目品牌站，`saaaai.com` 是个人主页；联系方式放 `sai@saaaai.com` 与 X `@saaaaicom`。未放年龄、签证、家庭等私人信息。
+- 作者落款放在 `.hp-statement` 内、H1 之后，不另起卡片：左侧职位、姓名、三语一句简介，右侧两个域名入口（`独立项目` / `个人主页`）和邮件/X。桌面双栏、≤1000px 单栏；`data-t` 只挂叶子节点，`data-t-aria` 更新导航可访问名，语言切换不覆盖姓名与域名。
+- 顶栏使用 `animated_wordmark()`：`.wm-static` 保留原域名（可访问名与无 JS/减少动效回退），`.wm-stage` 里 `.wm-domain` 15 个字符与 `.wm-cjk` 7 个字符逐字错峰。完整循环 5000ms：0–2.45s 域名，2.5–4.8s 中文，余下空拍；纯 CSS、只动 opacity，舞台宽度由静态域名预留。页脚字标保持静态。
+- 有头 ego-browser 实测：27 组宽度/语言无失败；动画暂停采样 0/650/2450/3000/4800/5000ms 分别为英文 0/15/0/0/0/0 字、中文 0/0/0/7/0/0 字，duration=5000ms，右侧工具与字标宽度位移均 0；`prefers-reduced-motion` 与禁 JS 均只显示静态域名；五页 × 三宽度共 15 组共享顶栏无溢出或按钮挤压。作者区浅色最低 5.3:1、深色最低 6.74:1；320px 无横向溢出。ouuut.com / saaaai.com / X 目标实测 200。
+- 证据 `.review/author-wordmark/report.json` 与 screenshots（`final-1440-desktop-domain/cjk`、`final-390-mobile-cjk`、`final-1440-bottom`、`final-390-bottom`、`final-1440-dark-bottom`、`final-320-bottom`）。构建 5 页，CSS `86ad3e34`，fonts `f2d2c9ae`，charset 2193；`py_compile`、`node --check`、design-lock JSON、`git diff --check` 通过。仅本地，未部署、未 push。

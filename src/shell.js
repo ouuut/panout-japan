@@ -36,6 +36,11 @@
       var v = dic[els[j].dataset.t];
       if (v && typeof v[l] === 'string') els[j].innerHTML = v[l];
     }
+    var labelled = document.querySelectorAll('[data-t-aria]');
+    for (var k = 0; k < labelled.length; k++) {
+      var label = dic[labelled[k].dataset.tAria];
+      if (label && typeof label[l] === 'string') labelled[k].setAttribute('aria-label', label[l]);
+    }
   }
 
   function setLang(l, animate) {
