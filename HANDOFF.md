@@ -21,7 +21,8 @@
 
 ## Next safe action
 
-- Wait for the independent read-only review, address any reproducible blocker, then let the user approve deployment. Do not publish merely because the local page is ready.
+- Independent `ClosingHybridReview` returned findings 0 / correct for commit 310cb97. It independently checked source, generated HTML, i18n, the six-card contract, title/highlight, provenance, masthead and archival; it did not claim its own pixel-level browser run. Its reported uncertainty about report tail labels was checked against the current report: there is no 280px label; 360 and 320 rows have matching `viewport`, sizes and widths. Source was not changed.
+- Let the user approve deployment when ready. Do not publish merely because the local page is ready.
 
 ## Rollback
 

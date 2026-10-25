@@ -543,3 +543,5 @@
 - 四方案对照台已移入 `F:/archive/20261025-ca-hybrid-panout/closing-options/`；核心文件、旧首页与交接文档备份在同目录。设计锁、README 已更新。C＋A 设计决策已写 retain，doc `a3c64fb2`。
 - 独立只读核验待派；本轮仅本地，未部署、未 push。
 - 已提交 `310cb97 home: combine C provenance with A closing statement`，并派 `ClosingHybridReview` 只读核验；源码冻结等待结果。
+- `ClosingHybridReview` 返回 **findings 0 / correct**：独立核对六卡结构、DOM 顺序、三语标题与唯一高亮、真实出典、住宅双口径、无 JS、顶栏发行 CSS 与旧方案归档。未起浏览器做像素复测，故不额外声称独立像素级验收。
+- 报告证据复核：它提到的 `report.json` 尾部疑似 320/280 标签错位，**当前文件不存在 280 标签**；尾部为 360 与 320，各含 zh/ja/en，320 的 titleSize 分别 26.24/21.44/22px、viewport 均为 320。按当前证据不作页面缺陷处理，也不据其范围外的 ≤290px 推断扩大合同。源码未因此改动。
