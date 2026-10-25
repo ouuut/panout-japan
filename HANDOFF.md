@@ -29,7 +29,7 @@
 
 ## Next safe action
 
-- User requested slower holds, lighter JA/ZH type, and a separate logo for each language. The localized 12s cycle and hold windows are implemented and measured locally. A third read-only review is pending; then the only remaining action is user approval before deployment. Do not publish merely because the local page is ready.
+- User requested slower holds, lighter JA/ZH type, and a separate logo for each language. The localized 12s cycle is implemented. The first review found a language-switch phase desync; commit `e4443ee` fixed it, and the second review found no defects. The only remaining action is user approval before deployment. Do not publish merely because the local page is ready.
 
 ## Rollback
 
