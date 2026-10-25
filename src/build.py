@@ -38,7 +38,7 @@ WM = '<span class="wm-main">japan</span><span class="wm-tld">.ouuut.com</span>'
 def animated_wordmark():
     """The plain domain is the static/no-JS and accessible name; layers are visual."""
     layers = []
-    phrases = (("ja", "六つの尺度で見る"), ("zh", "六种尺度看日本"), ("en", "Six scales of Japan"))
+    phrases = (("ja", "六つの尺度で日本を見る"), ("zh", "六种尺度看日本"), ("en", "Six scales of Japan"))
     for group, text in (("domain", BRAND),) + tuple(
             (f"phrase-{lang}", phrase) for lang, phrase in phrases):
         glyphs = "".join(f'<span aria-hidden="true" style="--i:{i}">{"&nbsp;" if c == " " else c}</span>'

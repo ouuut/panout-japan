@@ -485,7 +485,7 @@ html[lang="zh"] .foot, html[lang="zh"] .pager {
 .wm-phrase { display: flex; visibility: hidden; font-weight: 250; }
 .wm-phrase-ja {
   font-family: var(--ja-sans);
-  font-size: .72em;
+  font-size: .64em;
   letter-spacing: .02em;
 }
 .wm-phrase-zh {
@@ -515,6 +515,7 @@ html[lang="en"] .wm-phrase-en { visibility: visible; }
     animation-name: wm-cjk-letter;
     animation-delay: calc(6s + var(--i) * .04s - 12s);
   }
+  .wm-phrase-ja > span { animation-delay: calc(6s + var(--i) * .028s - 12s); }
   .wm-phrase-en > span { animation-delay: calc(6s + var(--i) * .026s - 12s); }
 }
 @keyframes wm-domain-letter {

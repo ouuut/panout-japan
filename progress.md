@@ -565,3 +565,10 @@
 - 9 组 320/390/1440 × 三语无溢出，可见 LOGO 宽度均在原字标舞台内；五页 × 两宽度共享顶栏 10 组无失败；实际点击 EN/ZH/JA 均立即切换为对应 LOGO；减少动效与禁 JS 仍固定显示静态域名。构建 CSS `3e4312e1`、fonts `0d7289d9`、charset 2192。证据 `.review/wordmark-tuning/report.json` 与六张三语桌面/手机截图。仅本地，未部署、未 push；独立复核待派。
 - `LocalizedLogoReview` 首轮发现 P1：切换语言后新显示层从 `display:none` 重新起算动画，与网址层相位错开，最多可同屏约 3.4s。修复为三版始终 `display:flex`、用 `visibility` 显示当前语言，隐藏层继续走同一时间轴。切换后实测相位差 0–14ms，EN/ZH/JA 各自整轮采样 `bothVisibleAt=[]`；网址与 LOGO 满显窗口不变。重建 CSS `2e8c308d`、fonts `1ae3f06e`。修正提交 `e4443ee fix: keep localized logo phases aligned`。
 - `LogoPhaseReview` 第二轮独立复核：**未发现缺陷**。实测三语层 `startTime` 恒定、点击 EN/ZH/JA 后相位差 0ms，未重启；域名与 LOGO 同屏 0.00s；满显约域名3.0s、三语LOGO约3.5s；字重 250/250/400 与同语 `.hp-verb` 一致；320/390/1440 无溢出；减少动效/无 JS 静态回退保留；单 H1、作者落款、四入口无回归。仅本地，未部署、未 push。
+
+## 2026-10-25 · 日文 LOGO 补齐宾语
+
+- 用户指出「六つの尺度で見る」漏了看的对象「日本」。修正为 **「六つの尺度で日本を見る」**，11 字；中/英文不变。日文字号调至 `.64em`，逐字间隔 28ms，维持完整停留 ≥3 秒。备份 `F:/archive/20261025-japanese-logo-panout/`。
+- 有头 ego-browser：9 组 1440/390/320 × JA/ZH/EN 全过，恰好一个当前语言层，文字、字重与参考 `.hp-verb` 一致；日文 LOGO 宽 237.03/172.33/129.33px，均在原字标范围内，横向溢出 0。桌面及手机截图未见裁切。
+- 50ms 冻结时间轴按每字 opacity 严格为 1 采样：日文完整 7200–10400ms（3.25s）；中文 7150–10400ms；英文 7400–10400ms；网址 1150–4050ms。语言切换后相位差 0ms、两串无同屏。减少动效与禁 JS 回退通过。报告 `.review/japanese-logo-correction/report.json`。
+- 重建 5 页，CSS `955d089f`、JS `664b7e9d`、fonts `0346c329`、charset 2192；`py_compile`、JSON 与 `git diff --check` 通过。仅本地，未部署、未 push；只读复核待派。
