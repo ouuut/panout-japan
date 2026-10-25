@@ -9,6 +9,7 @@
   var dic = null;
   var scriptSrc = (document.currentScript && document.currentScript.src) || '';
   var VER = '';
+  var I18N_VER = '__I18N_VER__';
   try { VER = new URL(scriptSrc).searchParams.get('v') || ''; } catch (e) {}
 
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -73,7 +74,8 @@
   function pageKey() {
     var p = location.pathname.replace(/index\.html$/, '');
     var m = p.match(/^\/(housing|crime|cabinet|quake)\//);
-    return m ? m[1] : 'home';
+    if (m) return m[1];
+    return document.querySelector('meta[name="robots"][content="noindex"]') ? '404' : 'home';
   }
 
   function applyMeta(l) {
@@ -119,7 +121,7 @@
 
   function loadDic() {
     if (dic) return Promise.resolve(dic);
-    return fetch('/assets/i18n.json')
+    return fetch('/assets/i18n.json' + (I18N_VER ? '?v=' + I18N_VER : ''))
       .then(function (r) { return r.json(); })
       .then(function (d) { dic = d; return d; })
       .catch(function () { return null; });

@@ -109,6 +109,11 @@ PAGE_META = {
         "en": (f"Housing — town-level prices | {BRAND}",
                "Closed condo prices in Tokyo for the latest four quarters (2025Q2–2026Q1), mapped as mean price per m² by town. Derived from MLIT data."),
     },
+    "404": {
+        "ja": (f"404 — この頁は、ない | {BRAND}", "このURLには頁がありません。表紙または四つの章から辿り直せます。"),
+        "zh": (f"404 — 这一页不存在 | {BRAND}", "这个网址没有对应页面。可以回到首页或四个章节。"),
+        "en": (f"404 — Page not found | {BRAND}", "No page exists at this URL. Return to the cover or choose a chapter."),
+    },
 }
 CAB = json.loads((ROOT / "app/cabinet/data.json").read_text(encoding="utf-8"))
 MUNI = json.loads((ROOT / "app/crime/data/muni.json").read_text(encoding="utf-8"))
@@ -752,7 +757,8 @@ FONT_VER = "__FONT_VER__"
 
 
 def head(title, desc, path, jsonld=None, extra_head="", body_class=""):
-    u = SITE_URL + path
+    is_404 = path == "/404.html"
+    u = SITE_URL + ("/" if is_404 else path)
     alts = "".join(
         f'<link rel="alternate" hreflang="{code}" href="{u}{"" if code == "ja" else "?lang=" + code}">'
         for code in ("ja", "zh", "en"))
@@ -775,6 +781,7 @@ def head(title, desc, path, jsonld=None, extra_head="", body_class=""):
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
+{('<meta name="robots" content="noindex">' if is_404 else '')}
 <link rel="canonical" href="{u}">
 {alts}
 <meta property="og:type" content="website">
@@ -988,9 +995,33 @@ def build_home_preview():
 </section>
 </main>"""
 
+    jsonld = {"@context": "https://schema.org", "@graph": [
+        {"@type": "Organization", "@id": SITE_URL + "/#organization", "name": "ouuut",
+         "url": "https://ouuut.com/", "sameAs": ["https://x.com/saaaaicom"]},
+        {"@type": "WebSite", "@id": SITE_URL + "/#website", "name": BRAND, "url": SITE_URL + "/",
+         "inLanguage": ["ja", "zh", "en"],
+         "publisher": {"@id": SITE_URL + "/#organization"}},
+    ]}
     return page("/", PAGE_META["home"]["ja"][0], PAGE_META["home"]["ja"][1],
-                body, "", None, register=True,
+                body, "", jsonld, register=True,
                 head_extra='<style>\n' + css + '\n</style>')
+
+
+def build_404():
+    links = "".join(f'<li><a href="/{key}/" data-t="nav.{key}">{ja(f"nav.{key}")}</a></li>'
+                    for key in ("quake", "crime", "cabinet", "housing"))
+    body = f'''<main id="main" class="cover"><div class="wrap">
+<p class="eyebrow" data-t="nf.code">404</p>
+<h1 data-t="nf.h1">{ja("nf.h1")}</h1>
+<p class="lede" data-t="nf.p">{ja("nf.p")}</p>
+<nav aria-label="Chapters"><ul>{links}</ul></nav>
+<div class="hero-actions">
+<a class="btn-primary" href="/" data-t="nf.home">{ja("nf.home")}</a>
+<a href="mailto:sai@saaaai.com" data-t="author.contact">{ja("author.contact")}</a>
+</div>
+</div></main>'''
+    return page("/404.html", PAGE_META["404"]["ja"][0], PAGE_META["404"]["ja"][1], body,
+                register=False)
 
 
 def build_preview_redirect():
@@ -1137,6 +1168,7 @@ def main():
     # Exactly four chapters: /quake/, /crime/, /cabinet/, /housing/ (plus the cover).
     # /preview/ remains a tiny redirect for the old preview URL.
     files["/"] = build_home_preview()
+    files["/404.html"] = build_404()
     files["/preview/"] = build_preview_redirect()
     files["/quake/"] = build_quake()
     files["/crime/"] = build_crime()
@@ -1150,11 +1182,12 @@ def main():
         dic[f"meta.{_pk}.title"] = {lg: _pv[lg][0] for lg in ("ja", "zh", "en")}
         dic[f"meta.{_pk}.desc"] = {lg: _pv[lg][1] for lg in ("ja", "zh", "en")}
     i18n_json = json.dumps(dic, ensure_ascii=False, separators=(",", ":"))
+    i18n_ver = hashlib.sha1(i18n_json.encode("utf-8")).hexdigest()[:8]
     files["/assets/i18n.json"] = i18n_json
 
     css = (SRC / "tokens.css").read_text(encoding="utf-8") + "\n" + \
           (SRC / "app.css").read_text(encoding="utf-8")
-    js = (SRC / "shell.js").read_text(encoding="utf-8")
+    js = (SRC / "shell.js").read_text(encoding="utf-8").replace("__I18N_VER__", i18n_ver)
 
     css_bytes = css.encode("utf-8")
     js_bytes = js.encode("utf-8")
@@ -1362,6 +1395,9 @@ def write_meta(font_meta):
         "  X-Frame-Options: DENY\n"
         "  Permissions-Policy: geolocation=(), microphone=(), camera=()\n"
         "  Cache-Control: public, max-age=0, must-revalidate\n"
+        "\n"
+        "/404.html\n"
+        "  X-Robots-Tag: noindex\n"
         "\n"
         "/assets/*\n"
         "  Cache-Control: public, max-age=31536000, immutable\n"
