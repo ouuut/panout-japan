@@ -1,6 +1,6 @@
 {
   "project": "panout-japan",
-  "updated": "2026-10-22",
+  "updated": "2026-10-25",
   "source_of_truth": "ouuut-v2 design-lock + live computed styles at 1440px, 2026-10-21. japan.ouuut.com must read as the same publication as ouuut.com.",
   "style": "Tokyo Expedition Magazine Editorial / ouuut family. Two themes only: sage (day) and dark (night). Zero structural lines.",
   "themes": ["sage", "dark"],
@@ -53,6 +53,15 @@
     "nav": "12px mono .08em uppercase / 12px CJK sans",
     "footer": "12px mono",
     "button": "13px mono 600 uppercase, 52px high, 2px radius"
+  },
+  "home": {
+    "band": "Six plates, three across, two rows; grid gap 16px. Two columns ≤1199px, one column ≤1000px (horizontal card), vertical card ≤640px.",
+    "order": ["weather", "quake", "crime", "cabinet", "housing", "news"],
+    "plate_box": "aspect-ratio 1000/380 — every plate is a build-time SVG at viewBox 1000×760, centred, never stretched (preserveAspectRatio meet).",
+    "preview_plates": "weather and news have no feed yet: the foot reads「予告」/「预告」/「Soon」without the 開く arrow, the card is a div rather than an a, and hover neither lifts nor tints it.",
+    "h1": "clamp(2rem,3.1vw,2.9rem) EN / clamp(1.75rem,2.8vw,2.5rem) JA·ZH, line-height 1.06 EN / 1.24 JA / 1.22 ZH.",
+    "measured_2026_10_25": "band bottom 943px at ≥1440px width; six plates fully above the fold in a 1920×945 viewport (a maximized 1080p browser).",
+    "removed_2026_10_25": "the cover eyebrow line「JAPAN.OUUUT.COM · 2000—2026」(key cover.kicker) is gone from the cover."
   },
   "assertions": [
     {
@@ -131,10 +140,24 @@
       "check": "JS disabled: content, tables, links visible; no blank reveal states",
       "threshold": "h1 + nav + table visible",
       "how": "playwright javaScriptEnabled=false"
+    },
+    {
+      "id": "home-band-six",
+      "kind": "probe",
+      "check": "Cover band holds six plates in three columns over two rows, ordered weather, quake, crime, cabinet, housing, news; only the four chapter plates are anchors",
+      "threshold": "plates = 6, columns = 3, rows = 2, anchors = 4",
+      "how": "playwright: .hp-band children, computed grid-template-columns, distinct card tops, .hp-entry[a] count at 1440px"
+    },
+    {
+      "id": "home-first-screen",
+      "kind": "probe",
+      "check": "All six plates end above the fold in a 1920×945 viewport and nothing overflows horizontally",
+      "threshold": "band bottom ≤ viewport height, overflow = 0",
+      "how": "playwright: .hp-band getBoundingClientRect().bottom, scrollWidth - clientWidth"
     }
   ],
   "notes": [
-    "Homepage uses four prod-style plates (one per chapter: quake, crime, cabinet, housing), each plate itself a link.",
+    "Homepage runs six prod-style plates, three across and two down, in this order: weather, quake, crime, cabinet, housing, news. The four chapter plates are links; the weather and news plates are previews (no live feed), so they carry「予告」instead of「開く」and are not links.",
     "Charts use one signal hue per theme; no rainbow categorical palette.",
     "Motion: grain, scroll progress, header scrolled, .rv reveal, theme view-transition. No custom cursor/particles."
   ]

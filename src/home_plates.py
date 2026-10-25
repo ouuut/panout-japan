@@ -301,3 +301,110 @@ def housing_svg(wards, muni_poly, w=1000, h=760, deals=None, towns=None):
     out.append(f'<text x="{w - 54}" y="{ky}" text-anchor="end" class="legend">23 WARDS / 2025Q2–2026Q1</text>')
 
     return _svg(w, h, "東京23区の中古マンション価格、2025年第2四半期から2026年第1四半期", "".join(out))
+
+
+def weather_svg(outline, w=1000, h=760, bbox=(121.0, 23.0, 151.0, 48.0)):
+    """Today's forecast plate — the archipelago, the day's ruler, the plan.
+
+    The forecast feed is not connected yet, so nothing here is a reading: the
+    only marks are real geography (the same coastline as the quake plate),
+    the hour scale, and where the readings will sit.
+    """
+    proj = S.Proj(bbox, w, h, 10)
+    segs = S.clip_lines(outline["features"], bbox, 0.03)
+    coast = "".join(S.path(seg, proj) for seg in segs)
+
+    out = []
+    # Pressure field: four isobars, one hue, shape only.
+    for i in range(4):
+        y = 122 + i * 146
+        amp = 42 - i * 6
+        d = (f"M-24 {y + 12:.1f}C{w * .20:.0f} {y - amp:.1f} {w * .36:.0f} {y + amp:.1f} "
+             f"{w * .54:.0f} {y:.1f}S{w * .80:.0f} {y - amp * .7:.1f} {w + 24:.0f} {y + 10:.1f}")
+        out.append(f'<path d="{d}" fill="none" stroke="var(--accent)" stroke-width="2.6" '
+                   f'opacity="{0.20 - 0.035 * i:.3f}"/>')
+
+    out.append(f'<path d="{coast}" fill="none" stroke="var(--ink)" stroke-width="1.4" '
+               f'opacity="0.95" stroke-linejoin="round"/>')
+
+    # Reading stations: prefectural capitals, three of them named.
+    for name, lon, lat, dx, dy, anchor in (
+            ("札幌", 141.35, 43.06, 13, 5, "start"),
+            ("東京", 139.69, 35.69, -13, 22, "end"),
+            ("那覇", 127.68, 26.21, 13, 6, "start")):
+        x, y = proj.xy(lon, lat)
+        out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="5" fill="none" '
+                   f'stroke="var(--accent)" stroke-width="1.6"/>')
+        out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="1.6" fill="var(--accent)"/>')
+        out.append(f'<text x="{x + dx:.1f}" y="{y + dy:.1f}" text-anchor="{anchor}" '
+                   f'class="ward halo ink">{name}</text>')
+
+    # The day, ticked hour by hour.
+    pad = 54
+    base = h - 54
+    for i in range(25):
+        x = pad + (w - 2 * pad) * i / 24
+        major = i % 6 == 0
+        out.append(f'<rect x="{x:.1f}" y="{base - (18 if major else 9):.1f}" width="1.2" '
+                   f'height="{18 if major else 9}" fill="var(--accent)" '
+                   f'opacity="{0.9 if major else 0.32}"/>')
+    for i in (0, 6, 12, 18, 24):
+        x = pad + (w - 2 * pad) * i / 24
+        anchor = "start" if i == 0 else ("end" if i == 24 else "middle")
+        out.append(f'<text x="{x:.1f}" y="{base + 30}" text-anchor="{anchor}" '
+                   f'class="micro">{i:02d}</text>')
+    out.append(f'<text x="{pad}" y="{base - 34}" class="micro">TODAY / 24H</text>')
+    out.append(f'<text x="{w - pad}" y="{base - 34}" text-anchor="end" class="micro">'
+               f'気象庁 · 47 都道府県</text>')
+
+    return _svg(w, h, "今日の日本天気予報 · 予告", "".join(out))
+
+
+def news_svg(w=1000, h=760, rows=10):
+    """Topic ladder plate — headline volume per topic, stacked by outlet.
+
+    Same rule as the weather plate: the feed is not connected, so the ladder is
+    a skeleton (rank, stack, hour scale), not a ranking of real topics.
+    """
+    out = []
+    left, right = 104, w - 54
+    top, bottom = 148, 662
+    bar_h = 30
+    step = (bottom - top) / rows
+
+    for i in range(rows):
+        y = top + i * step
+        width = (right - left) * (0.96 - 0.058 * i - (0.03 if i % 3 == 1 else 0))
+        out.append(f'<text x="{left - 20}" y="{y + bar_h * .72:.1f}" text-anchor="end" '
+                   f'class="micro">{i + 1:02d}</text>')
+        # A topic is several outlets stacked; the stack, not the length, is the point.
+        parts = (0.36, 0.27, 0.22, 0.15) if i < 3 else ((0.42, 0.33, 0.25) if i < 7 else (0.58, 0.42))
+        base_op = 0.60 - 0.038 * i
+        cursor = left
+        for j, frac in enumerate(parts):
+            seg_w = width * frac - 3
+            if seg_w <= 0:
+                continue
+            out.append(f'<rect x="{cursor:.1f}" y="{y:.1f}" width="{seg_w:.1f}" '
+                       f'height="{bar_h}" rx="1" fill="var(--accent)" '
+                       f'opacity="{max(0.08, base_op - 0.07 * (j % 3)):.3f}"/>')
+            cursor += seg_w + 3
+
+    for i in range(5):
+        x = left + (right - left) * i / 4
+        out.append(f'<rect x="{x:.1f}" y="{top - 26:.1f}" width="1.2" height="9" '
+                   f'fill="var(--accent)" opacity="0.32"/>')
+    out.append(f'<text x="{left}" y="{top - 36}" class="micro">TOPIC / 24H</text>')
+    out.append(f'<text x="{right}" y="{top - 36}" text-anchor="end" class="micro">'
+               f'各社 見出し · 30分ごと</text>')
+
+    ky = h - 56
+    out.append(f'<text x="54" y="{ky}" class="legend">TOPIC / OUTLET STACK</text>')
+    for i, op in enumerate((0.16, 0.34, 0.52, 0.66)):
+        out.append(f'<rect x="{54 + i * 24}" y="{ky + 14}" width="16" height="16" '
+                   f'fill="var(--accent)" opacity="{op}"/>')
+    out.append(f'<text x="{54 + 4 * 24 + 8}" y="{ky + 27}" class="legend">QUIET → RISING</text>')
+    out.append(f'<text x="{w - 54}" y="{ky}" text-anchor="end" class="legend">'
+               f'RANKED / 予告</text>')
+
+    return _svg(w, h, "日本のニュース話題ランキング · 予告", "".join(out))

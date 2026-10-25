@@ -33,7 +33,7 @@ SRC = ROOT / "src"
 SITE_URL = "https://japan.ouuut.com"
 BRAND = "japan.ouuut.com"
 WM = '<span class="wm-main">japan</span><span class="wm-tld">.ouuut.com</span>'
-BUILD_DATE = "2026-10-22"
+BUILD_DATE = "2026-10-25"
 BUILD_STAMP = datetime.now().strftime("%Y-%m-%d %H:%M")
 
 # ---------------------------------------------------------------- data
@@ -456,8 +456,7 @@ COPY = {
     "skip": ("本文へ", "跳到正文", "Skip to content"),
     "crumb.home": ("表紙", "封面", "Cover"),
 
-    "cover.kicker": ("JAPAN.OUUUT.COM · 2000—2026", "JAPAN.OUUUT.COM · 2000—2026", "JAPAN.OUUUT.COM · 2000—2026"),
-    "cover.title": ("日本を、<br><em>四つの尺度</em>で見る。", "用<em>四种尺度</em>，<br>看日本。", "Japan, at<br><em>four scales</em>."),
+    "cover.title": ("日本を、<br><em>四つの尺度</em>で見る。", "用<em>四种尺度</em>,<br>看日本。", "Japan, at<br><em>four scales</em>."),
     "cover.lede": ("引いて見る地震、寄って見る犯罪、通して見る内閣、並べて見る住宅。同じ国土を、四つの尺度で測る。",
                    "拉远看地震，凑近看犯罪，拉长看内阁，比着看住宅。同一片国土，四种尺度。",
                    "Pull back for earthquakes, zoom in for crime, stretch out for cabinets, compare housing. One land, four scales."),
@@ -492,11 +491,26 @@ COPY = {
                            "14 cabinets, 331 months. Largest monthly swing +20.5."),
     "card.housing.unit": ("中古マンション / 2025Q2–2026Q1", "二手公寓 / 2025Q2–2026Q1", "Used flats / 2025Q2–2026Q1"),
     "card.housing.title": ("並べて見る", "比着看", "Compare"),
-    "card.housing.claim": (f"直近4四半期の成約で町名ごとの平均㎡単価を塗る。{HOUSE_TOWNS:,}町・{HOUSE_N:,}件。",
-                           f"用最近四个季度成交，按町名平均㎡单价上色。{HOUSE_TOWNS:,} 个町、{HOUSE_N:,} 笔。",
-                           f"Latest four quarters of closed prices, mean per m² by town: {HOUSE_TOWNS:,} towns, {HOUSE_N:,} deals."),
+    "card.housing.claim": (f"直近4四半期の成約で町名ごとの平均m2単価を塗る。{HOUSE_TOWNS:,}町・{HOUSE_N:,}件。",
+                           f"用最近四个季度成交,按町名平均m2单价上色。{HOUSE_TOWNS:,} 个町、{HOUSE_N:,} 笔。",
+                           f"Latest four quarters of closed prices, mean per m2 by town: {HOUSE_TOWNS:,} towns, {HOUSE_N:,} deals."),
+    # The two preview plates carry no live feed yet: they promise a scale, and
+    # their foot shows「予告」instead of「開く」, so no card reads as an entry.
+    "card.weather.title": ("仰いで見る", "抬头看", "Look up"),
+    "card.weather.topic": ("天気", "天气", "Weather"),
+    "card.weather.unit": ("都道府県 / 予報", "都道府县 / 预报", "Prefectures / forecast"),
+    "card.weather.claim": ("各都道府県庁所在地の今日の空を、一枚に。",
+                           "各都道府县厅所在地,今日的天空收进一张图。",
+                           "Today's sky for every prefectural capital, on one plate."),
+    "card.news.title": ("追って見る", "追着看", "Follow along"),
+    "card.news.topic": ("話題", "话题", "Topics"),
+    "card.news.unit": ("時間 / 話題", "小时 / 话题", "Hours / topics"),
+    "card.news.claim": ("各社の見出しを束ね、いま上がっている話題を並べる。",
+                        "把各社标题束在一起,排出此刻正在上升的话题。",
+                        "Headlines from across the press, ranked by what is rising now."),
+    "card.soon": ("予告", "预告", "Soon"),
 
-    "q.eyebrow": ("01 / 引いて見る", "01 / 拉远看", "01 / Pull back"),
+    "q.eyebrow": ("02 / 引いて見る", "02 / 拉远看", "02 / Pull back"),
     "q.h1": (f"地震 — <em>{n(Q_N)}</em>の震源", f"地震 — <em>{n(Q_N)}</em>个震源", f"Earthquakes — <em>{n(Q_N)}</em> hypocentres"),
     "q.lede": (f"2000年から{Q_END_JA}まで、M4以上の震源を一点ずつ。年を切ると、同じ海が別の顔になる。",
                f"2000年至{Q_END_JA}，M4以上震源逐点记录。按年切开，同一片海换了面孔。",
@@ -522,7 +536,7 @@ COPY = {
                     "每年的震源数、最大震级、月度分布与主要地震。",
                     "Counts, largest magnitude, monthly distribution and notable events."),
 
-    "c.eyebrow": ("02 / 寄って見る", "02 / 凑近看", "02 / Zoom in"),
+    "c.eyebrow": ("03 / 寄って見る", "03 / 凑近看", "03 / Zoom in"),
     "c.h1": ("犯罪 — <em>5,234</em>の町丁", "犯罪 — <em>5,234</em>个町丁", "Crime — <em>5,234</em> neighbourhoods"),
     "c.lede": ("2025年の警視庁認知件数。東京都内の町丁を、人口あたりの率で並べる。",
                "2025年警视厅认知件数。把东京都内的町丁按人均率排列。",
@@ -547,12 +561,12 @@ COPY = {
     "c.index.sub": ("人口・件数・率・町丁別の上位。", "人口、件数、率与町丁排行。",
                     "Population, counts, rate and top neighbourhoods."),
 
-    "b.eyebrow": ("03 / 通して見る", "03 / 拉长看", "03 / Stretch out"),
+    "b.eyebrow": ("04 / 通して見る", "04 / 拉长看", "04 / Stretch out"),
     "b.h1": ("内閣 — <em>331</em>か月", "内阁 — <em>331</em>个月", "Cabinet — <em>331</em> months"),
     "b.lede": ("1998年から2026年まで、月ごとの支持率。内閣をまたいで、一本の線にする。",
                "1998年至2026年，逐月支持率。跨过内阁，连成一条线。",
                "Monthly approval from 1998 to 2026, joined across cabinets into one line."),
-    "h.eyebrow": ("04 / 並べて見る", "04 / 比着看", "04 / Compare"),
+    "h.eyebrow": ("05 / 並べて見る", "05 / 比着看", "05 / Compare"),
     "h.h1": ("住宅 — <em>町</em>名の価格", "住宅 — <em>町</em>名价格", "Housing — price by <em>town</em>"),
     "h.lede": ("中古マンションの成約価格、直近4四半期（2025年4月–2026年3月）。町名（地区名）ごとの平均㎡単価で塗る。",
                "二手公寓成交价，最近四个季度（2025年4月–2026年3月）。按町名（地区名）的平均㎡单价上色。",
@@ -844,45 +858,58 @@ def pager(prev_href, prev_label, next_href, next_label):
 
 # ---------------------------------------------------------------- pages
 def build_home_preview():
-    """Local-only home prototype: three direct entry panels, one click each."""
+    """Cover: six plates, three across. Four are live chapters (each plate a
+    link); the weather and news plates are previews — they carry「予告」instead
+    of「開く」and their feeds are not connected yet."""
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
 
+    # key, num, href (None = preview plate), verb, topic, count, unit, claim, source, plate
     rows = [
-        ("quake", "01", "/quake/", "card.quake.title", "nav.quake", n(Q_N),
+        ("weather", "01", None, "card.weather.title", "card.weather.topic", "47",
+         "card.weather.unit", "card.weather.claim", "気象庁 予報",
+         HP.weather_svg(OUTLINE)),
+        ("quake", "02", "/quake/", "card.quake.title", "nav.quake", n(Q_N),
          "card.quake.unit", "card.quake.claim", f"USGS ComCat · 2000—{Q_END_DOT}",
          HP.quake_svg(Q, OUTLINE, YEARS)),
-        ("crime", "02", "/crime/", "card.crime.title", "nav.crime", "5,234",
+        ("crime", "03", "/crime/", "card.crime.title", "nav.crime", "5,234",
          "card.crime.unit", "card.crime.claim", "警視庁 · 2025",
          HP.crime_svg(POINTS, MUNI_POLY, WARD_RATE)),
-        ("cabinet", "03", "/cabinet/", "card.cabinet.title", "nav.cabinet", "331",
+        ("cabinet", "04", "/cabinet/", "card.cabinet.title", "nav.cabinet", "331",
          "card.cabinet.unit", "card.cabinet.claim", "NHK / Nikkei / Kyodo · 1998—2026",
          HP.cabinet_svg(ALL_MONTHS, MONTH_MEAN, CAB)),
-        ("housing", "04", "/housing/", "card.housing.title", "nav.housing", f"{HOUSE['totals']['trades']:,}",
+        ("housing", "05", "/housing/", "card.housing.title", "nav.housing", f"{HOUSE['totals']['trades']:,}",
          "card.housing.unit", "card.housing.claim", "国土交通省 · 2025Q2—2026Q1",
          HP.housing_svg(HOUSE_WARDS, MUNI_POLY, deals=HOUSE_N, towns=HOUSE_TOWNS)),
+        ("news", "06", None, "card.news.title", "card.news.topic", "24",
+         "card.news.unit", "card.news.claim", "各社 RSS",
+         HP.news_svg()),
     ]
 
     entries = []
     for key, num, href, verb, topic, count, unit, claim, source, svg in rows:
-        entries.append(f"""<a class="hp-entry" href="{href}">
-<div class="hp-entry-head"><span class="hp-num">{num}</span><span class="hp-verb" data-t="{verb}">{ja(verb)}</span><span class="hp-topic" data-t="{topic}">{ja(topic)}</span></div>
+        foot = (f'<span class="hp-enter"><span data-t="prod.open">{ja("prod.open")}</span> ↗</span>'
+                if href else
+                f'<span class="hp-enter hp-enter-soon" data-t="card.soon">{ja("card.soon")}</span>')
+        card = f"""<div class="hp-entry-head"><span class="hp-num">{num}</span><span class="hp-verb" data-t="{verb}">{ja(verb)}</span><span class="hp-topic" data-t="{topic}">{ja(topic)}</span></div>
 <div class="hp-entry-visual" aria-hidden="true">{svg}</div>
 <div class="hp-entry-body">
 <p class="hp-count"><b>{count}</b><small data-t="{unit}">{ja(unit)}</small></p>
 <p class="hp-claim" data-t="{claim}">{ja(claim)}</p>
-<div class="hp-entry-foot"><span class="hp-source">{source}</span><span class="hp-enter"><span data-t="prod.open">{ja('prod.open')}</span> ↗</span></div>
-</div>
-</a>""")
+<div class="hp-entry-foot"><span class="hp-source">{source}</span>{foot}</div>
+</div>"""
+        if href:
+            entries.append(f'<a class="hp-entry" href="{href}">\n{card}\n</a>')
+        else:
+            entries.append(f'<div class="hp-entry hp-entry-soon">\n{card}\n</div>')
 
     body = f"""<main id="main" class="hp">
 <section class="wrap hp-intro">
-<p class="eyebrow" data-t="cover.kicker">{ja('cover.kicker')}</p>
 <div class="hp-intro-row">
 <h1 data-t="cover.title">{ja('cover.title')}</h1>
 <p class="hp-lede" data-t="cover.lede">{ja('cover.lede')}</p>
 </div>
 </section>
-<section class="wrap hp-band" aria-label="Four scales">
+<section class="wrap hp-band" aria-label="Chapters">
 {''.join(entries)}
 </section>
 <section class="wrap hp-method">
