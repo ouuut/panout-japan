@@ -572,3 +572,6 @@
 - 有头 ego-browser：9 组 1440/390/320 × JA/ZH/EN 全过，恰好一个当前语言层，文字、字重与参考 `.hp-verb` 一致；日文 LOGO 宽 237.03/172.33/129.33px，均在原字标范围内，横向溢出 0。桌面及手机截图未见裁切。
 - 50ms 冻结时间轴按每字 opacity 严格为 1 采样：日文完整 7200–10400ms（3.25s）；中文 7150–10400ms；英文 7400–10400ms；网址 1150–4050ms。语言切换后相位差 0ms、两串无同屏。减少动效与禁 JS 回退通过。报告 `.review/japanese-logo-correction/report.json`。
 - 重建 5 页，CSS `955d089f`、JS `664b7e9d`、fonts `0346c329`、charset 2192；`py_compile`、JSON 与 `git diff --check` 通过。仅本地，未部署、未 push；只读复核待派。
+- 修正提交 `07091d2 fix: restore Japan in Japanese logo`。`JapaneseLogoReview` 独立复核未发现缺陷：5 页 JA 11 字、三语只显示一版、1440/390/320 无裁切/溢出、切换不重启、静态回退保留；H1 原有「日本を」未误改。
+- 验收过程中两次探针写法错误（漏传语言、把 NodeList 当元素）均已修正；曾尝试调 EN/退出时序，因超出本次翻译修正范围已全部撤回，最终 `src/build.py`、`src/app.css` 与 `07091d2` 完全一致。最终构建 CSS `92371dd8`、fonts `f15785d0`。
+- 最终报告 `.review/japanese-logo-correction/final-report.json`，失败 0。锁定视觉口径每字 opacity>0.99：JA 7100–10450ms、ZH 7050–10450ms、EN 7250–10450ms；严格 opacity=1 的 50ms 采样：JA 7200–10400ms、ZH 7150–10400ms、EN 7400–10400ms。记忆 `wiki:correction-panout-japan-wordmark-20261025` 已回读；短条检索 doc `89186112-85f8-478a-bfe3-3479d000ece2`。

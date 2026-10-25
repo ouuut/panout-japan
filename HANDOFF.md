@@ -11,15 +11,15 @@
 
 ## Commands run
 
-- `python src/build.py` → 5 pages, CSS `955d089f`, JS `664b7e9d`, fonts `0346c329`, charset 2192.
+- `python src/build.py` → 5 pages, CSS `92371dd8`, JS `664b7e9d`, fonts `f15785d0`, charset 2192.
 - `python -m py_compile src/build.py`, `node --check src/shell.js`, design-lock JSON parse, `git diff --check` → passed.
 - Headed ego-browser, 27 width/language combinations (1440/1280/1000/768/640/390/375/360/320 × JA/ZH/EN): zero failures; one statement line, one H1, six cards, four chapter links, four source links, no document/body overflow, all author links inside their column.
 - Frozen animation sampling at 100ms: duration 12000ms; domain fully visible 1200–4100ms; ZH/JA phrase 7100–10400ms; EN phrase 7300–10400ms; no overlap; tools and wordmark width shift 0px. Exactly one localized layer is visible in each language; visible weights are 250 JA/ZH and 400 EN, matching `.hp-verb`. Ten page/width checks passed.
 - Live EN/ZH/JA switches keep all phrase layers on the same timeline through `visibility` (not `display`): measured phase drift 0–14ms, and a full-cycle sample after each switch had zero frames with domain and phrase visible together.
 - Shared masthead checked on `/`, `/quake/`, `/crime/`, `/cabinet/`, `/housing/` at 1440/768/390: 15 combinations, zero failures. Reduced-motion and JavaScript-disabled: static domain visible, stage hidden, no animation. Actual mobile EN→ZH switch passed.
-- Japanese logo correction, 2026-10-25: JA is `六つの尺度で日本を見る` (11 glyphs), not the object-omitting `六つの尺度で見る`. At 50ms exact-opacity-1 samples, JA full hold is 7200–10400ms (3.25s), ZH 7150–10400ms (3.30s), EN 7400–10400ms (3.05s); no domain/phrase overlap and 0ms phase drift. Nine 1440/390/320 × JA/ZH/EN sweeps: zero failures; JA logo width 237.03/172.33/129.33px fits the 250.81/182.40/136.81px wordmark stage. Reduced-motion and no-JS rechecked. Evidence `.review/japanese-logo-correction/report.json` and screenshots; all five generated pages carry the corrected layer.
+- Japanese logo correction, 2026-10-25: JA is `六つの尺度で日本を見る` (11 glyphs), not the object-omitting `六つの尺度で見る`. At the locked >0.99 visual threshold with 50ms samples, JA full hold is 7100–10450ms (3.40s), ZH 7050–10450ms (3.45s), EN 7250–10450ms (3.25s); supplementary exact-opacity-1 samples are JA 7200–10400ms, ZH 7150–10400ms, EN 7400–10400ms; no domain/phrase overlap and 0ms phase drift. Nine 1440/390/320 × JA/ZH/EN sweeps: zero failures; JA logo width 237.03/172.33/129.33px fits the 250.81/182.40/136.81px wordmark stage. Reduced-motion and no-JS rechecked. Evidence `.review/japanese-logo-correction/final-report.json` and final screenshots; all five generated pages carry the corrected layer. Intermediate timing experiments were reverted, and source is identical to reviewed commit `07091d2`; that independent review found no reproducible defect.
 - Contrast after theme transition: sage minimum 5.3:1, dark minimum 6.74:1. 320px: no horizontal overflow. Contact destinations returned 200 for ouuut.com, saaaai.com and x.com/saaaaicom.
-- Evidence: `F:/projects/panout-japan/.review/author-wordmark/report.json` for the author block; `F:/projects/panout-japan/.review/japanese-logo-correction/report.json` for the corrected localized cycle; `.review/wordmark-tuning/report.json` is historical. Screenshots are alongside each report.
+- Evidence: `F:/projects/panout-japan/.review/author-wordmark/report.json` for the author block; `F:/projects/panout-japan/.review/japanese-logo-correction/final-report.json` for the corrected localized cycle; `.review/wordmark-tuning/report.json` is historical. Screenshots are alongside each report.
 - Independent review, first pass: no implementation defect; it flagged the stale `saaaai.com` personal-homepage label. Cache-disabled browser check confirmed the live title is「セイシン株式会社｜AIプロダクト・スタジオ」with visible H1 `nakamoto sai`. Commit `92811f4` changes the label to 主站 / Main site / メインサイト and makes the Shanghai-born detail consistent across all three bios.
 - Independent review, second pass on `92811f4`: no defects. It verified nine 320/390/1440 × JA/ZH/EN combinations, four correct destinations, one H1 with the author block after it, no overflow, no animation regression, and served asset hashes CSS `3eba3c3c`, JS `664b7e9d`, fonts `d7a1a926`.
 
@@ -30,7 +30,7 @@
 
 ## Next safe action
 
-- The Japanese logo correction `六つの尺度で日本を見る` is implemented and verified locally; review is pending. The only remaining action is user approval before deployment. Do not publish merely because the local page is ready.
+- The Japanese logo correction `六つの尺度で日本を見る` is implemented, independently reviewed, and verified locally in commit `07091d2`. The only remaining action is user approval before deployment. Do not publish merely because the local page is ready.
 
 ## Rollback
 
