@@ -54,12 +54,12 @@ PCT_2011_E = round(100 * sum(10 ** (1.5 * e["mag"]) for e in Q if e["time"][:4] 
 # 每页三语 title/description：静态 HTML 里只有 ja，shell 在切语言时替换 head
 PAGE_META = {
     "home": {
-        "ja": (f"{BRAND} — 日本を、四つの尺度で見る",
-               f"{f"{Q_N:,}"}の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格。四つの入口から直接起動する。"),
-        "zh": (f"{BRAND} — 用四个尺度看日本",
-               f"{f"{Q_N:,}"} 个震源、5,234 个町丁、331 个月的內閣支持率、23 区住宅价格。四个入口直接启动。"),
-        "en": (f"{BRAND} — Japan in four scales",
-               f"{f"{Q_N:,}"} hypocentres, 5,234 neighbourhoods, 331 months of cabinet approval, 23-ward housing prices. Four direct entry points."),
+        "ja": (f"{BRAND} — 日本を、六つの尺度で見る",
+               f"{f"{Q_N:,}"}の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格。六つの尺度、四つの入口から直接起動する。"),
+        "zh": (f"{BRAND} — 用六个尺度看日本",
+               f"{f"{Q_N:,}"} 个震源、5,234 个町丁、331 个月的內閣支持率、23 区住宅价格。六个尺度，四个入口直接启动。"),
+        "en": (f"{BRAND} — Japan in six scales",
+               f"{f"{Q_N:,}"} hypocentres, 5,234 neighbourhoods, 331 months of cabinet approval, 23-ward housing prices. Six scales; four entry points."),
     },
     "quake": {
         "ja": (f"地震 — {f"{Q_N:,}"}の震源 | {BRAND}",
@@ -456,24 +456,26 @@ COPY = {
     "skip": ("本文へ", "跳到正文", "Skip to content"),
     "crumb.home": ("表紙", "封面", "Cover"),
 
-    "cover.title": ("日本を、<br><em>四つの尺度</em>で見る。", "用<em>四种尺度</em>,<br>看日本。", "Japan, at<br><em>four scales</em>."),
-    "cover.lede": ("引いて見る地震、寄って見る犯罪、通して見る内閣、並べて見る住宅。同じ国土を、四つの尺度で測る。",
-                   "拉远看地震，凑近看犯罪，拉长看内阁，比着看住宅。同一片国土，四种尺度。",
-                   "Pull back for earthquakes, zoom in for crime, stretch out for cabinets, compare housing. One land, four scales."),
-    "cover.cta": ("四つの章へ", "进入四个章节", "Enter the chapters"),
+    "cover.title": ("日本を、<br><em>六つの尺度</em>で見る。", "用<em>六种尺度</em>,<br>看日本。", "Japan, at<br><em>six scales</em>."),
+    "cover.lede": ("同じ国土を、六つの尺度で測る。",
+                   "同一片国土，六种尺度。",
+                   "One land, measured at six scales."),
+    "cover.cta": ("六つの尺度へ", "进入六个尺度", "Enter the six scales"),
     "cover.method": ("方法と出典", "方法与来源", "Method & sources"),
-    "cover.section.eyebrow": ("FOUR SCALES / 四つの章", "FOUR SCALES / 四个章节", "FOUR SCALES / FOUR CHAPTERS"),
-    "cover.section.h": ("同じ国土を、四つの尺度で。", "同一片国土，四种尺度。", "One land, four scales."),
+    "cover.section.eyebrow": ("SIX SCALES / 六つの尺度", "SIX SCALES / 六个尺度", "SIX SCALES / SIX PLATES"),
+    "cover.section.h": ("六つの尺度で見る日本。", "六个尺度看日本。", "Six scales on one land."),
     "cover.section.sub": ("数字はすべて一次資料から静的に生成。年を切り、町丁に寄り、内閣を並べ、区の値を比べる。",
                           "所有数字由一次资料静态生成。切年、入町丁、排内阁、比各区。",
                           "Every number is statically generated from primary sources. Cut by year, zoom into districts, line up cabinets, compare wards."),
     "ui.theme.sage": ("Sage", "浅色", "Sage"),
     "ui.theme.dark": ("Dark", "深色", "Dark"),
     "prod.open": ("開く", "打开", "Open"),
+    "cover.scale.weather": ("全国 · 47地点", "全国 · 47地点", "Nationwide · 47 cities"),
     "cover.scale.quake": ("列島 · 27年", "列岛 · 27年", "Archipelago · 27 yrs"),
     "cover.scale.crime": ("東京 · 62区市町村", "东京 · 62区市町村", "Tokyo · 62 wards"),
     "cover.scale.cabinet": ("内閣 · 14", "内阁 · 14", "Cabinets · 14"),
     "cover.scale.housing": ("住宅 · 23区", "住宅 · 23区", "Housing · 23 wards"),
+    "cover.scale.news": ("各社 · 24時間", "各社 · 24小时", "All papers · 24h"),
     "card.quake.unit": ("M4+ 震源 / 27年", "M4+ 震源 / 27年", "M4+ events / 27 yrs"),
     "card.quake.title": ("引いて見る", "拉远看", "Pull back"),
     "card.quake.claim": (f"2011年は回数で{PCT_2011_N}%、エネルギーで{PCT_2011_E}%。",
@@ -858,9 +860,11 @@ def pager(prev_href, prev_label, next_href, next_label):
 
 # ---------------------------------------------------------------- pages
 def build_home_preview():
-    """Cover: six plates, three across. Four are live chapters (each plate a
-    link); the weather and news plates are previews — they carry「予告」instead
-    of「開く」and their feeds are not connected yet."""
+    """Cover: six plates, three across, then the six scales as a ledger below
+    them — headline, its closing line, and one cell per plate naming the scale
+    and the measure it covers. Four plates are live chapters (each a link); the
+    weather and news plates are previews — they carry「予告」instead of「開く」
+    and their feeds are not connected yet."""
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
 
     # key, num, href (None = preview plate), verb, topic, count, unit, claim, source, plate
@@ -902,15 +906,32 @@ def build_home_preview():
         else:
             entries.append(f'<div class="hp-entry hp-entry-soon">\n{card}\n</div>')
 
+    scale_keys = {
+        "weather": "cover.scale.weather",
+        "quake": "cover.scale.quake",
+        "crime": "cover.scale.crime",
+        "cabinet": "cover.scale.cabinet",
+        "housing": "cover.scale.housing",
+        "news": "cover.scale.news",
+    }
+    scales = []
+    for key, num, href, verb, topic, count, unit, claim, source, svg in rows:
+        s = scale_keys[key]
+        scales.append(f'<li><span class="hp-scale-name" data-t="{verb}">{ja(verb)}</span>'
+                      f'<span class="hp-scale-n" data-t="{s}">{ja(s)}</span></li>')
+
     body = f"""<main id="main" class="hp">
-<section class="wrap hp-intro">
-<div class="hp-intro-row">
-<h1 data-t="cover.title">{ja('cover.title')}</h1>
-<p class="hp-lede" data-t="cover.lede">{ja('cover.lede')}</p>
-</div>
-</section>
 <section class="wrap hp-band" aria-label="Chapters">
 {''.join(entries)}
+</section>
+<section class="wrap hp-scales" aria-label="Scales">
+<div class="hp-scales-row">
+<h1 data-t="cover.title">{ja('cover.title')}</h1>
+<p class="hp-scales-note" data-t="cover.lede">{ja('cover.lede')}</p>
+</div>
+<ol class="hp-scale-list">
+{''.join(scales)}
+</ol>
 </section>
 <section class="wrap hp-method">
 <p class="hp-method-k">METHOD / SOURCES</p>
@@ -1308,7 +1329,7 @@ def write_meta(font_meta):
 
     (SITE / "llms.txt").write_text(f"""# {BRAND}
 
-> 日本を四つの尺度で見る静的データサイト。地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）、住宅（並べて見る）。
+> 日本を六つの尺度で見る静的データサイト。地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）、住宅（並べて見る）の四章、天気（仰いで見る）と話題（追って見る）は予告。
 
 - [地震](/quake/): 2000–{Q_END_DOT}、M4以上の震源{n(Q_N)}点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。

@@ -1,22 +1,27 @@
-/* Home preview · three direct scales. No selector state, no extra click. */
+/* Home preview · six scales, three across. No selector state, no extra click. */
 
 .hp { padding-bottom: 0; }
 
-.hp-intro {
-  padding-top: clamp(14px, 2.2vw, 22px);
-  padding-bottom: clamp(8px, 1vw, 10px);
+/* The six scales, as a ledger under the band: headline and closing line on the
+   first row, one cell per chapter below — the scale's name over the measure it
+   covers, in the band's own order. The name repeats the card's verb on
+   purpose: that repetition is what a legend is for. */
+.hp-scales {
+  margin-top: clamp(16px, 2vw, 20px);
+  padding-top: clamp(16px, 1.8vw, 20px);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
-.hp-intro-row {
+.hp-scales-row {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
   gap: clamp(28px, 4vw, 64px);
   align-items: end;
 }
 
-.hp-intro h1 {
+.hp-scales h1 {
   font-family: var(--serif);
-  font-size: clamp(30px, 3.1vw, 44px);
+  font-size: clamp(23px, 2.2vw, 31px);
   font-weight: 400;
   line-height: 1.06;
   letter-spacing: -.035em;
@@ -25,37 +30,79 @@
   max-width: 15ch;
   text-wrap: balance;
 }
-html[lang="ja"] .hp-intro h1 {
+html[lang="ja"] .hp-scales h1 {
   font-family: var(--ja-sans);
-  font-size: clamp(28px, 2.8vw, 40px);
+  font-size: clamp(22px, 2vw, 28px);
   font-weight: 200;
-  line-height: 1.24;
+  line-height: 1.14;
   letter-spacing: 0;
   max-width: 12em;
 }
-html[lang="zh"] .hp-intro h1 {
+html[lang="zh"] .hp-scales h1 {
   font-family: var(--zh-sans);
-  font-size: clamp(28px, 2.8vw, 40px);
+  font-size: clamp(22px, 2vw, 28px);
   font-weight: 200;
-  line-height: 1.22;
+  line-height: 1.12;
   letter-spacing: 0;
   max-width: 12em;
 }
-.hp-intro h1 em {
+.hp-scales h1 em {
   font-style: normal;
   color: var(--accent);
   text-decoration: none;
 }
 
-.hp-lede {
+.hp-scales-note {
   font-family: var(--sans);
-  font-size: clamp(15px, 1.35vw, 18px);
+  font-size: clamp(14px, 1.2vw, 16px);
   line-height: 1.7;
-  color: var(--ink);
-  max-width: 40ch;
-  margin: 0 0 5px;
+  color: var(--muted);
+  max-width: 34ch;
+  margin: 0 0 4px;
 }
-html[lang="ja"] .hp-lede, html[lang="zh"] .hp-lede { font-size: 15px; line-height: 1.8; }
+html[lang="ja"] .hp-scales-note, html[lang="zh"] .hp-scales-note {
+  font-family: var(--ja-sans);
+  font-size: 14px;
+  line-height: 1.8;
+}
+html[lang="zh"] .hp-scales-note { font-family: var(--zh-sans); }
+
+.hp-scale-list {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(12px, 1.6vw, 24px);
+  margin: clamp(14px, 1.6vw, 16px) 0 0;
+  padding: clamp(12px, 1.4vw, 14px) 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  list-style: none;
+}
+.hp-scale-list li { display: grid; gap: 3px; min-width: 0; }
+.hp-scale-name {
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+html[lang="ja"] .hp-scale-name, html[lang="zh"] .hp-scale-name {
+  font-family: var(--ja-sans);
+  font-weight: 250;
+  letter-spacing: 0;
+}
+html[lang="zh"] .hp-scale-name { font-family: var(--zh-sans); }
+.hp-scale-n {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.45;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+html[lang="ja"] .hp-scale-n, html[lang="zh"] .hp-scale-n {
+  font-family: var(--ja-sans);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+html[lang="zh"] .hp-scale-n { font-family: var(--zh-sans); }
 
 /* One continuous band of six chapters, three across. */
 .hp-band {
@@ -134,7 +181,7 @@ html[lang="ja"] .hp-topic, html[lang="zh"] .hp-topic {
 html[lang="zh"] .hp-topic { font-family: var(--zh-sans); }
 
 .hp-entry-visual {
-  aspect-ratio: 1000 / 340;
+  aspect-ratio: 1000 / 332;
   min-height: 0;
   margin-block: 2px;
   overflow: hidden;
@@ -306,9 +353,10 @@ html[lang="ja"] .hp-method-link, html[lang="zh"] .hp-method-link {
 .hp a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
 @media (max-width: 1000px) {
-  .hp-intro-row { grid-template-columns: 1fr; gap: 14px; align-items: start; }
-  .hp-intro h1 { max-width: 15ch; }
-  html[lang="ja"] .hp-intro h1, html[lang="zh"] .hp-intro h1 { max-width: 13em; }
+  .hp-scales-row { grid-template-columns: 1fr; gap: 14px; align-items: start; }
+  .hp-scales h1 { max-width: 15ch; }
+  html[lang="ja"] .hp-scales h1, html[lang="zh"] .hp-scales h1 { max-width: 13em; }
+  .hp-scale-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .hp-band { grid-template-columns: 1fr; }
   .hp-entry {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
@@ -330,13 +378,14 @@ html[lang="ja"] .hp-method-link, html[lang="zh"] .hp-method-link {
 }
 
 @media (max-width: 640px) {
-  .hp-intro { padding-top: 20px; padding-bottom: 18px; }
-  .hp-intro h1 { font-size: clamp(32px, 8.7vw, 45px); line-height: 1.14; }
-  html[lang="ja"] .hp-intro h1, html[lang="zh"] .hp-intro h1 {
-    font-size: clamp(30px, 8.2vw, 41px);
+  .hp-scales { margin-top: 22px; padding-top: 18px; }
+  .hp-scales h1 { font-size: clamp(30px, 8.2vw, 42px); line-height: 1.16; }
+  html[lang="ja"] .hp-scales h1, html[lang="zh"] .hp-scales h1 {
+    font-size: clamp(28px, 7.8vw, 38px);
     line-height: 1.28;
   }
-  .hp-lede { font-size: 15px; line-height: 1.75; }
+  .hp-scales-note { font-size: 14px; line-height: 1.75; }
+  .hp-scale-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
   .hp-entry {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
