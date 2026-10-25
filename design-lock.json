@@ -1,6 +1,6 @@
 {
   "project": "panout-japan",
-  "updated": "2026-10-25",
+  "updated": "2026-10-26",
   "source_of_truth": "ouuut-v2 design-lock + live computed styles at 1440px, 2026-10-21. japan.ouuut.com must read as the same publication as ouuut.com.",
   "style": "Tokyo Expedition Magazine Editorial / ouuut family. Two themes only: sage (day) and dark (night). Zero structural lines.",
   "themes": ["sage", "dark"],

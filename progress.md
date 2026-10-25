@@ -575,3 +575,12 @@
 - 修正提交 `07091d2 fix: restore Japan in Japanese logo`。`JapaneseLogoReview` 独立复核未发现缺陷：5 页 JA 11 字、三语只显示一版、1440/390/320 无裁切/溢出、切换不重启、静态回退保留；H1 原有「日本を」未误改。
 - 验收过程中两次探针写法错误（漏传语言、把 NodeList 当元素）均已修正；曾尝试调 EN/退出时序，因超出本次翻译修正范围已全部撤回，最终 `src/build.py`、`src/app.css` 与 `07091d2` 完全一致。最终构建 CSS `92371dd8`、fonts `f15785d0`。
 - 最终报告 `.review/japanese-logo-correction/final-report.json`，失败 0。锁定视觉口径每字 opacity>0.99：JA 7100–10450ms、ZH 7050–10450ms、EN 7250–10450ms；严格 opacity=1 的 50ms 采样：JA 7200–10400ms、ZH 7150–10400ms、EN 7400–10400ms。记忆 `wiki:correction-panout-japan-wordmark-20261025` 已回读；短条检索 doc `89186112-85f8-478a-bfe3-3479d000ece2`。
+
+## 2026-10-26 · 首页与三语 LOGO 生产发布收口
+
+- 用户明确要求上传生产并收口。发布前线上仍为「四つの尺度」，本地领先 GitHub/Gitea 各 25 个提交；无远端分叉。保存旧部署 `efaf451f-dd9a-4aa7-a7e8-3f0c594aa887`、生产 HTML 与 Cloudflare 项目/部署信息于 `F:/archive/20261026-panout-production/`。
+- 初次部署 `5d11e61b` 后，线上三语×1440/390/320 无溢出，JA 11 字完整；四章真实挂载全过：quake WebGL、crime/housing Leaflet、cabinet canvas。真实生产 Lighthouse 性能 97 / A11y 100 / Best practices 100 / SEO 100，LCP 2.1s、CLS 0、TBT 0ms。Python 本地预览不压缩， Lighthouse 58 不作为线上指标。
+- 发布探测发现缺顶层 404，Pages 把未知路径回退首页 200。新增本地三语 404、noindex、首页/四章/联系入口，注册时 `register=False`，sitemap 仍 5 个内容页。补首页 WebSite+Organization JSON-LD、字典独立内容哈希 `?v=98c95ae6`、404 响应 noindex。最终 `63262ef feat: add localized 404 and versioned dictionary`，重建 CSS `d417da71`、JS `10eb08f4`、fonts `12f06251`。
+- 最终生产 `b9b0c617-0a3f-49a8-8d05-ac6e8cd72c96`，未知 URL 真 404/no-store，三语版本化字典与结构化数据在线验证通过；robots/sitemap/llms/资源 200，TLS 余 76 天。最终报告 `.review/release/`。GitHub/Gitea 已 push 并 fetch 对账均 0 领先/0 落后。
+- 长项目监控三条件成立：线上常驻、周期可看、可机器判活。复用 vps-jp Kuma+TG：`panout_watch.py` 每小时第23分钟检查首页标记/robots/sitemap/llms/TLS；Kuma `panout-japan-check` id53 interval5400，通知1，登记 registry、KUMA_HB、PROBE_HEARTBEAT 已补，cron 已挂。首跑缺 JSON-LD 曾立案，补齐后实测 heartbeat UP + 恢复通知。Kuma 备份 `vps-ops/backups/kuma.db.pre-20261025-155727`，共享配置备份 `~/archive/20261026-panout-monitoring/`。
+- 未做：Search Console/Bing 提交、各社交平台预览、统计事件审计、全浏览器矩阵、真生产回滚计时；这些不等于已验收。下一步 24h 观察，天气/新闻仍是预告，不冒充已接数据。

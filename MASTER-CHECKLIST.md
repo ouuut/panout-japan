@@ -1,93 +1,101 @@
-# MASTER-CHECKLIST · panout-japan（网站类：部署上线阶段按 website-launch-checklist 展开）
+# MASTER-CHECKLIST · panout-japan
 
-> 正本：`sai-long-project/references/website-launch-checklist.md`（10 组 59 项）。M0 为纯静态聚合门面，
-> 无后端/账号/支付项标 N/A；`A1–A7` 任一不过即阻断发布。
+> 正本：`sai-long-project/references/website-launch-checklist.md`（10 组 59 项）。纯静态 MPA，无后端/账号/支付；A1–A7 任一不过即阻断。
+> 本次发布：2026-10-26，部署 `b9b0c617`，源码 `63262ef`。证据集中在 `.review/release/` 与 `HANDOFF.md`。
+> 记号：`[x]` 本次已实测；`[~]` 已明确范围或未完整覆盖；`[ ]` 未执行；`[N/A]` 当前产品不适用。
 
 ## A. 抓取与索引（阻断级）
 
-- [ ] **A1** robots.txt 生产放行 + Sitemap 声明 + AI 爬虫策略
-- [ ] **A2** sitemap.xml 只收 canonical、lastmod 真实
-- [ ] **A3** canonical 自指 + 全站统一
-- [ ] **A4** hreflang 多语言闭环（ja / zh-CN / en + x-default，三语站必须做）
-- [ ] **A5** title / description 全站唯一可点击（三语各一套）
-- [ ] **A6** H1 每页唯一、层级不断
-- [ ] **A7** noindex 残留清零
+- [x] **A1** robots 生产 200 + Allow / + Sitemap；未对 AI bot 另设封禁。
+- [x] **A2** sitemap 恰为五个 canonical 内容页；lastmod 为构建日期；无 404 或 preview。
+- [x] **A3** 五页自指 canonical；运行时语言 canonical 与 URL 参数一致。
+- [x] **A4** ja / zh / en / x-default 四向 alternate，语言运行时 canonical 同步。
+- [x] **A5** 五页静态 JA title/description 唯一；三语字典驱动对应语言 head。
+- [x] **A6** 五页及 404 各一个 H1；首页方法 H2 / 来源 H3 递进。
+- [x] **A7** 五个内容页无 noindex / X-Robots-Tag noindex；刻意保留 404/preview noindex。
 
-## B. GEO / AI 搜索（高权 B1/B2）
+## B. GEO / AI 搜索
 
-- [ ] **B1** llms.txt（低成本做、不神化）
-- [ ] **B2** JSON-LD Organization + WebSite
-- [ ] **B3** JSON-LD 内容型按模板挂载（M0 门面无文章，N/A 或只挂 WebSite）
-- [ ] **B4** 站内 FAQ 内容块（"这是什么数据/多久更新/口径是什么"）
+- [x] **B1** `/llms.txt` 生产 200，含项目与四章口径。
+- [x] **B2** 首页 WebSite + Organization JSON-LD 已上线；四章 Dataset JSON-LD 保留。
+- [x] **B3** 四章 Dataset 类型，无伪造 FAQ 结构化数据。
+- [~] **B4** 首页有“方法与出典”及计算口径；未另做独立 FAQ 富媒体模板。
 
-## C. 社交传播（高权 C1/C2）
+## C. 社交传播
 
-- [ ] **C1** OG 标签完整（服务端直出，1200×630）
-- [ ] **C2** Twitter/X Card
-- [ ] **C3** 全平台预览实测（M0 首发做一遍）
-- [ ] **C4** 分享文案 + UTM 绑定（M0 可 N/A，有分享按钮才做）
+- [ ] **C1** 现有 OG title/description/url/type 但无 `og:image` 1200×630；未补图。
+- [ ] **C2** 现有 `twitter:card=summary`，未做大图卡及验证器验收。
+- [ ] **C3** 未执行 Facebook / LinkedIn / Telegram / WhatsApp / Slack 平台预览。
+- [N/A] **C4** 无站内分享按钮或 UTM 渠道计划。
 
 ## D. 数据统计与增长
 
-- [ ] **D1** 访问统计选型落地（Plausible/Umami 优先）
-- [ ] **D2** 事件埋点与追踪计划（M0 三跳转各埋一个）
-- [ ] **D3** Search Console + Bing 验证
-- [ ] **D4** PWA 可安装性（M0 纯静态门面：N/A，M1 再议）
-- [ ] **D5** 订阅/留存触点（RSS：M0 N/A，M2 新闻聚合时做）
+- [~] **D1** Pages 自带 Web Analytics beacon；未另行验证实时报表，无新增第三方统计。
+- [ ] **D2** 未新增事件埋点计划或上报验收。
+- [ ] **D3** 未提交 Search Console / Bing。
+- [N/A] **D4** 静态 MPA 非 PWA，不引入离线缓存需求。
+- [N/A] **D5** 新闻聚合未启动，暂无 RSS/订阅入口。
 
-## E. 性能（高权 E8）
+## E. 性能
 
-- [ ] **E1** 图片现代格式 + 响应式 + 显式尺寸
-- [ ] **E2** CJK 字库子集化（禁整包 Noto 上线）
-- [ ] **E3** JS 体积与长任务（M0 极简 JS，核对即可）
-- [ ] **E4** LCP 元素可被预扫描器发现
-- [ ] **E5** CLS 预留空间
-- [ ] **E6** 缓存策略（哈希产物 immutable + HTML 短 TTL）
-- [ ] **E7** 发布必 purge CDN、校验必 cache-bust
-- [ ] **E8** 发布前跑 Lighthouse（移动端）记基线
+- [x] **E1** 图版为构建期内联 SVG，不拉伸；无需要响应式替代的大照片。
+- [x] **E2** 13 个字体文件约 2092KB，CJK 按页面字符集子集化；版本化 woff2。
+- [x] **E3** 生产 Lighthouse TBT 0ms；共享 shell 约 15KB，章节按需加载。
+- [x] **E4** LCP 为静态直出的卡片文字；非 JS 动态海报；生产 LCP 2.1s。
+- [x] **E5** 生产 CLS 0；字标固定舞台，动效只改 opacity。
+- [x] **E6** HTML max-age=0；静态资源长期缓存且带内容版本；字典已独立版本化。
+- [~] **E7** 校验使用 cache-bust；生产已正确返回新版，未额外执行全站 purge。
+- [x] **E8** 移动端 Lighthouse：性能 97、A11y 100、Best Practices 100、SEO 100。
 
 ## F. 安全
 
-- [ ] **F1** 全站 HTTPS + 强制跳转 + HSTS（子域全 HTTPS 后再加 includeSubDomains）
-- [ ] **F2** 混合内容清零
-- [ ] **F3** 安全响应头基线
-- [ ] **F4** CSP 先 Report-Only 再强制（M0 静态站可直接收紧）
-- [ ] **F5** 依赖漏洞与供应链（lockfile + audit）
-- [ ] **F6** 泄漏面自查（.env/secrets 未进仓、关 source map）
+- [~] **F1** HTTPS 与证书实测，剩余 76 天；未新增全子域 preload 策略。
+- [~] **F2** 页面为 HTTPS，未做全站所有外链/第三方请求的混合内容专项扫描。
+- [~] **F3** `_headers` 声明 nosniff、frame deny、Referrer/Permissions-Policy；平台默认行为另见 HANDOFF，未做所有响应类型覆盖证明。
+- [ ] **F4** 未启用 CSP Report-Only / 强制 CSP。
+- [ ] **F5** 本轮未新建依赖 lockfile 或全量供应链审计。
+- [~] **F6** 部署目录为生成的公开 `site/`；无密钥打包，source map 未随应用复制；未做全历史泄密审计。
 
-## G. 可靠性（高权 G3）
+## G. 可靠性
 
-- [ ] **G1** 备份 3-2-1（静态站：仓 + .deploy 快照，RPO/RTO 写下）
-- [ ] **G2** 恢复演练（M0：从仓重建一次即算）
-- [ ] **G3** 外部可用性监控（首页探针 + TLS 告警，进看门狗）
-- [ ] **G4** 错误日志与轮转（静态站：CDN 日志 + 前端 Sentry 视需要）
-- [ ] **G5** 上线前彩排 + 回滚路径（staging 走一遍 + DNS 降 TTL + 回滚<5min）
-- [ ] **G6** 域名/证书/账号续费（ouuut.com 到期日查一次写下）
+- [~] **G1** GitHub + Gitea + 本地生产根 + Cloudflare 部署留存；RPO=源码提交，RTO=回滚部署。未做全基础设施 3-2-1 灾备审计。
+- [x] **G2** 从源码完整重建五页与资源并在本地预览实测。
+- [x] **G3** Kuma id 53 + TG + 每小时首页/robots/sitemap/llms/TLS 探针已接，最新 UP；首发缺少 JSON-LD 的真实故障已被捕获并恢复。
+- [~] **G4** 静态站 CDN 日志与探针日志；未新增 Sentry/RUM。
+- [~] **G5** 本地完整构建、预览、生产冒烟完成；未做真实生产回滚计时。
+- [ ] **G6** 未查域名商续费页；TLS 到期已测并由监控继续跟踪。
 
-## H. 合规 / 无障碍（高权 H1–H4）
+## H. 合规 / 无障碍
 
-- [ ] **H1** 键盘完全可达、无陷阱
-- [ ] **H2** 焦点指示清晰
-- [ ] **H3** 对比度达标（正文 ≥4.5:1）
-- [ ] **H4** 动效可减弱、无闪光风险
-- [ ] **H5** 隐私政策与条款（M0 无统计无表单可简化，但有用统计就必须有）
-- [ ] **H6** 数据来源与许可可查（地震 USGS / 犯罪率警视庁 / 支持率 NHK + 各许可）
-- [ ] **H7** 敏感内容免责与时效（数据标更新日期）
-- [ ] **H8** 联系方式可用（页脚 + 404 回首页）
+- [~] **H1** 键盘移动菜单开/Esc 关、链接及 404 路径已测；未做全四章所有控件键盘矩阵。
+- [x] **H2** 全局 `:focus-visible` 2px 外框，主题色对比，菜单键盘操作实测。
+- [~] **H3** 目标正文/作者/导航对比度已测：sage 最低 4.9:1，dark 最低 6.48:1；过渡中间值不作终点判据。Lighthouse A11y 100；未逐字全站扫描。
+- [x] **H4** reduced-motion 与 no-JS 固定域名、无动画；字标只改透明度。
+- [~] **H5** 无表单/新增统计 cookie；未新增隐私条款页，Pages 自带分析未单独审计。
+- [x] **H6** 四章一次来源、计算口径、CC BY 4.0 可查。
+- [x] **H7** 数据期间和来源在卡面/章节标注；非投资建议、无敏感操作。
+- [x] **H8** 作者邮件/X 可点；404 提供首页、四章、联系入口。
 
 ## I. 多语言 / 移动端
 
-- [ ] **I1** 语言探测优先级固定（?lang= > localStorage > navigator > 默认）
-- [ ] **I2** hreflang 双向回链 + x-default（同 A4）
-- [ ] **I3** 字典完整性与残留门禁（缺键阻断）
-- [ ] **I4** 移动端视口与断点（360/390/768/桌面，overflow=0）
-- [ ] **I5** 触摸目标 ≥44px 与抽屉导航
+- [x] **I1** `?lang=` 优先，其次本地记忆，默认 ja；URL 与按钮同步。
+- [x] **I2** alternate 含 x-default；canonical 在切换时同步。
+- [x] **I3** 185 键三语完整，使用键无缺失；字典按内容版本加载。
+- [x] **I4** 320/390/1440 三语无横向溢出；章节页桌面实际挂载无溢出。
+- [~] **I5** 顶栏触控按钮 44px、移动抽屉开/Esc 关实测；抽屉未实现完整焦点陷阱，见后续无障碍改进。
 
 ## J. 发布流程与发布后
 
-- [ ] **J1** 发布前快照备份（发布命令落 AGENTS.md 发布节）
-- [ ] **J2** 一键回滚与灰度（<5 分钟，演练计时）
-- [ ] **J3** URL 与状态码（404 真 404 + 回首页）
-- [ ] **J4** 发布后冒烟验证（固化成脚本，结果贴 progress）
-- [ ] **J5** 变更日志落盘
-- [ ] **J6** 发布后监控（24h + 首周）
+- [x] **J1** 旧部署、HTML、Cloudflare 元数据已存 `F:/archive/20261026-panout-production/`。
+- [~] **J2** 已记录旧部署及官方 rollback endpoint；未真切生产回滚计时。
+- [x] **J3** 未知 URL 返回真 404 + no-store + 三语错误页；四章稳定 URL 200。
+- [x] **J4** 生产三语、移动端、五页、四章挂载、字典、404 实测，证据 `.review/release/`。
+- [x] **J5** README / HANDOFF / progress / TRACK_TREE 已记录；源码双远端推齐。
+- [~] **J6** Kuma+TG 已启动并见 UP；24h 与首周持续观察不能提前勾选。
+
+## 后续（不属于已完成验收）
+
+1. Search Console / Bing 提交与收录检查。
+2. 1200×630 OG 图、Twitter 大图卡与各社交平台实测。
+3. 全站键盘矩阵、抽屉焦点陷阱与 CSP。
+4. 天气与新闻真实数据接入，当前仅预告。
