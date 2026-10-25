@@ -331,9 +331,9 @@ html[lang="ja"] .hp-method-link, html[lang="zh"] .hp-method-link {
 
 @media (max-width: 640px) {
   .hp-intro { padding-top: 20px; padding-bottom: 18px; }
-  .hp-intro h1 { font-size: clamp(2rem, 8.7vw, 2.8rem); line-height: 1.14; }
+  .hp-intro h1 { font-size: clamp(32px, 8.7vw, 45px); line-height: 1.14; }
   html[lang="ja"] .hp-intro h1, html[lang="zh"] .hp-intro h1 {
-    font-size: clamp(1.85rem, 8.2vw, 2.55rem);
+    font-size: clamp(30px, 8.2vw, 41px);
     line-height: 1.28;
   }
   .hp-lede { font-size: 15px; line-height: 1.75; }
