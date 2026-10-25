@@ -1,6 +1,6 @@
 # 六张卡片以下 · 四方案对照预览
 
-打开：`http://127.0.0.1:8900/design-previews/closing-options/?lang=ja#a`
+打开：`http://127.0.0.1:8900/design-previews/closing-options/`（无 hash 或非法 hash 均默认 A）
 
 本页只用于选择六张数据卡以下的收尾区，**没有改动正式首页、生成器或线上部署**。六张卡、图表、顶栏、真实链接与三语字典均取自 `site/index.html` 和 `src/shell.js`。
 
@@ -16,7 +16,7 @@
 ## 操作
 
 - 顶部「现状 / A / B / C / D」切换；数字键 `0–4`、左右方向键也可切换。
-- 「桌面 / 390」改变预览容器，响应式使用容器查询，确实会切换为单列卡片。
+- 「桌面 / 390」改变预览容器，响应式使用容器查询，确实会切换为单列卡片；390 模式是带内部滚动与框内菜单的手机框，不展开整张长页。
 - 顶栏语言按钮切换日/中/英；两个圆点切换 sage/dark。手机语言在原站汉堡菜单内。
 - A/B/D 的「出处与计算方法」可展开；C 默认展开，可收起。
 - 链接锚点：`#a`、`#b`、`#c`、`#d`；现状为 `#current`。
@@ -26,7 +26,7 @@
 - `build-lab.py`：读取真实首页与字典，生成隔离预览到 `site/design-previews/closing-options/`。
 - `lab.css`：四套结构及对照工具条；颜色只使用现有站点 token，无渐变。
 - `lab.js`：方案、宽度、出典展开控制；语言与主题逻辑原样使用 `src/shell.js`。
-- `report.json`：验收结果；`screenshots/`：有头浏览器截图。
+- `report.json`：当前验收结果；`screenshots/`：当前有头浏览器截图。旧过程证据已移至 `F:\archive\20261025-panout-closing-preview-stale\`。
 
 ```bash
 cd F:/projects/panout-japan
@@ -39,10 +39,13 @@ cd site && python -m http.server 8900
 
 ## 已实测
 
+- 无 hash 与非法 hash 均回落到 A，工具栏高亮与可见方案一致；`window.__lab` 正常初始化。
 - A–D × 桌面/390：每档仅显示一套、各一个 H1、六卡四链接保留，文档与局部溢出均为 0。
+- 英文四方案标题的计算字体为 Instrument Serif、400，字体文件 loaded；日/中分别走现有 JP/SC 字体栈。
 - B：六条尺度、四个真实入口；天气与新闻没有伪链接。
-- 三语逐文案键匹配；CJK 字体走现有字体栈；sage/dark 的计算色确实切换。
+- 三语逐文案键匹配；sage/dark 的计算色确实切换。
 - A/B/C/D 出典按钮展开/收起与 `aria-expanded`、内容可见性一致；图标不旋转、无旋转外接盒溢出。
-- 截图含桌面整页、390 容器整页与下方区域裁图。未宣称跨浏览器或 axe 全套通过。
+- 390 容器内的汉堡按钮真实可点击，菜单在框内展开，语言切换可用。
+- `report.json` 与 `screenshots/` 为修复后的证据。未宣称跨浏览器或 axe 全套通过。
 
 选择后，再将选定的单方案移植到 `src/build.py`、`src/home-preview.css` 与页脚实现；对照台不直接作为生产页发布。

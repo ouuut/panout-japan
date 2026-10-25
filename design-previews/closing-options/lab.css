@@ -43,7 +43,25 @@
   background: var(--bg);
   overflow: clip;
 }
-.lab-viewport.is-mobile { width: min(390px, 100%); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent); }
+.lab-viewport.is-mobile {
+  position: relative;
+  width: min(390px, 100%);
+  height: min(844px, calc(100dvh - 150px));
+  min-height: 480px;
+  overflow-x: clip;
+  overflow-y: auto;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.lab-viewport.is-mobile > .masthead { position: sticky; top: 0; }
+.lab-viewport.is-mobile .mobile-menu {
+  position: absolute;
+  top: 64px;
+  right: 15px;
+  bottom: auto;
+  left: 0;
+  height: calc(100% - 64px);
+  min-height: 0;
+}
 /* The comparison chrome is not part of the proposed design. */
 .lab-toolbar + .lab-stage .lab-viewport > .masthead { position: relative; }
 .lab-toolbar + .lab-stage .lab-viewport > main#main { animation: none; }
@@ -111,7 +129,7 @@ html[lang="zh"] .oc-disclosure { font-family: var(--zh-sans); }
 .oc-a-title {
   max-width: 13ch;
   color: var(--ink);
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--serif);
   font-size: clamp(48px, 5.3vw, 78px);
   font-weight: 400;
   letter-spacing: -.035em;
@@ -140,7 +158,7 @@ html[lang="zh"] .oc-a-title { font-family: var(--zh-sans); }
 .oc-b-intro { align-self: start; }
 .oc-b-title {
   max-width: 12ch;
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--serif);
   font-size: clamp(32px, 3.4vw, 48px);
   font-weight: 400;
   letter-spacing: -.025em;
@@ -181,7 +199,7 @@ a.oc-scale:hover .oc-scale-action { transform: translate(2px, -2px); }
   background: var(--surface);
   border-radius: 4px;
 }
-.oc-c-title { margin-bottom: 24px; font-family: "Instrument Serif", Georgia, serif; font-size: clamp(36px, 4vw, 56px); font-weight: 400; letter-spacing: -.025em; line-height: 1.15; }
+.oc-c-title { margin-bottom: 24px; font-family: var(--serif); font-size: clamp(36px, 4vw, 56px); font-weight: 400; letter-spacing: -.025em; line-height: 1.15; }
 html[lang="ja"] .oc-c-title, html[lang="zh"] .oc-c-title { font-family: var(--ja-sans); font-size: clamp(32px, 3.4vw, 48px); line-height: 1.35; }
 html[lang="zh"] .oc-c-title { font-family: var(--zh-sans); }
 .oc-c-lede { max-width: 30ch; margin-bottom: 16px; color: var(--ink); font-size: 17px; line-height: 1.8; }
@@ -204,6 +222,30 @@ html[lang="ja"] .oc-d-title, html[lang="zh"] .oc-d-title { max-width: 24em; font
 html[lang="zh"] .oc-d-title { font-family: var(--zh-sans); }
 .oc-d-method .oc-method-copy { max-width: 64ch; font-size: 14px; }
 .oc-d .oc-sources-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+
+/* The site's global h1 !important policy also applies to this lab. Override it
+   only for the four candidate titles, never for the cloned cards or masthead. */
+html[lang="en"] .lab-design .oc-a-title,
+html[lang="en"] .lab-design .oc-b-title,
+html[lang="en"] .lab-design .oc-c-title,
+html[lang="en"] .lab-design .oc-d-title {
+  font-family: var(--serif) !important;
+  font-weight: 400 !important;
+}
+html[lang="ja"] .lab-design .oc-a-title,
+html[lang="ja"] .lab-design .oc-b-title,
+html[lang="ja"] .lab-design .oc-c-title,
+html[lang="ja"] .lab-design .oc-d-title {
+  font-family: var(--ja-sans) !important;
+  font-weight: 300 !important;
+}
+html[lang="zh"] .lab-design .oc-a-title,
+html[lang="zh"] .lab-design .oc-b-title,
+html[lang="zh"] .lab-design .oc-c-title,
+html[lang="zh"] .lab-design .oc-d-title {
+  font-family: var(--zh-sans) !important;
+  font-weight: 300 !important;
+}
 
 /* All four alternatives retire the duplicate chapter row and repeated tagline. */
 .lab-footer { padding: 48px 0 40px; }
@@ -236,12 +278,15 @@ html[lang="zh"] .oc-d-title { font-family: var(--zh-sans); }
   .oc-d { grid-template-columns: 1fr; gap: 24px; }
 }
 @container home (max-width: 760px) {
-  .lab-viewport .masthead-in { height: 64px; gap: 8px; }
-  .lab-viewport .wordmark { font-size: 30px; }
+  .lab-viewport { --nav-h: 64px; }
+  .lab-viewport .masthead-in { height: 64px; gap: 8px; min-width: 0; padding-inline: 16px; }
+  .lab-viewport .masthead-in > .wordmark { flex: 1 1 auto; min-width: 0; font-size: 24px; }
+  .lab-viewport .mobile-menu { padding-inline: 16px; }
+  .lab-viewport .tools { flex: 0 0 auto; min-width: 0; margin-left: auto; gap: 4px; }
+  .lab-viewport .theme-switcher { flex: 0 0 auto; margin: 0; }
+  .lab-viewport .burger { flex: 0 0 44px; }
   .lab-viewport .chapters, .lab-viewport .masthead .lang-nav { display: none; }
   .lab-viewport .burger { display: flex; }
-  .lab-viewport .tools { margin-left: auto; gap: 4px; }
-  .lab-viewport .theme-switcher { margin: 0; }
   .lab-viewport .theme-dot { width: 44px; height: 44px; }
   .lab-viewport .foot-top, .lab-viewport .foot-bottom { flex-direction: column; align-items: flex-start; gap: 20px; }
   .lab-viewport .foot .wordmark { margin-bottom: 28px; }

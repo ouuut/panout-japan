@@ -22,7 +22,7 @@
   }
 
   function setVariant(variant, updateHash) {
-    if (variants.indexOf(variant) < 0) return;
+    if (variants.indexOf(variant) < 0) variant = 'a';
     if (document.activeElement && document.activeElement.closest('.lab-design')) document.activeElement.blur();
     document.querySelectorAll('.lab-design').forEach(function (section) {
       var active = section.dataset.variant === variant;
@@ -50,6 +50,12 @@
   document.querySelectorAll('[data-select-width]').forEach(function (button) {
     button.addEventListener('click', function () { setWidth(button.dataset.selectWidth); });
   });
+  var burger = viewport.querySelector('.masthead [data-burger]');
+  if (burger) {
+    burger.addEventListener('click', function () {
+      if (viewport.classList.contains('is-mobile') && burger.getAttribute('aria-expanded') !== 'true') viewport.scrollTop = 0;
+    }, true);
+  }
   document.querySelectorAll('.oc-disclosure').forEach(function (button) {
     button.addEventListener('click', function () {
       var expanded = button.getAttribute('aria-expanded') === 'true';
@@ -90,7 +96,7 @@
   // The language control changes html[lang], so CJK font routing stays native.
   // Source labels in C link to the chapter that documents that dataset.
 
-  setVariant(location.hash.slice(1), false);
+  setVariant(location.hash.slice(1));
   setWidth('desktop');
   window.__lab = { setVariant: setVariant, setWidth: setWidth, variants: variants.slice() };
 })();
