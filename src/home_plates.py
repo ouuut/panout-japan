@@ -321,8 +321,8 @@ def weather_svg(outline, w=1000, h=760, bbox=(121.0, 23.0, 151.0, 48.0)):
         amp = 42 - i * 6
         d = (f"M-24 {y + 12:.1f}C{w * .20:.0f} {y - amp:.1f} {w * .36:.0f} {y + amp:.1f} "
              f"{w * .54:.0f} {y:.1f}S{w * .80:.0f} {y - amp * .7:.1f} {w + 24:.0f} {y + 10:.1f}")
-        out.append(f'<path d="{d}" fill="none" stroke="var(--accent)" stroke-width="2.6" '
-                   f'opacity="{0.20 - 0.035 * i:.3f}"/>')
+        out.append(f'<path d="{d}" fill="none" stroke="var(--accent)" stroke-width="3.2" '
+                   f'opacity="{0.30 - 0.05 * i:.3f}"/>')
 
     out.append(f'<path d="{coast}" fill="none" stroke="var(--ink)" stroke-width="1.4" '
                f'opacity="0.95" stroke-linejoin="round"/>')
@@ -355,7 +355,7 @@ def weather_svg(outline, w=1000, h=760, bbox=(121.0, 23.0, 151.0, 48.0)):
                    f'class="micro">{i:02d}</text>')
     out.append(f'<text x="{pad}" y="{base - 34}" class="micro">TODAY / 24H</text>')
     out.append(f'<text x="{w - pad}" y="{base - 34}" text-anchor="end" class="micro">'
-               f'気象庁 · 47 都道府県</text>')
+               f'気象庁 予報</text>')
 
     return _svg(w, h, "今日の日本天気予報 · 予告", "".join(out))
 
@@ -396,7 +396,7 @@ def news_svg(w=1000, h=760, rows=10):
                    f'fill="var(--accent)" opacity="0.32"/>')
     out.append(f'<text x="{left}" y="{top - 36}" class="micro">TOPIC / 24H</text>')
     out.append(f'<text x="{right}" y="{top - 36}" text-anchor="end" class="micro">'
-               f'各社 見出し · 30分ごと</text>')
+               f'各社 見出し</text>')
 
     ky = h - 56
     out.append(f'<text x="54" y="{ky}" class="legend">TOPIC / OUTLET STACK</text>')
