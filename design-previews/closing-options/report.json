@@ -1,0 +1,228 @@
+{
+  "results": [
+    {
+      "variant": "a",
+      "width": "desktop",
+      "visible": [
+        "a"
+      ],
+      "lang": "ja",
+      "theme": "sage",
+      "mismatches": [],
+      "plates": 6,
+      "cardLinks": 4,
+      "scales": 0,
+      "scaleLinks": 0,
+      "footTag": 0,
+      "h1": 1,
+      "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+      "expanded": "true",
+      "panelHidden": false,
+      "panelSources": 5,
+      "buttonOverflow": 0,
+      "docOverflow": 0,
+      "localOverflow": [],
+      "bandColumns": 3,
+      "wrapWidth": 1440
+    },
+    {
+      "variant": "b",
+      "width": "desktop",
+      "visible": [
+        "b"
+      ],
+      "lang": "ja",
+      "theme": "sage",
+      "mismatches": [],
+      "plates": 6,
+      "cardLinks": 4,
+      "scales": 6,
+      "scaleLinks": 4,
+      "footTag": 0,
+      "h1": 1,
+      "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+      "expanded": "true",
+      "panelHidden": false,
+      "panelSources": 5,
+      "buttonOverflow": 0,
+      "docOverflow": 0,
+      "localOverflow": [],
+      "bandColumns": 3,
+      "wrapWidth": 1440
+    },
+    {
+      "variant": "c",
+      "width": "desktop",
+      "visible": [
+        "c"
+      ],
+      "lang": "ja",
+      "theme": "sage",
+      "mismatches": [],
+      "plates": 6,
+      "cardLinks": 4,
+      "scales": 0,
+      "scaleLinks": 0,
+      "footTag": 0,
+      "h1": 1,
+      "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+      "expanded": "false",
+      "panelHidden": true,
+      "panelSources": 5,
+      "buttonOverflow": 0,
+      "docOverflow": 0,
+      "localOverflow": [],
+      "bandColumns": 3,
+      "wrapWidth": 1440
+    },
+    {
+      "variant": "d",
+      "width": "desktop",
+      "visible": [
+        "d"
+      ],
+      "lang": "ja",
+      "theme": "sage",
+      "mismatches": [],
+      "plates": 6,
+      "cardLinks": 4,
+      "scales": 0,
+      "scaleLinks": 0,
+      "footTag": 0,
+      "h1": 1,
+      "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+      "expanded": "true",
+      "panelHidden": false,
+      "panelSources": 5,
+      "buttonOverflow": 0,
+      "docOverflow": 0,
+      "localOverflow": [],
+      "bandColumns": 3,
+      "wrapWidth": 1440
+    },
+    {
+      "variant": "a",
+      "width": "mobile",
+      "visible": [
+        "a"
+      ],
+      "lang": "ja",
+      "theme": "sage",
+      "mismatches": [],
+      "plates": 6,
+      "cardLinks": 4,
+      "scales": 0,
+      "scaleLinks": 0,
+      "footTag": 0,
+      "h1": 1,
+      "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+      "expanded": "true",
+      "panelHidden": false,
+      "panelSources": 5,
+      "buttonOverflow": 0,
+      "docOverflow": 0,
+      "localOverflow": [],
+      "bandColumns": 1,
+      "wrapWidth": 390
+    },
+    {
+      "variant": "b",
+      "width": "mobile",
+      "visible": [
+        "b"
+      ],
+      "lang": "ja",
+      "theme": "sage",
+      "mismatches": [],
+      "plates": 6,
+      "cardLinks": 4,
+      "scales": 6,
+      "scaleLinks": 4,
+      "footTag": 0,
+      "h1": 1,
+      "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+      "expanded": "true",
+      "panelHidden": false,
+      "panelSources": 5,
+      "buttonOverflow": 0,
+      "docOverflow": 0,
+      "localOverflow": [],
+      "bandColumns": 1,
+      "wrapWidth": 390
+    },
+    {
+      "variant": "c",
+      "width": "mobile",
+      "visible": [
+        "c"
+      ],
+      "lang": "ja",
+      "theme": "sage",
+      "mismatches": [],
+      "plates": 6,
+      "cardLinks": 4,
+      "scales": 0,
+      "scaleLinks": 0,
+      "footTag": 0,
+      "h1": 1,
+      "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+      "expanded": "false",
+      "panelHidden": true,
+      "panelSources": 5,
+      "buttonOverflow": 0,
+      "docOverflow": 0,
+      "localOverflow": [],
+      "bandColumns": 1,
+      "wrapWidth": 390
+    },
+    {
+      "variant": "d",
+      "width": "mobile",
+      "visible": [
+        "d"
+      ],
+      "lang": "ja",
+      "theme": "sage",
+      "mismatches": [],
+      "plates": 6,
+      "cardLinks": 4,
+      "scales": 0,
+      "scaleLinks": 0,
+      "footTag": 0,
+      "h1": 1,
+      "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+      "expanded": "true",
+      "panelHidden": false,
+      "panelSources": 5,
+      "buttonOverflow": 0,
+      "docOverflow": 0,
+      "localOverflow": [],
+      "bandColumns": 1,
+      "wrapWidth": 390
+    }
+  ],
+  "english": {
+    "lang": "en",
+    "heading": "Japan, atsix scales.",
+    "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+    "method": "Method & sources"
+  },
+  "chinese": {
+    "lang": "zh",
+    "heading": "用六种尺度,看日本。",
+    "font": "\"Noto Sans JP\", \"Noto Sans SC\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", system-ui, -apple-system, sans-serif",
+    "method": "方法与出处"
+  },
+  "dark": {
+    "theme": "dark",
+    "bg": "rgb(14, 14, 12)",
+    "ink": "rgb(237, 235, 228)",
+    "accent": "rgb(255, 106, 61)"
+  },
+  "cenglish": {
+    "lang": "en",
+    "heading": "Method and sources",
+    "buttonOverflow": 0,
+    "docOverflow": 0
+  }
+}

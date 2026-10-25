@@ -67,6 +67,7 @@ npx wrangler pages deploy site --project-name=panout-site --branch=main
 ## 文档
 
 - `progress.md` —— 逐轮流水（只增不改）
+- `design-previews/closing-options/` —— 六卡以下四套候选的独立对照台；不改正式首页，打开 `http://127.0.0.1:8900/design-previews/closing-options/?lang=ja#a` 选择。唯一 next：用户选定 A/B/C/D 后再移植生产。
 - `MASTER-CHECKLIST.md` —— 发布验收清单
 - `docs/UPGRADE-DIRECTIONS.md` —— 三个子站的后续升级方向
 - `AGENTS.md` —— 本仓门规（备份、提交、发布）
