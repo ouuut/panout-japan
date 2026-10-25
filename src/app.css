@@ -1390,13 +1390,20 @@ html body #crm-root .panel-card { border-radius: 4px !important; }
   .beats { grid-template-columns: 1fr; gap: 32px; }
 }
 
+@media (min-width: 761px) and (max-width: 1100px) {
+  .masthead-in { gap: 8px; }
+  .masthead-in > .wordmark { flex: 0 0 auto; min-width: 0; font-size: clamp(22px, 3vw, 26px); }
+  .chapters { gap: 12px; }
+  .tools { gap: 4px; }
+}
+
 @media (max-width: 760px) {
   :root { --nav-h: 64px; }
-  .masthead-in { height: 64px; gap: 8px; }
-  .wordmark { font-size: 30px; }
+  .masthead-in { height: 64px; gap: 8px; min-width: 0; }
+  .masthead-in > .wordmark { flex: 0 0 auto; min-width: 0; font-size: 24px; }
   .chapters, .masthead .lang-nav { display: none; }
-  .burger { display: flex; }
-  .tools { margin-left: auto; gap: 4px; }
+  .burger { display: flex; flex: 0 0 44px; }
+  .tools { flex: 0 0 auto; min-width: 0; margin-left: auto; gap: 4px; }
   .theme-switcher { margin: 0; }
   .theme-dot { width: 44px; height: 44px; }
   .two-col { grid-template-columns: 1fr; gap: 32px; }
@@ -1411,8 +1418,11 @@ html body #crm-root .panel-card { border-radius: 4px !important; }
   .foot .wordmark { margin-bottom: 28px; }
 }
 
+@media (max-width: 380px) {
+  .masthead-in > .wordmark { font-size: 18px; }
+}
+
 @media (max-width: 340px) {
-  .wordmark { font-size: 26px; }
   .masthead-in { gap: 6px; }
 }
 

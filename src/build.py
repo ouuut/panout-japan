@@ -456,21 +456,34 @@ COPY = {
     "skip": ("本文へ", "跳到正文", "Skip to content"),
     "crumb.home": ("表紙", "封面", "Cover"),
 
-    "cover.title": ("日本を、<br><em>六つの尺度</em>で見る。", "用<em>六种尺度</em>,<br>看日本。", "Japan, at<br><em>six scales</em>."),
-    # The statement sentence is composed from the cards' own verbs and topics;
-    # these three keys carry only its punctuation, per language.
-    "cover.sep.term": ("", "", " · "),
-    "cover.sep.clause": ("、", "，", ", "),
-    "cover.sep.end": ("。", "。", "."),
-    "cover.cta": ("六つの尺度へ", "进入六个尺度", "Enter the six scales"),
-    "cover.method": ("方法と出典", "方法与来源", "Method & sources"),
-    "cover.section.eyebrow": ("SIX SCALES / 六つの尺度", "SIX SCALES / 六个尺度", "SIX SCALES / SIX PLATES"),
-    "cover.section.h": ("六つの尺度で見る日本。", "六个尺度看日本。", "Six scales on one land."),
-    "cover.section.sub": ("数字はすべて一次資料から静的に生成。年を切り、町丁に寄り、内閣を並べ、区の値を比べる。",
-                          "所有数字由一次资料静态生成。切年、入町丁、排内阁、比各区。",
-                          "Every number is statically generated from primary sources. Cut by year, zoom into districts, line up cabinets, compare wards."),
+    "cover.title": ("日本を、<em>六つの尺度</em>で見る。", "<em>六种尺度</em>看日本。", "Japan through <em>six scales</em>."),
     "ui.theme.sage": ("Sage", "浅色", "Sage"),
     "ui.theme.dark": ("Dark", "深色", "Dark"),
+    "home.c.lede": (
+        "数字の意味は、数え方で変わる。出典と集計の前提を、各章と合わせて示す。",
+        "数字的意义取决于怎么数。这里说明出处与统计前提，细则见各章。",
+        "Numbers change meaning with the counting rule. Sources and assumptions are summarised here; each chapter documents the details.",
+    ),
+    "home.details": ("出典と計算方法", "出处与计算方法", "Sources and counting rules"),
+    "home.definitions": ("計算方法", "计算方法", "Counting rules"),
+    "home.definitions.copy": (
+        f"地震はM4以上・{len(YEARS)}年分、犯罪率は人口1,000人当たり、支持率は月内全調査の算術平均。住宅は町名ごとの平均㎡単価。補間や面積での絞り込みはしない。",
+        f"地震取 M4 以上、{len(YEARS)} 年；犯罪率按每千人；支持率取月内全部调查的算术平均；住宅按町名计算平均㎡单价。不插值，也不按面积筛选。",
+        f"Earthquakes are M4+ over {len(YEARS)} years. Crime is per 1,000 residents; cabinet approval is the arithmetic mean of all polls in a month. Housing is mean price per square metre by town. No interpolation or area filter.",
+    ),
+    "home.quake.title": ("地震", "地震", "Earthquakes"),
+    "home.quake.source": ("USGS ComCat", "USGS ComCat", "USGS ComCat"),
+    "home.quake.copy": (f"2000年からM4以上、{n(Q_N)}の震源。", f"2000 年至今 M4 以上，共 {n(Q_N)} 个震源。", f"{n(Q_N)} M4+ hypocentres since 2000."),
+    "home.crime.title": ("犯罪", "犯罪", "Crime"),
+    "home.crime.source": ("警視庁", "警视厅", "Tokyo Metropolitan Police"),
+    "home.crime.copy": (f"2025年、東京{len(MUNI)}区市町村・{n(CHOME_COUNT)}町丁。", f"2025 年，东京 {len(MUNI)} 区市町村、{n(CHOME_COUNT)} 町丁。", f"2025; {len(MUNI)} municipalities, {n(CHOME_COUNT)} Tokyo neighbourhoods."),
+    "home.cabinet.title": ("内閣", "内阁", "Cabinet"),
+    "home.cabinet.source": ("NHK・各社世論調査", "NHK・各社民调", "NHK and media polls"),
+    "home.cabinet.copy": (f"{len(CAB['cabinets'])}内閣、{n(len(MONTH_MEAN))}か月、{n(len(POLLS))}の調査。", f"{len(CAB['cabinets'])} 届内阁、{n(len(MONTH_MEAN))} 个月、{n(len(POLLS))} 次调查。", f"{len(CAB['cabinets'])} cabinets, {n(len(MONTH_MEAN))} months, {n(len(POLLS))} polls."),
+    "home.housing.title": ("住宅", "住宅", "Housing"),
+    "home.housing.source": ("国土交通省 PDL 1.0", "国土交通省 PDL 1.0", "MLIT / PDL 1.0"),
+    "home.housing.copy": (f"{HOUSE['basis']}、東京全域の中古マンション等の成約{n(HOUSE_N)}件。23区の{n(HOUSE['totals']['trades'])}件は区・町名の価格を表示。", f"{HOUSE['basis']}，东京全域二手公寓等共 {n(HOUSE_N)} 笔成交；其中 23 区 {n(HOUSE['totals']['trades'])} 笔展示区与町名价格。", f"{n(HOUSE_N)} used-flat transactions across Tokyo, {HOUSE['basis']}; {n(HOUSE['totals']['trades'])} in the 23 wards carry ward and town prices."),
+    "home.compiled": ("出典は各章に記載。本站が一次資料から加工・静的生成。", "各章列出出处。本站根据一次资料加工并静态生成。", "Sources are named in each chapter. Compiled from primary sources and statically generated."),
     "prod.open": ("開く", "打开", "Open"),
     "cover.scale.quake": ("列島 · 27年", "列岛 · 27年", "Archipelago · 27 yrs"),
     "cover.scale.crime": ("東京 · 62区市町村", "东京 · 62区市町村", "Tokyo · 62 wards"),
@@ -694,10 +707,6 @@ COPY = {
              "The URL changed, or the page was never built. Start again from the four chapters."),
     "nf.home": ("表紙へ戻る", "回到封面", "Back to the cover"),
 
-    "foot.tag": ("引いて見る・寄って見る・通して見る・並べて見る",
-                 "拉远看 · 凑近看 · 拉长看 · 比着看",
-                 "Pull back · zoom in · stretch out · compare"),
-    "foot.method": ("方法と出典", "方法与出处", "Method & sources"),
     "foot.built": ("静的生成", "静态生成", "Statically generated"),
 }
 
@@ -813,18 +822,9 @@ def shell_tail():
 
 
 def foot():
-    return f"""<footer class="foot"><div class="wrap foot-in">
-<div class="foot-top">
-<a class="wordmark" href="/" aria-label="{BRAND}">{WM}</a>
-</div>
-<div class="foot-products">
-<a href="/quake/"{tattr('nav.quake')}>{ja('nav.quake')}</a>
-<a href="/crime/"{tattr('nav.crime')}>{ja('nav.crime')}</a>
-<a href="/cabinet/"{tattr('nav.cabinet')}>{ja('nav.cabinet')}</a>
-<a href="/housing/"{tattr('nav.housing')}>{ja('nav.housing')}</a>
-</div>
+    return f"""<footer class="foot hp-foot"><div class="wrap foot-in">
+<div class="foot-top"><a class="wordmark" href="/" aria-label="{BRAND}">{WM}</a></div>
 <div class="foot-bottom">
-<span>{BRAND} — <span{tattr('foot.tag')}>{ja('foot.tag')}</span></span>
 <span><a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a> · <span{tattr('foot.built')}>{ja('foot.built')}</span> · {BUILD_DATE}</span>
 </div>
 </div></footer>
@@ -860,11 +860,12 @@ def pager(prev_href, prev_label, next_href, next_label):
 
 # ---------------------------------------------------------------- pages
 def build_home_preview():
-    """Cover: six plates, three across, then the page's own statement below them
-    — the h1 and one sentence built from the plates' own verbs and topics. Four
-    plates are live chapters (each a link); the weather and news plates are
-    previews — they carry「予告」instead of「開く」and their feeds are not
-    connected yet."""
+    """Six plates, followed by the selected C provenance panel and A statement.
+
+    Four plates are live chapter links. Weather and news are previews with no
+    connected feed; they carry「予告」and are not anchors. Provenance remains
+    readable without JavaScript, and the closing statement stays on one line.
+    """
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
 
     # key, num, href (None = preview plate), verb, topic, count, unit, claim, source, plate
@@ -906,29 +907,42 @@ def build_home_preview():
         else:
             entries.append(f'<div class="hp-entry hp-entry-soon">\n{card}\n</div>')
 
-    # The page's statement under the band: one clause per plate, each the card's
-    # own verb plus what that scale covers. The separators are real text with
-    # their own keys so the sentence breaks and reads correctly in every
-    # language (English needs " · " between the two terms, CJK does not).
-    clauses = [
-        f'<span class="hp-clause"><span class="hp-v" data-t="{verb}">{ja(verb)}</span>'
-        f'<span data-t="cover.sep.term">{ja("cover.sep.term")}</span>'
-        f'<span class="hp-n" data-t="{topic}">{ja(topic)}</span></span>'
-        for key, num, href, verb, topic, count, unit, claim, source, svg in rows]
-    sep = f'<span data-t="cover.sep.clause">{ja("cover.sep.clause")}</span>'
-    clause_html = sep.join(clauses) + f'<span data-t="cover.sep.end">{ja("cover.sep.end")}</span>'
+    source_items = []
+    for key in ("quake", "crime", "cabinet", "housing"):
+        source_items.append(
+            f'<article class="hp-source-item"><h3><span data-t="home.{key}.title">{ja(f"home.{key}.title")}</span>'
+            f'<span aria-hidden="true">—</span><a href="/{key}/"><span data-t="home.{key}.source">{ja(f"home.{key}.source")}</span> ↗</a></h3>'
+            f'<p data-t="home.{key}.copy">{ja(f"home.{key}.copy")}</p></article>'
+        )
 
     body = f"""<main id="main" class="hp">
 <section class="wrap hp-band" aria-label="Chapters">
 {''.join(entries)}
 </section>
-<section class="wrap hp-scales">
-<h1 data-t="cover.title">{ja('cover.title')}</h1>
-<p class="hp-scales-lede">{clause_html}</p>
+<section class="wrap hp-provenance" aria-labelledby="method-title">
+<div class="hp-provenance-panel">
+<div class="hp-provenance-intro">
+<p class="hp-kicker">PRIMARY SOURCES / STATIC BUILD</p>
+<h2 id="method-title" data-t="m.h1">{ja('m.h1')}</h2>
+<p class="hp-provenance-lede" data-t="home.c.lede">{ja('home.c.lede')}</p>
+</div>
+<div class="hp-provenance-content">
+<details class="hp-sources" open>
+<summary data-t="home.details">{ja('home.details')}</summary>
+<div class="hp-sources-body">
+<div class="hp-sources-list">{''.join(source_items)}</div>
+<div class="hp-definitions">
+<h3 data-t="home.definitions">{ja('home.definitions')}</h3>
+<p data-t="home.definitions.copy">{ja('home.definitions.copy')}</p>
+<p data-t="home.compiled">{ja('home.compiled')}</p>
+</div>
+</div>
+</details>
+</div>
+</div>
 </section>
-<section class="wrap hp-method">
-<p class="hp-method-k">METHOD / SOURCES</p>
-<p class="hp-method-p" data-t="cover.section.sub">{ja('cover.section.sub')}</p>
+<section class="wrap hp-statement">
+<h1 data-t="cover.title">{ja('cover.title')}</h1>
 </section>
 </main>"""
 

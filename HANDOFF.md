@@ -1,21 +1,32 @@
-# HANDOFF · Pan Out Japan（建仓轮）
+# HANDOFF · panout-japan
 
-## 家谱与现役站实况
+## Current
 
-- 本项目：`F:/projects/panout-japan` · GH `nakamotosai/panout-japan`（public，ouuut 组织建仓权限不足先个人顶上）· 规划域 `japan.ouuut.com`（DNS 实测空闲）。
-- 三老站（回滚锚，保持在线）：地震 `F:/projects/earthquake` → `3d.saaaai.com`；犯罪率 `F:/projects/tokyo-crime-map` → `crime.saaaai.com`；支持率 `F:/projects/cabinet-approval` → `japan.saaaai.com`（注意：支持率现行域与本项目规划域同名不同父域，切流时别搞混）。
-- ouuut 官网：`F:/projects/ouuut-v2` → `ouuut.com`（M3 加 Products 条）。
-- 新闻聚合蓝本：cnjpv5（`~/cnjpv5` → `cn.saaaai.com`，M2 模仿对象）。
+- Production source: `F:/projects/panout-japan`; GitHub `ouuut/panout-japan`, Gitea mirror. Brand/domain: `japan.ouuut.com`.
+- Current local milestone: the user selected C+A for the homepage closing on 2026-10-25. `src/build.py` generates six cards → C provenance → A single-line statement → compact footer; `src/home-preview.css` holds the closing styles. Only「六种尺度」in「六种尺度看日本。」is accent-coloured. JA/EN use equivalent one-line titles.
+- `site/` is generated, not tracked and never edited directly. Local preview: `http://127.0.0.1:8900/?lang=zh`. The retired four-option lab and source backups are at `F:/archive/20261025-ca-hybrid-panout/`.
+- No production deployment or remote push has been made for this change. Production status remains the separately recorded Cloudflare Pages release, not this local work.
 
-## 本轮做了什么
+## Commands run
 
-- 命名三轮：scout/watch/map（被用户否：URL 看不出日本）→ pan/jp/japan（pan 全空闲）→ 拍板：产品 **Pan Out Japan** + 域 **`japan.ouuut.com`** + 仓个人顶上。
-- 长项目建仓：GitHub 建仓 + 本地 git init + 十真相源骨架（README/CONSTITUTION/AGENTS/TRACK_TREE/SPEC/PLAN/design-lock/progress/MASTER-CHECKLIST/HANDOFF）+ INDEX.md 补行（待）+ 项目本登记（待）。
+- `python src/build.py` → latest run passed: 5 pages, CSS `0a49e2d9`, JS `06db0ba6`, 2189 charset characters.
+- Headed ego-browser at `http://127.0.0.1:8900/`: 27 width/language combinations (1440/1280/1000/768/640/390/375/360/320 × JA/ZH/EN), one statement line and zero document/body overflow in every case; 6 cards / 4 chapter links / 4 source links / 1 H1; full masthead controls fit.
+- Keyboard `<details>` close/reopen → content visibility false/true; actual mobile EN/ZH switch passed; dark accent `#FF6A3D` passed; JS-disabled static JA provenance and title remain visible. Report: `F:/projects/panout-japan/.review/ca-hybrid/report.json`; screenshots alongside it.
+- `python -m py_compile src/build.py`, design-lock JSON parse, `git diff --check` → passed. C+A retain readback doc `a3c64fb2`.
 
-## 缺口（下轮入口）
+## Not verified
 
-1. `F:/projects/INDEX.md` 补 `panout-japan` 行。
-2. 项目本 `~/project-journal/projects.md` PARA-Projects 登记（官方写入路径缺失，用降级流程：备份→改一行→四项校验→commit+push）。
-3. Gitea 镜像：`sai/find-out` 等 scope 全探不到，惯例待确认（不挡建仓，已记 README 阻塞）。
-4. ouuut 组织 transfer：等用户拿到组织建仓/transfer 权限再办。
-5. 首 commit + push（等 1+2 落完同轮做）。
+- Full-site legacy accessibility/axe audit, all non-home chapter regressions, and cross-browser rendering were not run; the closing's measured contrast and keyboard/JS-disabled checks are not a substitute for a full audit.
+- Cloudflare production, cache purge, remote branch parity and deployment checklist were not run.
+
+## Next safe action
+
+- Wait for the independent read-only review, address any reproducible blocker, then let the user approve deployment. Do not publish merely because the local page is ready.
+
+## Rollback
+
+- Pre-change `src/build.py`, `src/home-preview.css`, `src/app.css`, `site/index.html`, README/design lock and this handoff are backed up at `F:/archive/20261025-ca-hybrid-panout/`. The previous four-option preview is preserved there as `closing-options/`.
+
+## Confidence
+
+4/5 — actual generated page and real headed interactions were exercised locally; independent review and production deployment are separate.

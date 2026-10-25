@@ -2,73 +2,6 @@
 
 .hp { padding-bottom: 0; }
 
-/* The six scales, as the page's statement under the band: headline on the left,
-   the six ways of looking as one sentence on the right — every clause is the
-   card's own verb (muted) plus what that scale covers (ink). No index, no
-   second set of numbers: the plates above already carry those. */
-.hp-scales {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
-  gap: clamp(28px, 4vw, 64px);
-  align-items: start;
-  margin-top: clamp(18px, 2.2vw, 24px);
-  padding-top: clamp(16px, 1.8vw, 20px);
-  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
-}
-
-.hp-scales h1 {
-  font-family: var(--serif);
-  font-size: clamp(26px, 2.6vw, 38px);
-  font-weight: 400;
-  line-height: 1.08;
-  letter-spacing: -.035em;
-  color: var(--ink);
-  margin: 0;
-  max-width: 15ch;
-  text-wrap: balance;
-}
-html[lang="ja"] .hp-scales h1 {
-  font-family: var(--ja-sans);
-  font-size: clamp(24px, 2.4vw, 34px);
-  font-weight: 200;
-  line-height: 1.22;
-  letter-spacing: 0;
-  max-width: 12em;
-}
-html[lang="zh"] .hp-scales h1 {
-  font-family: var(--zh-sans);
-  font-size: clamp(24px, 2.4vw, 34px);
-  font-weight: 200;
-  line-height: 1.2;
-  letter-spacing: 0;
-  max-width: 12em;
-}
-.hp-scales h1 em {
-  font-style: normal;
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.hp-scales-lede {
-  margin: 4px 0 0;
-  max-width: 52ch;
-  font-family: var(--sans);
-  font-size: clamp(15px, 1.3vw, 17px);
-  line-height: 1.75;
-  color: var(--ink);
-}
-html[lang="ja"] .hp-scales-lede, html[lang="zh"] .hp-scales-lede {
-  font-family: var(--ja-sans);
-  font-size: 16px;
-  line-height: 1.95;
-}
-html[lang="zh"] .hp-scales-lede { font-family: var(--zh-sans); }
-/* One clause = one scale: keep the two terms together, let the separators
-   between clauses carry every break opportunity. */
-.hp-clause { white-space: nowrap; }
-.hp-v { color: var(--muted); }
-.hp-n { color: var(--ink); }
-
 /* One continuous band of six chapters, three across. */
 .hp-band {
   display: grid;
@@ -276,51 +209,135 @@ html[lang="ja"] .hp-enter, html[lang="zh"] .hp-enter {
   stroke-linejoin: round;
 }
 
-.hp-method {
+/* C / provenance first: the complete, quiet evidence panel above the statement. */
+.hp-provenance { padding-top: 64px; }
+.hp-provenance-panel {
   display: grid;
-  grid-template-columns: 170px minmax(0, 1fr) auto;
-  gap: clamp(20px, 4vw, 48px);
-  align-items: start;
-  padding-block: clamp(28px, 4vw, 48px);
+  grid-template-columns: minmax(260px, .8fr) minmax(0, 1.2fr);
+  gap: 64px;
+  padding: 32px;
+  background: var(--surface);
+  border-radius: var(--radius);
 }
-.hp-method-k {
-  font-family: var(--mono);
-  font-size: 11px;
-  line-height: 1.5;
-  letter-spacing: .10em;
-  text-transform: uppercase;
+.hp-kicker {
+  margin: 0 0 16px;
   color: var(--muted);
-}
-.hp-method-p {
-  max-width: 64ch;
-  font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.75;
-  color: var(--ink);
-}
-html[lang="ja"] .hp-method-p, html[lang="zh"] .hp-method-p { font-size: 15px; line-height: 1.8; }
-.hp-method-link {
   font-family: var(--mono);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: .1em;
   line-height: 1.5;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+}
+.hp-provenance-intro > h2 {
+  margin: 0 0 24px;
+  font-family: var(--serif);
+  font-size: clamp(36px, 4vw, 56px);
+  line-height: 1.15;
+  letter-spacing: -.025em;
+}
+html[lang="ja"] .hp-provenance-intro > h2,
+html[lang="zh"] .hp-provenance-intro > h2 {
+  font-family: var(--ja-sans);
+  font-size: clamp(32px, 3.4vw, 48px);
+  line-height: 1.35;
+}
+html[lang="zh"] .hp-provenance-intro > h2 { font-family: var(--zh-sans); }
+.hp-provenance-lede {
+  max-width: 30ch;
+  margin: 0;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.8;
+}
+html[lang="ja"] .hp-provenance-lede { font-family: var(--ja-sans); }
+html[lang="zh"] .hp-provenance-lede { font-family: var(--zh-sans); }
+.hp-sources summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 44px;
   color: var(--accent-ink);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  list-style: none;
+}
+.hp-sources summary::-webkit-details-marker { display: none; }
+.hp-sources summary::after { content: "×"; flex: none; font: 20px/24px var(--mono); }
+.hp-sources:not([open]) summary::after { content: "+"; }
+.hp-sources-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 32px;
+  padding: 16px 0 24px;
+}
+.hp-source-item { min-width: 0; overflow-wrap: anywhere; }
+.hp-source-item h3 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.hp-source-item h3 > span:first-child { flex: none; }
+.hp-source-item h3 > span[aria-hidden] { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.hp-source-item h3 a { color: var(--ink); font-size: 12px; text-decoration: none; }
+.hp-source-item h3 a:hover { color: var(--accent-ink); }
+.hp-source-item p, .hp-definitions p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.hp-definitions { padding-top: 8px; }
+.hp-definitions h3 { margin: 0 0 16px; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .1em; }
+.hp-definitions p + p { margin-top: 4px; color: var(--ink); }
+.hp-statement {
+  padding-block: 64px 40px;
+}
+.hp-statement h1 {
+  max-width: 100%;
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(38px, 5.3vw, 78px);
+  line-height: 1.12;
+  letter-spacing: -.035em;
   white-space: nowrap;
 }
-html[lang="ja"] .hp-method-link, html[lang="zh"] .hp-method-link {
+html[lang="ja"] .hp-statement h1, html[lang="zh"] .hp-statement h1 {
   font-family: var(--ja-sans);
-  font-size: 12px;
-  letter-spacing: 0;
+  font-size: clamp(38px, 5vw, 72px);
+  line-height: 1.25;
+  letter-spacing: -.035em;
 }
+html[lang="zh"] .hp-statement h1 { font-family: var(--zh-sans); }
+.hp-statement h1 em { color: var(--accent); font-style: normal; }
 
-.hp a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+/* The selected ending carries chapter links in provenance, not twice in the footer. */
+.hp-foot { padding-block: 48px 40px; }
+.hp-foot .foot-in { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.hp-foot .foot-top { flex: none; margin: 0; }
+.hp-foot .foot-top .wordmark { margin: 0; }
+.hp-foot .foot-bottom { justify-content: flex-end; margin: 0; text-align: right; }
+
+.hp a:focus-visible, .hp-sources summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+/* The global title policy intentionally does not reach this editorial pair. */
+html[lang="en"] .hp-statement h1,
+html[lang="en"] .hp-provenance-intro > h2 { font-family: var(--serif) !important; font-weight: 400 !important; }
+html[lang="ja"] .hp-statement h1,
+html[lang="ja"] .hp-provenance-intro > h2 { font-family: var(--ja-sans) !important; font-weight: 300 !important; }
+html[lang="zh"] .hp-statement h1,
+html[lang="zh"] .hp-provenance-intro > h2 { font-family: var(--zh-sans) !important; font-weight: 300 !important; }
 
 @media (max-width: 1000px) {
-  .hp-scales { grid-template-columns: 1fr; gap: 14px; }
-  .hp-scales h1 { max-width: 15ch; }
-  html[lang="ja"] .hp-scales h1, html[lang="zh"] .hp-scales h1 { max-width: 13em; }
+  .hp-provenance-panel { grid-template-columns: 1fr; gap: 32px; }
+  .hp-provenance-lede { max-width: 46ch; }
+  .hp-sources-list { grid-template-columns: 1fr; }
   .hp-band { grid-template-columns: 1fr; }
   .hp-entry {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
@@ -338,17 +355,22 @@ html[lang="ja"] .hp-method-link, html[lang="zh"] .hp-method-link {
     margin: 0;
   }
   .hp-entry-body { grid-area: body; align-self: end; }
-  .hp-method { grid-template-columns: 1fr; gap: 13px; }
 }
 
 @media (max-width: 640px) {
-  .hp-scales { margin-top: 20px; padding-top: 16px; }
-  .hp-scales h1 { font-size: clamp(28px, 7.6vw, 38px); line-height: 1.2; }
-  html[lang="ja"] .hp-scales h1, html[lang="zh"] .hp-scales h1 {
-    font-size: clamp(26px, 7.2vw, 34px);
-    line-height: 1.28;
-  }
-  .hp-scales-lede { font-size: 15px; line-height: 1.9; }
+  .hp-statement { padding-block: 48px 32px; }
+  .hp-statement h1 { font-size: clamp(22px, 6.4vw, 38px); }
+  html[lang="ja"] .hp-statement h1 { font-size: clamp(20px, 6.7vw, 34px); }
+  html[lang="zh"] .hp-statement h1 { font-size: clamp(24px, 8.2vw, 44px); }
+  .hp-provenance { padding-top: 48px; }
+  .hp-provenance-panel { padding: 24px; }
+  .hp-sources-list { grid-template-columns: 1fr; }
+  .hp-provenance-intro > h2 { font-size: 40px; }
+  html[lang="ja"] .hp-provenance-intro > h2,
+  html[lang="zh"] .hp-provenance-intro > h2 { font-size: 34px; }
+  .hp-foot { padding-block: 40px 32px; }
+  .hp-foot .foot-in { align-items: flex-start; flex-direction: column; gap: 24px; }
+  .hp-foot .foot-bottom { justify-content: flex-start; text-align: left; }
   .hp-entry {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
@@ -364,7 +386,6 @@ html[lang="ja"] .hp-method-link, html[lang="zh"] .hp-method-link {
   .hp-count b { font-size: 46px; }
   .hp-claim { font-size: 13px; min-height: 0; }
   .hp-entry-foot { gap: 8px; }
-  .hp-method { padding-block: 32px; }
 }
 
 @media (max-width: 380px) {
