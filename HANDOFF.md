@@ -3,21 +3,21 @@
 ## Current
 
 - Production source: `F:/projects/panout-japan`; GitHub `ouuut/panout-japan`, Gitea mirror. Brand/domain: `japan.ouuut.com`.
-- Local milestone, 2026-10-25: C+A homepage closing now carries an integrated author signature inside `.hp-statement` (after the single H1), plus a five-second animated masthead wordmark shared by all five pages.
+- Local milestone, 2026-10-25: C+A homepage closing carries an integrated author signature inside `.hp-statement` (after the single H1), plus a twelve-second animated masthead wordmark shared by all five pages.
 - Author content: 中本蔡 / NAKAMOTO SAI; public bio: a Shanghai-born, Tokyo-based Chinese-language writer and independent AI creator. Links: `https://ouuut.com/` labelled independent projects, `https://saaaai.com/` neutrally labelled main site (live browser title is セイシン株式会社｜AIプロダクト・スタジオ, so it is not called a personal homepage), `mailto:sai@saaaai.com`, `https://x.com/saaaaicom`. No age, visa, family or other private biography.
-- Masthead: accessible link name remains `japan.ouuut.com`. Visual layers alternate every 5000ms: domain glyphs appear left-to-right and fade, then `六种尺度看日本` does the same, then the domain returns. Pure CSS, opacity only; the stage reserves the old wordmark width. Reduced motion and no-JS show the static domain. The footer wordmark is static.
+- Masthead: accessible link name remains `japan.ouuut.com`. Every 12000ms: the domain appears left-to-right, holds fully visible for about 3s, then fades; the active UI language's logo appears, holds about 3s, fades, and returns to the domain. Localized phrases: JA 六つの尺度で見る, ZH 六种尺度看日本, EN Six scales of Japan. JA/ZH weight 250 matches `.hp-verb`「抬头看」; EN uses the serif at 400. Only the active language layer is shown. Pure CSS, opacity only; the stage reserves the old wordmark width. Reduced motion and no-JS show the static domain. The footer wordmark is static.
 - `site/` is generated and never edited directly. Local preview: `http://127.0.0.1:8900/?lang=zh`. Old four-option lab: `F:/archive/20261025-ca-hybrid-panout/`. Pre-author backups and domain-card snapshots: `F:/archive/20261025-author-wordmark-panout/`.
 - No production deployment or remote push has been made for this change.
 
 ## Commands run
 
-- `python src/build.py` → 5 pages, CSS `3eba3c3c`, JS `664b7e9d`, fonts `d7a1a926`, charset 2192.
+- `python src/build.py` → 5 pages, CSS `3e4312e1`, JS `664b7e9d`, fonts `0d7289d9`, charset 2192.
 - `python -m py_compile src/build.py`, `node --check src/shell.js`, design-lock JSON parse, `git diff --check` → passed.
 - Headed ego-browser, 27 width/language combinations (1440/1280/1000/768/640/390/375/360/320 × JA/ZH/EN): zero failures; one statement line, one H1, six cards, four chapter links, four source links, no document/body overflow, all author links inside their column.
-- Frozen animation sampling: duration 5000ms; domain visible glyphs 0 at 0ms, 15 at 650ms, 0 at 2450ms; CJK 7 at 3000ms, 0 at 4800ms, 0 at 5000ms; tools shift 0px, wordmark width shift 0px.
+- Frozen animation sampling at 100ms: duration 12000ms; domain fully visible 1200–4100ms; ZH/JA phrase 7100–10400ms; EN phrase 7300–10400ms; no overlap; tools and wordmark width shift 0px. Exactly one localized layer is visible in each language; visible weights are 250 JA/ZH and 400 EN, matching `.hp-verb`. Ten page/width checks and three live language clicks passed.
 - Shared masthead checked on `/`, `/quake/`, `/crime/`, `/cabinet/`, `/housing/` at 1440/768/390: 15 combinations, zero failures. Reduced-motion and JavaScript-disabled: static domain visible, stage hidden, no animation. Actual mobile EN→ZH switch passed.
 - Contrast after theme transition: sage minimum 5.3:1, dark minimum 6.74:1. 320px: no horizontal overflow. Contact destinations returned 200 for ouuut.com, saaaai.com and x.com/saaaaicom.
-- Evidence: `F:/projects/panout-japan/.review/author-wordmark/report.json` and screenshots alongside it.
+- Evidence: `F:/projects/panout-japan/.review/author-wordmark/report.json` for the author block and `F:/projects/panout-japan/.review/wordmark-tuning/report.json` for the current localized twelve-second cycle; screenshots alongside both.
 - Independent review, first pass: no implementation defect; it flagged the stale `saaaai.com` personal-homepage label. Cache-disabled browser check confirmed the live title is「セイシン株式会社｜AIプロダクト・スタジオ」with visible H1 `nakamoto sai`. Commit `92811f4` changes the label to 主站 / Main site / メインサイト and makes the Shanghai-born detail consistent across all three bios.
 - Independent review, second pass on `92811f4`: no defects. It verified nine 320/390/1440 × JA/ZH/EN combinations, four correct destinations, one H1 with the author block after it, no overflow, no animation regression, and served asset hashes CSS `3eba3c3c`, JS `664b7e9d`, fonts `d7a1a926`.
 
@@ -28,11 +28,11 @@
 
 ## Next safe action
 
-- Both independent reviews are complete and the second pass on `92811f4` found no defects. The only remaining action is user approval before deployment. Do not publish merely because the local page is ready.
+- User requested slower holds, lighter JA/ZH type, and a separate logo for each language. The localized 12s cycle and hold windows are implemented and measured locally. A third read-only review is pending; then the only remaining action is user approval before deployment. Do not publish merely because the local page is ready.
 
 ## Rollback
 
-- Last known good before this round: commit `58abed1`. Revert the source/doc commit and rebuild `python src/build.py`; `site/` is generated.
+- Last known good before this localized-motion round: commit `9bbbcbd`. Revert the source/doc commit and rebuild `python src/build.py`; `site/` is generated.
 - Previous handoff and domain cards: `F:/archive/20261025-author-wordmark-panout/`. Previous closing implementation backup: `F:/archive/20261025-ca-hybrid-panout/`.
 
 ## Confidence

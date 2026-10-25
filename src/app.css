@@ -472,35 +472,58 @@ html[lang="zh"] .foot, html[lang="zh"] .pager {
 .wordmark .wm-main { font-size: 1em; letter-spacing: -.015em; }
 .wordmark .wm-tld { font-size: 1em; letter-spacing: -.015em; font-weight: 800; }
 
-/* Shared five-second wordmark cycle: plain text stays the accessible name.
-   Absolute layers reserve the old link's width; no script or layout animation. */
+/* Shared twelve-second wordmark cycle: plain text stays the accessible name.
+   Both phrases hold fully visible for about three seconds. Only opacity moves;
+   absolute layers reserve the old link's width, so controls never shift. */
 .wordmark-cycle { position: relative; }
 .wordmark-cycle .wm-static { display: inline-flex; align-items: baseline; }
 .wordmark-cycle .wm-stage { display: none; position: absolute; inset: 0; pointer-events: none; }
 .wm-cycle { position: absolute; inset: 0 auto auto 0; display: flex; align-items: baseline; height: 100%; }
 .wm-cycle > span { opacity: 0; }
-.wm-cjk {
+.wm-phrase { display: none; font-weight: 250; }
+.wm-phrase-ja {
   font-family: var(--ja-sans);
+  font-size: .72em;
+  letter-spacing: .02em;
+}
+.wm-phrase-zh {
+  font-family: var(--zh-sans);
   font-size: .86em;
-  font-weight: 500;
   letter-spacing: .035em;
 }
-html[lang="zh"] .wm-cjk { font-family: var(--zh-sans); }
+.wm-phrase-en {
+  font-family: var(--serif);
+  font-size: .72em;
+  font-weight: 400;
+  letter-spacing: -.01em;
+}
+html[lang="ja"] .wm-phrase-ja,
+html[lang="zh"] .wm-phrase-zh,
+html[lang="en"] .wm-phrase-en { display: flex; }
 @media (prefers-reduced-motion: no-preference) {
   html.js .wordmark-cycle .wm-static { opacity: 0; }
   html.js .wordmark-cycle .wm-stage { display: block; }
-  .wm-domain { animation: wm-domain-window 5s linear infinite; }
-  .wm-cjk { animation: wm-cjk-window 5s linear infinite; }
+  .wm-domain { animation: wm-domain-window 12s linear infinite; }
+  .wm-phrase { animation: wm-cjk-window 12s linear infinite; }
   .wm-cycle > span {
-    animation: wm-letter-cycle 5s cubic-bezier(.4, 0, .2, 1) infinite;
-    animation-delay: calc(var(--i) * .028s - 5s);
+    animation: wm-domain-letter 12s cubic-bezier(.4, 0, .2, 1) infinite;
+    animation-delay: calc(var(--i) * .065s - 12s);
   }
-  .wm-cjk > span { animation-delay: calc(2.5s + var(--i) * .05s - 5s); }
+  .wm-phrase > span {
+    animation-name: wm-cjk-letter;
+    animation-delay: calc(6s + var(--i) * .04s - 12s);
+  }
+  .wm-phrase-en > span { animation-delay: calc(6s + var(--i) * .026s - 12s); }
 }
-@keyframes wm-letter-cycle {
+@keyframes wm-domain-letter {
   0% { opacity: 0; }
-  5%, 33% { opacity: 1; }
-  40%, 100% { opacity: 0; }
+  2%, 33.75% { opacity: 1; }
+  41.25%, 100% { opacity: 0; }
+}
+@keyframes wm-cjk-letter {
+  0% { opacity: 0; }
+  7.5%, 36.75% { opacity: 1; }
+  45.25%, 100% { opacity: 0; }
 }
 @keyframes wm-domain-window {
   0%, 49% { opacity: 1; }

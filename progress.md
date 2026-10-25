@@ -555,3 +555,11 @@
 - 证据 `.review/author-wordmark/report.json` 与 screenshots（`final-1440-desktop-domain/cjk`、`final-390-mobile-cjk`、`final-1440-bottom`、`final-390-bottom`、`final-1440-dark-bottom`、`final-320-bottom`）。构建 5 页，CSS `86ad3e34`，fonts `f2d2c9ae`，charset 2193；`py_compile`、`node --check`、design-lock JSON、`git diff --check` 通过。仅本地，未部署、未 push。
 - 已提交 `beda6f0 home: add author signature and animated wordmark`；`AuthorWordmarkReview` 独立复核未发现实现缺陷，但指出 `saaaai.com` 落地页并非纯个人主页。亲自用浏览器 + 禁缓存复核：title「セイシン株式会社｜AIプロダクト・スタジオ」、H1 `nakamoto sai`、含会社概要；`llms.txt` 仍自称个人主页。按一手现状把标签从「个人主页」改为中性「主站 / Main site」，日英简介补上与中文一致的「上海出身」，避免把过期记忆当现状。修正提交 `92811f4 home: correct saaaai site label`，重建 CSS `3eba3c3c`、fonts `d7a1a926`、charset 2192。
 - `SaaaaiLabelReview` 第二轮独立复核：**未发现缺陷**。实测三语标签为 主站/メインサイト/Main site，日英简介含上海出身，9 组 320/390/1440 无越界，4 个入口 href 正确，`.hp-author` 仍位于单 H1 之后；补丁未触及动效，减少动效与静态 HTML 回退保留，发行资源哈希与交接一致。`.review/author-wordmark/report.json` 的 `correction.failures=[]`。仅本地，未部署、未 push。
+
+## 2026-10-25 · 字标减速、字重与三语 LOGO
+
+- 用户反馈：中文字标太粗，应与卡片「抬头看」同字重；动画太快，网址完整后要停几秒，再滚出文字，文字完整后再停几秒；并且三种语言要有三个 LOGO。
+- 实测卡片中文 `.hp-verb` 为 250、中文字标原为 500；改为 250。日文 LOGO 也 250；英文按英文卡片字重使用衬线 400。三语版本分别为「六つの尺度で見る」「六种尺度看日本」「Six scales of Japan」，各自独立动画层，只显示当前 `html[lang]` 对应版本。
+- 周期改为 12000ms。100ms 冻结采样：网址完整 1200–4100ms（3.0s）；日中 LOGO 完整 7100–10400ms（3.4s）；英文 7300–10400ms（3.2s）；两串无重叠。所有动画 duration=12000ms，工具与字标宽度位移 0。
+- 验证中修出两处真实缺口：中文渐隐关键帧原落到父层切换之后，已压回自身半周期；三语层漏了公共 `.wm-phrase` 类导致三版同时显示，已补齐并重建。
+- 9 组 320/390/1440 × 三语无溢出，可见 LOGO 宽度均在原字标舞台内；五页 × 两宽度共享顶栏 10 组无失败；实际点击 EN/ZH/JA 均立即切换为对应 LOGO；减少动效与禁 JS 仍固定显示静态域名。构建 CSS `3e4312e1`、fonts `0d7289d9`、charset 2192。证据 `.review/wordmark-tuning/report.json` 与六张三语桌面/手机截图。仅本地，未部署、未 push；独立复核待派。
