@@ -457,9 +457,11 @@ COPY = {
     "crumb.home": ("表紙", "封面", "Cover"),
 
     "cover.title": ("日本を、<br><em>六つの尺度</em>で見る。", "用<em>六种尺度</em>,<br>看日本。", "Japan, at<br><em>six scales</em>."),
-    "cover.lede": ("同じ国土を、六つの尺度で測る。",
-                   "同一片国土，六种尺度。",
-                   "One land, measured at six scales."),
+    # The statement sentence is composed from the cards' own verbs and topics;
+    # these three keys carry only its punctuation, per language.
+    "cover.sep.term": ("", "", " · "),
+    "cover.sep.clause": ("、", "，", ", "),
+    "cover.sep.end": ("。", "。", "."),
     "cover.cta": ("六つの尺度へ", "进入六个尺度", "Enter the six scales"),
     "cover.method": ("方法と出典", "方法与来源", "Method & sources"),
     "cover.section.eyebrow": ("SIX SCALES / 六つの尺度", "SIX SCALES / 六个尺度", "SIX SCALES / SIX PLATES"),
@@ -470,12 +472,10 @@ COPY = {
     "ui.theme.sage": ("Sage", "浅色", "Sage"),
     "ui.theme.dark": ("Dark", "深色", "Dark"),
     "prod.open": ("開く", "打开", "Open"),
-    "cover.scale.weather": ("全国 · 47地点", "全国 · 47地点", "Nationwide · 47 cities"),
     "cover.scale.quake": ("列島 · 27年", "列岛 · 27年", "Archipelago · 27 yrs"),
     "cover.scale.crime": ("東京 · 62区市町村", "东京 · 62区市町村", "Tokyo · 62 wards"),
     "cover.scale.cabinet": ("内閣 · 14", "内阁 · 14", "Cabinets · 14"),
     "cover.scale.housing": ("住宅 · 23区", "住宅 · 23区", "Housing · 23 wards"),
-    "cover.scale.news": ("各社 · 24時間", "各社 · 24小时", "All papers · 24h"),
     "card.quake.unit": ("M4+ 震源 / 27年", "M4+ 震源 / 27年", "M4+ events / 27 yrs"),
     "card.quake.title": ("引いて見る", "拉远看", "Pull back"),
     "card.quake.claim": (f"2011年は回数で{PCT_2011_N}%、エネルギーで{PCT_2011_E}%。",
@@ -906,32 +906,25 @@ def build_home_preview():
         else:
             entries.append(f'<div class="hp-entry hp-entry-soon">\n{card}\n</div>')
 
-    scale_keys = {
-        "weather": "cover.scale.weather",
-        "quake": "cover.scale.quake",
-        "crime": "cover.scale.crime",
-        "cabinet": "cover.scale.cabinet",
-        "housing": "cover.scale.housing",
-        "news": "cover.scale.news",
-    }
-    scales = []
-    for key, num, href, verb, topic, count, unit, claim, source, svg in rows:
-        s = scale_keys[key]
-        scales.append(f'<li><span class="hp-scale-name" data-t="{verb}">{ja(verb)}</span>'
-                      f'<span class="hp-scale-n" data-t="{s}">{ja(s)}</span></li>')
+    # The page's statement under the band: one clause per plate, each the card's
+    # own verb plus what that scale covers. The separators are real text with
+    # their own keys so the sentence breaks and reads correctly in every
+    # language (English needs " · " between the two terms, CJK does not).
+    clauses = [
+        f'<span class="hp-clause"><span class="hp-v" data-t="{verb}">{ja(verb)}</span>'
+        f'<span data-t="cover.sep.term">{ja("cover.sep.term")}</span>'
+        f'<span class="hp-n" data-t="{topic}">{ja(topic)}</span></span>'
+        for key, num, href, verb, topic, count, unit, claim, source, svg in rows]
+    sep = f'<span data-t="cover.sep.clause">{ja("cover.sep.clause")}</span>'
+    clause_html = sep.join(clauses) + f'<span data-t="cover.sep.end">{ja("cover.sep.end")}</span>'
 
     body = f"""<main id="main" class="hp">
 <section class="wrap hp-band" aria-label="Chapters">
 {''.join(entries)}
 </section>
-<section class="wrap hp-scales" aria-label="Scales">
-<div class="hp-scales-row">
+<section class="wrap hp-scales">
 <h1 data-t="cover.title">{ja('cover.title')}</h1>
-<p class="hp-scales-note" data-t="cover.lede">{ja('cover.lede')}</p>
-</div>
-<ol class="hp-scale-list">
-{''.join(scales)}
-</ol>
+<p class="hp-scales-lede">{clause_html}</p>
 </section>
 <section class="wrap hp-method">
 <p class="hp-method-k">METHOD / SOURCES</p>
