@@ -11,10 +11,11 @@
 
 ## Commands run
 
-- `python src/build.py` → 5 pages, CSS `3e4312e1`, JS `664b7e9d`, fonts `0d7289d9`, charset 2192.
+- `python src/build.py` → 5 pages, CSS `2e8c308d`, JS `664b7e9d`, fonts `1ae3f06e`, charset 2192.
 - `python -m py_compile src/build.py`, `node --check src/shell.js`, design-lock JSON parse, `git diff --check` → passed.
 - Headed ego-browser, 27 width/language combinations (1440/1280/1000/768/640/390/375/360/320 × JA/ZH/EN): zero failures; one statement line, one H1, six cards, four chapter links, four source links, no document/body overflow, all author links inside their column.
-- Frozen animation sampling at 100ms: duration 12000ms; domain fully visible 1200–4100ms; ZH/JA phrase 7100–10400ms; EN phrase 7300–10400ms; no overlap; tools and wordmark width shift 0px. Exactly one localized layer is visible in each language; visible weights are 250 JA/ZH and 400 EN, matching `.hp-verb`. Ten page/width checks and three live language clicks passed.
+- Frozen animation sampling at 100ms: duration 12000ms; domain fully visible 1200–4100ms; ZH/JA phrase 7100–10400ms; EN phrase 7300–10400ms; no overlap; tools and wordmark width shift 0px. Exactly one localized layer is visible in each language; visible weights are 250 JA/ZH and 400 EN, matching `.hp-verb`. Ten page/width checks passed.
+- Live EN/ZH/JA switches keep all phrase layers on the same timeline through `visibility` (not `display`): measured phase drift 0–14ms, and a full-cycle sample after each switch had zero frames with domain and phrase visible together.
 - Shared masthead checked on `/`, `/quake/`, `/crime/`, `/cabinet/`, `/housing/` at 1440/768/390: 15 combinations, zero failures. Reduced-motion and JavaScript-disabled: static domain visible, stage hidden, no animation. Actual mobile EN→ZH switch passed.
 - Contrast after theme transition: sage minimum 5.3:1, dark minimum 6.74:1. 320px: no horizontal overflow. Contact destinations returned 200 for ouuut.com, saaaai.com and x.com/saaaaicom.
 - Evidence: `F:/projects/panout-japan/.review/author-wordmark/report.json` for the author block and `F:/projects/panout-japan/.review/wordmark-tuning/report.json` for the current localized twelve-second cycle; screenshots alongside both.

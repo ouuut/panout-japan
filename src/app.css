@@ -480,7 +480,9 @@ html[lang="zh"] .foot, html[lang="zh"] .pager {
 .wordmark-cycle .wm-stage { display: none; position: absolute; inset: 0; pointer-events: none; }
 .wm-cycle { position: absolute; inset: 0 auto auto 0; display: flex; align-items: baseline; height: 100%; }
 .wm-cycle > span { opacity: 0; }
-.wm-phrase { display: none; font-weight: 250; }
+/* Keep every language layer animating; visibility only controls which is seen,
+   so a language switch never restarts that layer's 12s phase. */
+.wm-phrase { display: flex; visibility: hidden; font-weight: 250; }
 .wm-phrase-ja {
   font-family: var(--ja-sans);
   font-size: .72em;
@@ -499,7 +501,7 @@ html[lang="zh"] .foot, html[lang="zh"] .pager {
 }
 html[lang="ja"] .wm-phrase-ja,
 html[lang="zh"] .wm-phrase-zh,
-html[lang="en"] .wm-phrase-en { display: flex; }
+html[lang="en"] .wm-phrase-en { visibility: visible; }
 @media (prefers-reduced-motion: no-preference) {
   html.js .wordmark-cycle .wm-static { opacity: 0; }
   html.js .wordmark-cycle .wm-stage { display: block; }
