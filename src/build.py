@@ -860,11 +860,11 @@ def pager(prev_href, prev_label, next_href, next_label):
 
 # ---------------------------------------------------------------- pages
 def build_home_preview():
-    """Cover: six plates, three across, then the six scales as a ledger below
-    them — headline, its closing line, and one cell per plate naming the scale
-    and the measure it covers. Four plates are live chapters (each a link); the
-    weather and news plates are previews — they carry「予告」instead of「開く」
-    and their feeds are not connected yet."""
+    """Cover: six plates, three across, then the page's own statement below them
+    — the h1 and one sentence built from the plates' own verbs and topics. Four
+    plates are live chapters (each a link); the weather and news plates are
+    previews — they carry「予告」instead of「開く」and their feeds are not
+    connected yet."""
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
 
     # key, num, href (None = preview plate), verb, topic, count, unit, claim, source, plate

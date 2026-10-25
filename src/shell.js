@@ -34,7 +34,7 @@
     var els = document.querySelectorAll('[data-t]');
     for (var j = 0; j < els.length; j++) {
       var v = dic[els[j].dataset.t];
-      if (v && v[l]) els[j].innerHTML = v[l];
+      if (v && typeof v[l] === 'string') els[j].innerHTML = v[l];
     }
   }
 
