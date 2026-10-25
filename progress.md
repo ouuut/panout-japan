@@ -542,3 +542,4 @@
 - 有头 ego-browser 实测：9 宽度 × 3 语言共 27 组，单行、溢出、六卡四链、出典四链、单 H1 均通过；键盘关闭/展开真实可见性正确，手机 EN/ZH 实际切换、深色高亮、禁 JS 静态 JA 出典可读；错误 0。证据 `.review/ca-hybrid/report.json` 与同目录 screenshots。未宣称全站 axe/跨浏览器/线上通过。
 - 四方案对照台已移入 `F:/archive/20261025-ca-hybrid-panout/closing-options/`；核心文件、旧首页与交接文档备份在同目录。设计锁、README 已更新。C＋A 设计决策已写 retain，doc `a3c64fb2`。
 - 独立只读核验待派；本轮仅本地，未部署、未 push。
+- 已提交 `310cb97 home: combine C provenance with A closing statement`，并派 `ClosingHybridReview` 只读核验；源码冻结等待结果。
