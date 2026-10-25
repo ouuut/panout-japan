@@ -261,5 +261,18 @@
     "toolbarRight": 390.22222900390625,
     "burgerVisible": true
   },
-  "errors": []
+  "errors": [],
+  "mobileFidelity": {
+    "frameWidth": 390,
+    "clientWidth": 390,
+    "scrollWidth": 390,
+    "wrapPadding": "20px",
+    "baselineTitle": "28.08px",
+    "realViewport": 390,
+    "realWrapPadding": "20px",
+    "realBaselineTitle": "28.0958px",
+    "menuAlignedToFrame": true,
+    "wordmarkOverflow": 0,
+    "menuLanguageSwitch": "en"
+  }
 }

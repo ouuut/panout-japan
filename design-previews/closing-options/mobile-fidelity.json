@@ -1,0 +1,25 @@
+{
+  "framed": {
+    "frameWidth": 390,
+    "clientWidth": 390,
+    "scrollWidth": 390,
+    "wrapPadding": "20px",
+    "baselineTitle": "28.08px",
+    "brand": "japan.ouuut.com",
+    "brandOverflow": 0
+  },
+  "menu": {
+    "frameLeft": 525,
+    "frameRight": 915,
+    "menuLeft": 525,
+    "menuRight": 915,
+    "expanded": "true"
+  },
+  "lang": "en",
+  "real": {
+    "viewport": 390,
+    "clientWidth": 390,
+    "wrapPadding": "20px",
+    "baselineTitle": "28.0958px"
+  }
+}

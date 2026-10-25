@@ -50,13 +50,16 @@
   min-height: 480px;
   overflow-x: clip;
   overflow-y: auto;
+  scrollbar-width: none;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent);
 }
+.lab-viewport.is-mobile::-webkit-scrollbar { display: none; }
+.lab-viewport.is-mobile .wrap { padding-inline: 20px; }
 .lab-viewport.is-mobile > .masthead { position: sticky; top: 0; }
 .lab-viewport.is-mobile .mobile-menu {
   position: absolute;
   top: 64px;
-  right: 15px;
+  right: 0;
   bottom: auto;
   left: 0;
   height: calc(100% - 64px);
@@ -296,8 +299,8 @@ html[lang="zh"] .lab-design .oc-d-title {
 }
 @container home (max-width: 640px) {
   .lab-viewport .hp-scales { margin-top: 20px; padding-top: 16px; }
-  .lab-viewport .hp-scales h1 { font-size: clamp(28px, 7.6vw, 38px); line-height: 1.2; }
-  html[lang="ja"] .lab-viewport .hp-scales h1, html[lang="zh"] .lab-viewport .hp-scales h1 { font-size: 28px; line-height: 1.28; }
+  .lab-viewport .hp-scales h1 { font-size: clamp(28px, 7.6cqw, 38px); line-height: 1.2; }
+  html[lang="ja"] .lab-viewport .hp-scales h1, html[lang="zh"] .lab-viewport .hp-scales h1 { font-size: clamp(26px, 7.2cqw, 34px); line-height: 1.28; }
   .lab-viewport .hp-scales-lede { font-size: 15px; line-height: 1.9; }
   .lab-viewport .hp-entry { grid-template-columns: 1fr; grid-template-rows: auto auto auto; grid-template-areas: "head" "visual" "body"; gap: 10px; padding: 16px; }
   .lab-viewport .hp-entry-visual { aspect-ratio: 1000 / 680; height: auto; min-height: 0; }
