@@ -595,4 +595,4 @@
 - 线上性能探针（390px，禁缓存）：LCP 240ms、CLS 0、1 个 133ms long task、无溢出。未重跑 Lighthouse（本机无 Chrome 安装），不把该探针冒充 Lighthouse。
 - 监控：既有 vps-jp `panout_watch.py` 仍检查首页标记、robots/sitemap/llms/TLS；其 `panout-japan-watch/1.0` UA 对生产返回 200。Kuma id53 / 每小时第 23 分钟不变。
 - 备份：`F:/archive/20261026-125659-panout-weather/`（旧 `build.py`、`shell.js`、README/HANDOFF/CHECKLIST/progress/TRACK_TREE、旧 `site/index.html`、headers/redirects/sitemap/llms、Cloudflare 旧部署元数据）。旧生产 `b9b0c617` 为回滚点。
-- 未做：天气快照刷新/定时任务未接；天气页 Lighthouse 未重跑；新闻仍为预告。源码提交 `692d5e9`，文档收口提交随后，双远端推送对账后更新。
+- 未做：天气快照刷新/定时任务未接；天气页 Lighthouse 未重跑；新闻仍为预告。源码提交 `692d5e9`，文档收口提交紧随其后；双远端推送并 fetch 对账 0/0。
