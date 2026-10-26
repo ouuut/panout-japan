@@ -596,3 +596,14 @@
 - 监控：既有 vps-jp `panout_watch.py` 仍检查首页标记、robots/sitemap/llms/TLS；其 `panout-japan-watch/1.0` UA 对生产返回 200。Kuma id53 / 每小时第 23 分钟不变。
 - 备份：`F:/archive/20261026-125659-panout-weather/`（旧 `build.py`、`shell.js`、README/HANDOFF/CHECKLIST/progress/TRACK_TREE、旧 `site/index.html`、headers/redirects/sitemap/llms、Cloudflare 旧部署元数据）。旧生产 `b9b0c617` 为回滚点。
 - 未做：天气快照刷新/定时任务未接；天气页 Lighthouse 未重跑；新闻仍为预告。源码提交 `692d5e9`，文档收口提交紧随其后；双远端推送并 fetch 对账 0/0。
+
+## 2026-10-26 · 天气快照日更上线
+
+- 用户把时间与执行方式全部交给我判断。选定 06:10 JST：使用 JMA 05:00 短时预报，早上打开页面看到的是当天预报；05:00 产品不发布今日最低气温，`todayLow` 继续为 `null`，这是官方数据缺口。
+- 新增生产数据模块 `tools/weather_data.py`（只抓 95 个 JMA 资源，不重抓 Natural Earth、不重算 `geo.js`）与编排 `tools/refresh_weather.py`：抓取 → 47 县校验 → 写候选 → 全量构建 → 本地产物校验 → Cloudflare Pages 部署 → 线上复核 → 双远端提交；失败保留旧快照，部署后复核失败尝试回滚上一部署。
+- 新增 `deploy/systemd/panout-weather-refresh.{service,timer}` 与 `tools/panout_weather_refresh.sh`；VPS `vps-jp` 安装 systemd user timer，06:10 JST、`Persistent=true`、flock 防重入。VPS 字体源一次性同步到 `/home/ubuntu/panout-fonts/` 与仓库 `.cache/fonts`；`src/fonts.py` 支持 `PANOUT_LATIN_FONTS` / `PANOUT_SC_FONTS` / `PANOUT_OUTFIT_FONT` 环境变量。VPS 安装 `python3-shapely` 以支持全量构建的首页 SVG 裁剪。
+- 凭据：VPS `~/.config/panout/weather.env`（600）保存 Cloudflare Pages token/account 与字体路径；GitHub 使用仓库 deploy key `vps-jp weather refresh deploy key`（write），Gitea 走既有 SSH。没有把 token 写进仓库。
+- 首次手动生产 run：`bash tools/panout_weather_refresh.sh --force`，JMA 95 资源、47 县、`generatedAt 2026-10-26T04:36:11Z`（11:00 JST 产品）；VPS 构建 6 页、CSS `a5806f8d`、JS `54848846`、fonts `314fe557`、charset 2243、weather `abac1865`；部署 `ca2cf008-5a36-4f16-a213-e921e3564d5b`，线上 `generatedAt` 与 47 县复核通过；提交 `ae514e7` 并推送 GitHub/Gitea。第二次无 `--force` run 正确跳过；`systemctl --user start` 也 exit 0。
+- 监控：Kuma 新增 `panout-weather-refresh` id 54，push interval 93600s（26h）、notification 1、token 入 `kuma_tokens.json`、`KUMA_HB` 映射已加；只有部署与线上复核通过后才推 UP。既有 `panout-japan-check` id 53 不变。
+- 线上浏览器（ego-browser）实测：`/weather/?lang=ja` 47 州、47 行、49 个地图点、默认东京 `130000`、`generatedAt 2026-10-26T04:36:11Z`、横向溢出 0、H1「日本の天気」；截图 `.review/weather-lab/live-refresh-1440-ja.png`。
+- 未做：首次自动 06:10 run 要等 2026-10-27；真实回滚未计时；天气页 Lighthouse 未重跑。运行手册 `docs/WEATHER-REFRESH.md`。源码提交 `ae514e7` + `02402f2`，文档收口提交紧随其后。

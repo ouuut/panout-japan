@@ -2,13 +2,13 @@
 
 `japan.ouuut.com` —— 抬头看天气，拉远看地震，凑近看犯罪，拉长看内阁，比着看住宅，追着看话题。同一片国土，六种尺度。
 
-> 状态：**首页 C＋A 收尾、三语 LOGO 与天气章已发布生产**（2026-10-26）。Cloudflare Pages `panout-site` 部署 `1ca63cf9`；六页与五章交互、天气、404、移动端已实测。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
+> 状态：**首页 C＋A 收尾、三语 LOGO、天气章与每日天气刷新已发布生产**（2026-10-26）。Cloudflare Pages `panout-site` 部署 `ca2cf008`；六页与五章交互、天气、404、移动端已实测；VPS 每日 06:10 JST 刷新 JMA 快照。生产根 `F:/projects/panout-japan`，仓 `ouuut/panout-japan`。
 > 命名：**japan.ouuut.com**。域名即品牌，旧字标已退役。
 > 封面:**六块数据板,三列两行**——天气 / 地震 / 犯罪 / 内阁 / 住宅 / 新闻(2026-10-25)。天气 / 地震 / 犯罪 / 内阁 / 住宅五块是链接;新闻是预告板,页脚标「予告」而不是「開く」,数据源未接;六块板底边实测 743–754px(ja/en/zh × 根字号 16/20px),1920×945 与 1440×900 首屏内六块板齐全。六卡以下是用户选定的 **C＋A** 收尾:先为 C「方法与出典」面板(五个真实章节来源、计算口径,原生展开/收起、无 JS 可读),后为 A 的单行大字「六种尺度看日本。」——只有「六种尺度」使用主题重点色,日/英也保留同一单行收尾。大字同一节内接作者落款:中本蔡 / NAKAMOTO SAI、三语简介,以及 ouuut.com(独立项目)、saaaai.com(主站)、邮件与 X。页脚精简为字标、CC BY 4.0、静态生成与日期。旧小标题、方法行和重复章节导航已撤除,六卡本身不改。
 > 顶栏字标每 12 秒一轮:`japan.ouuut.com` 逐字从左出现,完整后停约 3 秒再渐隐;随后按界面语言换成对应 LOGO——日文「六つの尺度で日本を見る」、中文「六种尺度看日本」、英文「Six scales of Japan」——同样显隐并停约 3 秒,再回域名。日/中字标与卡片「抬头看」同为 250 字重;纯 CSS,宽度固定不推挤右侧按钮,减少动态效果与无 JS 时固定显示域名。
-> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，commit `692d5e9`，部署 `1ca63cf9`）。
+> 线上：`https://japan.ouuut.com`（Cloudflare Pages `panout-site`，天气数据 commit `ae514e7`，部署 `ca2cf008`）。
 > 本地预览：`http://127.0.0.1:8900/`（构建后 `cd site && python -m http.server 8900`）；旧 `/preview/` 自动跳到 `/`。
-> 天气：`/weather/` 把気象庁（JMA）的 47 都道府县预报快照做成可交互地图；今日/明日 + 未来 7 天，未发布气温留空，预报值不冒充观测值。数据与运行时在 `src/weather/`，构建产物在 `/assets/weather/`。
+> 天气：`/weather/` 把気象庁（JMA）的 47 都道府县预报快照做成可交互地图；今日/明日 + 未来 7 天，未发布气温留空，预报值不冒充观测值。数据与运行时在 `src/weather/`，构建产物在 `/assets/weather/`。VPS 每天 **06:10 JST** 抓取 95 个 JMA 资源、校验 47 县、重建并部署；失败保留上一快照。运行手册见 `docs/WEATHER-REFRESH.md`。
 > 住宅：`/housing/` 用国土交通省不动产情报图书馆（PDL 1.0）2025Q2–2026Q1 的成約明细，按官方最小定位单位「市区町村 + 町名（地区名）」汇总平均㎡単価：東京全域 1,237 个町上色（1,614 个町多边形，无成交的留白）。数据期间取官方已公布的最新滚动四个季度（2026-10 时为 2025Q2–2026Q1，即 2025 年 4 月–2026 年 3 月），页内工具条徽标、数据卡与 FAQ 均明示。界面与犯罪率章同一套模板（工具栏 / 右侧卡片 / 左下分布仪 / 竖向缩放条）；点选任一区域会平滑飞入该区域（区级 12 级、町级 14 级，手机各降一级）。不筛面积、不算中位数、不做 70㎡ 换算。首页第五块数据板同步上屏。
 
 ## 架构
@@ -56,11 +56,23 @@ npx wrangler pages deploy site --project-name=panout-site --branch=main
 构建产出 `_headers` / `_redirects` / `sitemap.xml` / `robots.txt` / `llms.txt` / `data/*.csv`，
 全部由构建生成，不手改 `site/`。
 
+### 天气日更
+
+生产在 `vps-jp` 用 systemd timer 每天 **06:10 JST** 执行：
+
+```bash
+bash tools/panout_weather_refresh.sh --dry-run      # 只抓取校验
+bash tools/panout_weather_refresh.sh --no-deploy --no-commit
+bash tools/panout_weather_refresh.sh --force        # 手动强制一次
+```
+
+流程为抓取 95 个 JMA 资源 → 校验 47 都道府县 → 写 `src/weather/data.js` → 全量构建 → Cloudflare Pages 部署 → 线上复核 → 双远端提交。失败保留旧快照；运行手册见 `docs/WEATHER-REFRESH.md`。
+
 ## 数据
 
 | 章 | 口径 | 源 |
 |---|---|---|
-| 天气 | 47 都道府县；今天/明天 + 未来 7 天；预报值，不是观测值 | 気象庁（JMA）予報スナップショット |
+| 天气 | 47 都道府县；今天/明天 + 未来 7 天；预报值，不是观测值；每日 06:10 JST 刷新 | 気象庁（JMA）予報スナップショット |
 | 地震 | 27 年（2000–2026.08），M4+，40,145 次；2011 年按次数 14.6% / 按能量 86.2% | USGS ComCat |
 | 犯罪 | 2025 全年，5,234 町丁，中位 4.4‰，最高 1,332‰ | 警視庁 町丁目別犯罪統計 |
 | 内阁 | 14 任 331 个月，644 次调查；最大单月变动 +20.5 | 各社世论调查汇总（NHK/日经/共同/时事/朝日/读卖） |
@@ -73,5 +85,6 @@ npx wrangler pages deploy site --project-name=panout-site --branch=main
 - `progress.md` —— 逐轮流水（只增不改）
 - `F:/archive/20261025-ca-hybrid-panout/closing-options/` —— 已归档的六卡以下四方案历史对照台。用户选定 **C＋A**，正式实现见 `src/build.py` 与 `src/home-preview.css`；本地 `http://127.0.0.1:8900/` 为定稿首页。天气已接入 `/weather/`；新闻仍为预告，后续再接 RSS/编辑流。入口见 `HANDOFF.md`。
 - `MASTER-CHECKLIST.md` —— 发布验收清单
+- `docs/WEATHER-REFRESH.md` —— 天气日更运行手册（systemd、Kuma、失败恢复、回滚）
 - `docs/UPGRADE-DIRECTIONS.md` —— 三个子站的后续升级方向
 - `AGENTS.md` —— 本仓门规（备份、提交、发布）

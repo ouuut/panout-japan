@@ -29,4 +29,5 @@
 ## 发布（网站类，MASTER-CHECKLIST.md 为验收载体）
 
 - 发布前逐项打勾，**A1–A7 任一不过即阻断**。
+- 天气快照由 `vps-jp` 的 `panout-weather-refresh.timer` 每日 06:10 JST 自动刷新、构建、部署并提交双远端；本地改动前先 `git pull --ff-only origin main`，不要手改 `src/weather/data.js` 绕过刷新脚本。运行手册 `docs/WEATHER-REFRESH.md`。
 - 回滚：DNS 下线即回（M0 门面无状态）；老站三域独立不受影响。
