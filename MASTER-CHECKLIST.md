@@ -1,7 +1,7 @@
 # MASTER-CHECKLIST · panout-japan
 
 > 正本：`sai-long-project/references/website-launch-checklist.md`（10 组 59 项）。纯静态 MPA，无后端/账号/支付；A1–A7 任一不过即阻断。
-> 本次发布：2026-10-26，部署 `e16a2b8e-fcc9-4f5b-81d0-c9c744814c16`，源码 `6d37d1b`。证据集中在 `.review/weather-lab/`、`.review/release/` 与 `HANDOFF.md`。
+> 本次发布：2026-10-26，部署 `e16a2b8e-fcc9-4f5b-81d0-c9c744814c16`，源码 `ec09254`。证据集中在 `.review/weather-lab/`、`.review/release/` 与 `HANDOFF.md`。
 > 记号：`[x]` 本次已实测；`[~]` 已明确范围或未完整覆盖；`[ ]` 未执行；`[N/A]` 当前产品不适用。
 
 ## A. 抓取与索引（阻断级）
