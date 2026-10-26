@@ -606,4 +606,4 @@
 - 首次手动生产 run：`bash tools/panout_weather_refresh.sh --force`，JMA 95 资源、47 县、`generatedAt 2026-10-26T04:36:11Z`（11:00 JST 产品）；VPS 构建 6 页、CSS `a5806f8d`、JS `54848846`、fonts `314fe557`、charset 2243、weather `abac1865`；部署 `ca2cf008-5a36-4f16-a213-e921e3564d5b`，线上 `generatedAt` 与 47 县复核通过；提交 `ae514e7` 并推送 GitHub/Gitea。第二次无 `--force` run 正确跳过；`systemctl --user start` 也 exit 0。
 - 监控：Kuma 新增 `panout-weather-refresh` id 54，push interval 93600s（26h）、notification 1、token 入 `kuma_tokens.json`、`KUMA_HB` 映射已加；只有部署与线上复核通过后才推 UP。既有 `panout-japan-check` id 53 不变。
 - 线上浏览器（ego-browser）实测：`/weather/?lang=ja` 47 州、47 行、49 个地图点、默认东京 `130000`、`generatedAt 2026-10-26T04:36:11Z`、横向溢出 0、H1「日本の天気」；截图 `.review/weather-lab/live-refresh-1440-ja.png`。
-- 未做：首次自动 06:10 run 要等 2026-10-27；真实回滚未计时；天气页 Lighthouse 未重跑。运行手册 `docs/WEATHER-REFRESH.md`。源码提交 `ae514e7` + `02402f2`，文档收口提交紧随其后。
+- 未做：首次自动 06:10 run 要等 2026-10-27；真实回滚未计时；天气页 Lighthouse 未重跑。运行手册 `docs/WEATHER-REFRESH.md`。源码提交 `ae514e7` + `02402f2`，文档收口 `1f0d211`；双远端 fetch 对账 0/0。
