@@ -60,7 +60,7 @@
 
 - [~] **G1** GitHub + Gitea + 本地生产根 + Cloudflare 部署留存；RPO=源码提交，RTO=回滚部署。未做全基础设施 3-2-1 灾备审计。
 - [x] **G2** 从源码完整重建六页与资源并在本地预览实测。
-- [x] **G3** Kuma id 53 + TG + 每小时首页/robots/sitemap/llms/TLS 探针已接，最新 UP；首发缺少 JSON-LD 的真实故障已被捕获并恢复。
+- [x] **G3** Kuma id 53 + TG + 每小时首页/robots/sitemap/llms/TLS 探针已接；部署后手动跑 exit 0、心跳 13:14 JST，首发缺少 JSON-LD 的真实故障已被捕获并恢复。
 - [~] **G4** 静态站 CDN 日志与探针日志；未新增 Sentry/RUM。
 - [~] **G5** 本地完整构建、预览、生产冒烟完成；未做真实生产回滚计时。
 - [ ] **G6** 未查域名商续费页；TLS 到期已测并由监控继续跟踪。
