@@ -26,7 +26,7 @@
 
 ## Not verified
 
-- The automatic 06:10 JST run has not been observed yet; the manual runs were at 13:36, 13:57 and 14:07 JST and used the 11:00 JMA product. The timer is enabled and next fires 2026-10-27 06:10 JST.
+- The automatic 06:10 JST run has not been observed yet; the manual runs were at 13:36, 13:57 and 14:07 JST and used the 11:00 JMA product. The timer is enabled and next fires 2026-10-27 06:10 JST. The external weather probe was run manually and Kuma id 54 is UP; its :45 cron has not fired on its own yet.
 - No Lighthouse rerun for `/weather/` (no local Chrome installation). Live PerformanceObserver on 390px gave LCP 240ms, CLS 0 and one 133ms long task; that is not a substitute for Lighthouse.
 - No full cross-browser matrix or full-site axe audit; this release used headed Chromium and targeted contrast/focus/reduced-motion checks. Contrast readings during a theme transition are not stable endpoints; final sage navigation is 4.9:1, dark 7.76:1.
 - No Search Console/Bing submission, Facebook/LinkedIn/Telegram share-preview validation, custom OG image, analytics/event tracking, enforced CSP, or domain-registrar renewal check. Pages supplies its own Web Analytics beacon; that was not independently audited.
