@@ -15,9 +15,9 @@ The VPS refreshes the official JMA forecast snapshot once a day and redeploys th
 - Kuma: `panout-weather-refresh` push monitor, id 54, interval 93600s, notification 1
 - Production: Cloudflare Pages `panout-site`, branch `main`
 
-The 06:10 run uses JMA's 05:00 short-range product. That product does not publish
-today's minimum temperature, so `todayLow` is normally `null`; this is an official
-data gap, not a fetch failure. The daily job does not fetch Natural Earth and does
+The 06:10 run uses JMA's 05:00–06:00 JST short-range products. Those products do
+not publish today's minimum temperature, so `todayLow` is normally `null`; this is
+an official data gap, not a fetch failure. The daily job does not fetch Natural Earth and does
 not rebuild `geo.js`.
 
 ## Manual commands
