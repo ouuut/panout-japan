@@ -50,7 +50,7 @@ def animated_wordmark():
             '<span class="wm-stage" aria-hidden="true">' + "".join(layers) + '</span>')
 
 
-BUILD_DATE = "2026-10-26"
+BUILD_DATE = datetime.now().strftime("%Y-%m-%d")
 BUILD_STAMP = datetime.now().strftime("%Y-%m-%d %H:%M")
 
 # ---------------------------------------------------------------- data
