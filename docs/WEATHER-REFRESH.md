@@ -77,6 +77,20 @@ verification failure attempts a rollback to the previous production deployment.
 If source push fails after a verified deployment, the production snapshot is
 kept and the monitor goes red; the next run retries the source update.
 
+## Manual release check
+
+Automated data checks do not see the rendered dates. After a forced refresh, open
+`https://japan.ouuut.com/weather/?lang=ja` and confirm:
+
+- `.editorial-dateline` is the report date, not tomorrow.
+- The seven `.week-day` cards start with `今日` + the report date, then six
+  consecutive dates; today uses `today`/`pop`, tomorrow and later use
+  `week[0..5]`.
+- Tokyo shows the map, high/low, precipitation and the 47-row table.
+
+This gate caught the 2026-10-26 off-by-one where `week[0]` (tomorrow) was rendered
+as today. Do not treat the data-level validation as proof of the rendered date.
+
 ## Recovery
 
 ```bash

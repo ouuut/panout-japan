@@ -1,7 +1,7 @@
 # MASTER-CHECKLIST · panout-japan
 
 > 正本：`sai-long-project/references/website-launch-checklist.md`（10 组 59 项）。纯静态 MPA，无后端/账号/支付；A1–A7 任一不过即阻断。
-> 本次发布：2026-10-26，部署 `1ca63cf9-e8f4-4f71-a9c8-41900ca9cf74`，源码 `692d5e9`。证据集中在 `.review/weather-lab/`、`.review/release/` 与 `HANDOFF.md`。
+> 本次发布：2026-10-26，部署 `e16a2b8e-fcc9-4f5b-81d0-c9c744814c16`，源码 `6d37d1b`。证据集中在 `.review/weather-lab/`、`.review/release/` 与 `HANDOFF.md`。
 > 记号：`[x]` 本次已实测；`[~]` 已明确范围或未完整覆盖；`[ ]` 未执行；`[N/A]` 当前产品不适用。
 
 ## A. 抓取与索引（阻断级）
@@ -64,7 +64,7 @@
 - [~] **G4** 静态站 CDN 日志与探针日志；未新增 Sentry/RUM。
 - [~] **G5** 本地完整构建、预览、生产冒烟完成；未做真实生产回滚计时。
 - [ ] **G6** 未查域名商续费页；TLS 到期已测并由监控继续跟踪。
-- [x] **G7** 天气日更已接：vps-jp systemd timer 每日 06:10 JST，抓 95 个 JMA 资源、校验 47 县、全量构建、Pages 部署、线上复核、双远端提交；Kuma id 54 26h push monitor；首次手动 run、幂等跳过和 systemd service 均 exit 0。首次自动 06:10 run 尚待 2026-10-27 观察。
+- [x] **G7** 天气日更已接：vps-jp systemd timer 每日 06:10 JST，抓 95 个 JMA 资源、校验 47 县、全量构建、Pages 部署、线上复核、双远端提交；Kuma id 54 26h push monitor；首次手动 run、两次 `--force` 生产 run、幂等跳过和 systemd service 均 exit 0。2026-10-26 强制 run 发现并修复周日期 off-by-one（`week[0]` 是明日，UI 误当今日），浏览器复核 dateline 10/26、7 卡 10/26–11/01。首次自动 06:10 run 尚待 2026-10-27 观察。
 
 ## H. 合规 / 无障碍
 
