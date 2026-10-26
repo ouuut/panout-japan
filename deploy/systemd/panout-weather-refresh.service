@@ -1,0 +1,14 @@
+[Unit]
+Description=Pan Out Japan daily weather snapshot refresh
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ubuntu/panout-japan
+EnvironmentFile=-/home/ubuntu/.config/panout/weather.env
+ExecStart=/bin/bash /home/ubuntu/panout-japan/tools/panout_weather_refresh.sh
+TimeoutStartSec=1800
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

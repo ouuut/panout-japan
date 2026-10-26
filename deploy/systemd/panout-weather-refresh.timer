@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the Pan Out Japan weather refresh daily at 06:10 JST
+
+[Timer]
+OnCalendar=*-*-* 06:10:00 Asia/Tokyo
+Persistent=true
+AccuracySec=1min
+Unit=panout-weather-refresh.service
+
+[Install]
+WantedBy=timers.target

@@ -20,12 +20,13 @@ Roles
   Noto Sans JP 500 / SC 500    CJK body + UI
 """
 import hashlib
+import os
 import shutil
 from pathlib import Path
 
-LATIN_DIR = Path("F:/projects/ouuut-v2/assets/fonts")
-SC_CACHE = Path("F:/projects/saaaai-v3/tools/.cache")
-OUTFIT_SRC = Path("F:/archive/20261014-omp-data-retire/dirs/tmp_fonts/outfit.ttf")
+LATIN_DIR = Path(os.environ.get("PANOUT_LATIN_FONTS", "F:/projects/ouuut-v2/assets/fonts"))
+SC_CACHE = Path(os.environ.get("PANOUT_SC_FONTS", "F:/projects/saaaai-v3/tools/.cache"))
+OUTFIT_SRC = Path(os.environ.get("PANOUT_OUTFIT_FONT", "F:/archive/20261014-omp-data-retire/dirs/tmp_fonts/outfit.ttf"))
 
 # name, source path or filename in cache_dir, weight, family
 CJK = [
