@@ -52,7 +52,9 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
   function region(r) { return lang === 'zh' ? (r.nameZh || r.nameJa || r.name) : lang === 'en' ? (r.nameEn || r.name) : (r.nameJa || r.name); }
   function area(r) { return (state.day === 0 ? (r.areaName || r.sourceAreaName || r.office) : (r.weekSourceWeatherAreaName || r.areaName || '')) + ' / ' + (state.day === 0 ? (r.todaySourceAreaName || '') : (r.weekSourceAreaName || '')); }
-  function weatherCode(r, day) { var d = day === 0 ? (r.weatherCodeOfficial || r.weatherCode) : day === 1 && r.tomorrowCodeOfficial ? r.tomorrowCodeOfficial : (r.week[day] && (r.week[day].codeOfficial || r.week[day].code)); return d == null ? (r.weatherCode || '') : d; }
+  // JMA weekly data starts tomorrow; day 0 is the report date, so shift by one.
+  function weekEntry(r, day) { return day > 0 ? r.week[day - 1] : null; }
+  function weatherCode(r, day) { if (day === 0) return r.weatherCodeOfficial || r.weatherCode || ''; if (day === 1 && r.tomorrowCodeOfficial) return r.tomorrowCodeOfficial; var w = weekEntry(r, day); var d = w && (w.codeOfficial || w.code); return d == null ? (r.weatherCode || '') : d; }
   function kind(code) { if (['clear','cloud','rain','snow','thunder'].indexOf(code) >= 0) return code; var n = parseInt(String(code || '0'), 10); if (!n) return 'cloud'; if (n === 350 || n === 450) return 'thunder'; if (n >= 400) return 'snow'; if (n >= 300) return 'rain'; if (n >= 200) return 'cloud'; return 'clear'; }
   function svgGlyph(code) {
     var k = kind(code), s = '<g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
@@ -63,9 +65,10 @@
     return s + '</g>';
   }
   function icon(code) { return '<span class="weather-icon" data-kind="'+kind(code)+'"><svg viewBox="0 0 32 32" aria-hidden="true">'+svgGlyph(code)+'</svg></span>'; }
-  function high(r, day) { if (day === 0) return r.today && r.today.high; if (day === 1 && r.tomorrow) return r.tomorrow.high; return r.week[day] && r.week[day].high; }
-  function low(r, day) { if (day === 0) return r.today && r.today.low; if (day === 1 && r.tomorrow) return r.tomorrow.low; return r.week[day] && r.week[day].low; }
-  function pop(r, day) { var v = day === 0 ? r.pop : r.week[day] && r.week[day].pop; return v == null || v === '' ? null : Number(v); }
+  function high(r, day) { if (day === 0) return r.today && r.today.high; if (day === 1 && r.tomorrow) return r.tomorrow.high; var w = weekEntry(r, day); return w && w.high; }
+  function low(r, day) { if (day === 0) return r.today && r.today.low; if (day === 1 && r.tomorrow) return r.tomorrow.low; var w = weekEntry(r, day); return w && w.low; }
+  function pop(r, day) { var v = day === 0 ? r.pop : (weekEntry(r, day) || {}).pop; return v == null || v === '' ? null : Number(v); }
+  function dayDate(r, day) { if (day === 0) return r.reportDatetime ? r.reportDatetime.slice(0, 10) : (r.week[0] || {}).date; var w = weekEntry(r, day); return w && w.date; }
   function temp(v) { return v == null || v === '' ? '<span aria-label="'+esc(tr('noData'))+'">—</span>' : esc(v)+'<span>°</span>'; }
   function pct(v) { return v == null ? '—' : esc(v)+'%'; }
   function dateFmt(date, weekday) {
@@ -171,7 +174,7 @@
   }
   function editorial(r) {
     var p = pop(r, state.day);
-    var head = '<div class="editorial-head"><div class="editorial-dateline">'+esc(dateFmt((r.week[state.day]||r.week[0]).date,true))+' · '+esc(groupLabel(groupOf(r)))+'</div>'+daySwitch()+'</div>';
+    var head = '<div class="editorial-head"><div class="editorial-dateline">'+esc(dateFmt(dayDate(r,state.day),true))+' · '+esc(groupLabel(groupOf(r)))+'</div>'+daySwitch()+'</div>';
     var identity = '<div class="editorial-identity"><h2 class="editorial-place">'+esc(region(r))+'</h2><p class="editorial-en">'+esc(r.nameEn||r.name)+'</p></div>';
     var weather = '<div class="editorial-weather"><div class="editorial-condition">'+icon(weatherCode(r,state.day))+'<span>'+esc(conditionName(weatherCode(r,state.day)))+'</span></div><div class="editorial-temps"><div class="temperature"><span>'+esc(tr('high'))+'</span><strong>'+temp(high(r,state.day))+'</strong></div><div class="temperature low"><span>'+esc(tr('low'))+'</span><strong>'+temp(low(r,state.day))+'</strong></div></div></div>';
     var details = '<div class="editorial-details"><p class="editorial-rain">'+esc(tr('rain'))+' <strong>'+pct(p)+'</strong> '+popPeriod(r)+'</p></div>';
@@ -181,8 +184,9 @@
     return '<div class="editorial-map-column"><div class="map-canvas">'+mapMarkup()+'<div class="map-footer">'+legend()+'<p class="map-source"><span>気象庁 / JMA</span><span>'+esc(tr('issued'))+' '+esc(timestamp(DATA.reportDatetime || (regions[0] && regions[0].reportDatetime)))+'</span></p></div>'+okinawaCard()+'</div></div>';
   }
   function week(r) {
-    return '<section class="weather-section" aria-labelledby="week-title"><div class="section-heading"><h2 id="week-title">'+esc(tr('week'))+'</h2><p>'+esc(tr('weekSub'))+'</p></div><div class="week-scroll"><div class="week-grid">'+r.week.slice(0,7).map(function (d,i) {
-      return '<article class="week-day'+(i===state.day?' is-selected':'')+'"><time class="week-date" datetime="'+esc(d.date)+'">'+esc(i===0?tr('today'):dateFmt(d.date,true))+'</time>'+icon(weatherCode(r,i))+'<p class="week-temp">'+esc(high(r,i)==null?'—':high(r,i)+'°')+'<span>'+esc(low(r,i)==null?'—':low(r,i)+'°')+'</span></p><p class="week-rain">'+pct(pop(r,i))+'</p>'+(d.reliability?'<p class="week-reliability">'+esc(tr('confidence'))+' '+esc(d.reliability)+'</p>':'')+'</article>';
+    return '<section class="weather-section" aria-labelledby="week-title"><div class="section-heading"><h2 id="week-title">'+esc(tr('week'))+'</h2><p>'+esc(tr('weekSub'))+'</p></div><div class="week-scroll"><div class="week-grid">'+[0,1,2,3,4,5,6].map(function (i) {
+      var d = i === 0 ? { date: dayDate(r, 0) } : (weekEntry(r, i) || {});
+      return '<article class="week-day'+(i===state.day?' is-selected':'')+'"><time class="week-date" datetime="'+esc(d.date)+'">'+esc(i===0?tr('today'):dateFmt(d.date,true))+'</time>'+icon(weatherCode(r,i))+'<p class="week-temp">'+esc(high(r,i)==null?'—':high(r,i)+'°')+'<span>'+esc(low(r,i)==null?'—':low(r,i)+'°')+'</span></p><p class="week-rain">'+pct(pop(r,i))+'</p>'+(i>0 && d.reliability?'<p class="week-reliability">'+esc(tr('confidence'))+' '+esc(d.reliability)+'</p>':'')+'</article>';
     }).join('')+'</div></div></section>';
   }
   function directory(r) {

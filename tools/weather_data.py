@@ -430,6 +430,7 @@ def write_notes(data: dict, report: dict, manifest: dict, path: Path) -> None:
         f"- Regions **{report['regions']}**, geometries **{report['geometries']}**, categories `{json.dumps(report['weatherCategories'], ensure_ascii=False)}`.",
         f"- Missing values: `{json.dumps(report['missing'], ensure_ascii=False)}`.",
         "- `null` means JMA did not issue the value. No temperature, precipitation probability, reliability, observation or overview is invented.",
+        "- `week[0]` is the day after the report date; the UI renders today from `today`/`pop` and the next six days from `week`.",
         "- Daytime short-range products (05:00–16:00 JST) do not publish today's minimum; `todayLow` is therefore normally null.",
         "- Source: 気象庁 (JMA) forecast JSON; attribution and source links are rendered on `/weather/`.",
     ]
