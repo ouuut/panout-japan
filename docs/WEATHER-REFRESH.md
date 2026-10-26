@@ -91,6 +91,34 @@ Automated data checks do not see the rendered dates. After a forced refresh, ope
 This gate caught the 2026-10-26 off-by-one where `week[0]` (tomorrow) was rendered
 as today. Do not treat the data-level validation as proof of the rendered date.
 
+## Monitoring
+
+Kuma monitor `panout-weather-refresh` (id 54) is fed by two independent paths:
+
+- The refresh script records `last_failure_at` / `last_error` in `state.json` and
+  pushes DOWN on failure, UP only after deployment and production verification.
+- The external probe `/home/ubuntu/vps-ops/scripts/panout_weather_watch.py`
+  (source `deploy/vps/panout_weather_watch.py`) runs at minute 45 every hour.
+  It reads `state.json`, requires a success by **06:40 JST**, rejects a failure
+  newer than the last success, then fetches `/weather/` and the versioned
+  `data.js`. It reconciles `generatedAt`, 47 regions, all `reportDatetime`
+  dates, `week[0]` = report date + 1, and the immutable cache header.
+
+Registration: `/home/ubuntu/watchdog/registry.json` item
+`panout-japan.weather`, cron `panout-weather-watch`, heartbeat
+`/home/ubuntu/watchdog/heartbeats/panout-weather-refresh.ok`, Kuma token in
+`/home/ubuntu/vps-ops/scripts/kuma_tokens.json`. Kuma interval is 26h; the
+monitor uses one retry with a 2-minute grace.
+
+Manual probe run:
+
+```bash
+python3 /home/ubuntu/vps-ops/scripts/panout_weather_watch.py
+```
+
+The probe is read-only and exits 0; incidents are pushed through
+`watchdog_common` (Kuma red + TG event).
+
 ## Recovery
 
 ```bash

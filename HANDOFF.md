@@ -21,7 +21,7 @@
 - Production browser: `/weather/` 200 with title and 47 regions; real Okinawa selection and ZH label; canonical `?lang=zh`; mobile 390 card 200×200, overflow 0, menu includes weather. Home weather card click reaches `/weather/`. Unknown URL is a true 404 with `no-store` and a weather link. All four existing chapters still mount (quake WebGL, crime/housing Leaflet, cabinet chart), nav has five links.
 - Headers/assets: weather HTML `max-age=0, must-revalidate`; `/assets/weather/*` 200 with `max-age=31536000, immutable`; sitemap six URLs; `llms.txt` lists five chapters; robots 200 with `Allow: /` and sitemap.
 - Live performance probe (390px mobile, no cache): LCP 240ms, CLS 0, one 133ms long task, no overflow. Lighthouse was not rerun for the weather page (no local Chrome installation); the prior homepage Lighthouse remains 97/100/100/100.
-- Monitoring: existing `/home/ubuntu/vps-ops/scripts/panout_watch.py` checks homepage markers, robots/sitemap/llms and TLS hourly at minute 23; Kuma `panout-japan-check` id 53, heartbeat `/home/ubuntu/watchdog/heartbeats/panout-japan.ok`. New daily refresh monitor: Kuma `panout-weather-refresh` id 54, push interval 93600s, notification 1, token in `kuma_tokens.json`, `KUMA_HB` mapping added; the refresh script pushes UP only after deployment and production verification. systemd timer `panout-weather-refresh.timer` next run 2026-10-27 06:10 JST.
+- Monitoring: `/home/ubuntu/vps-ops/scripts/panout_watch.py` checks homepage markers, robots/sitemap/llms and TLS hourly at minute 23; Kuma `panout-japan-check` id 53, heartbeat `/home/ubuntu/watchdog/heartbeats/panout-japan.ok`. Weather pipeline: Kuma `panout-weather-refresh` id 54, push interval 93600s, one retry / 120s, notification 1; external probe `/home/ubuntu/vps-ops/scripts/panout_weather_watch.py` (source `deploy/vps/panout_weather_watch.py`) runs at minute 45, checks `state.json` (success by 06:40 JST, failure marker, 26h age) and reconciles production `data.js` (`generatedAt`, 47 regions, report dates, `week[0]`, immutable cache). Registry item `panout-japan.weather`, cron `panout-weather-watch`, heartbeat `panout-weather-refresh.ok`, token in `kuma_tokens.json`. The refresh script also records `last_failure_at` and pushes DOWN on failure. systemd timer `panout-weather-refresh.timer` next run 2026-10-27 06:10 JST.
 - Evidence: `.review/weather-lab/` (production screenshots, live tests, performance probe, source handoff) and `.review/release/` (prior release). Backup of pre-weather source and old deployment metadata: `F:/archive/20261026-125659-panout-weather/`.
 
 ## Not verified
@@ -35,13 +35,13 @@
 
 ## Next safe action
 
-- Observe the first automatic refresh on 2026-10-27 06:10 JST: check `state.json`, `journalctl --user -u panout-weather-refresh.service`, production `generatedAt`, and Kuma id 54. Then choose the news feed; do not describe the news preview as a live product. Re-run Lighthouse on `/weather/` when a Chrome installation is available.
+- Observe the first automatic refresh on 2026-10-27 06:10 JST: check `state.json`, `journalctl --user -u panout-weather-refresh.service`, production `generatedAt`, Kuma id 54, and the external probe log at 06:45. Then choose the news feed; do not describe the news preview as a live product. Re-run Lighthouse on `/weather/` when a Chrome installation is available.
 
 ## Rollback
 
-- Current production deployment: `ca2cf008-5a36-4f16-a213-e921e3564d5b`. Previous production deployment: `1ca63cf9-e8f4-4f71-a9c8-41900ca9cf74` (the weather chapter release), saved in `F:/archive/20261026-125659-panout-weather/cloudflare-before-weather.json` and in `state.json` as `previous_deployment_id`.
-- Restore through the Cloudflare dashboard “Rollback to this deployment”, or POST `https://api.cloudflare.com/client/v4/accounts/{account_id}/pages/projects/panout-site/deployments/1ca63cf9-e8f4-4f71-a9c8-41900ca9cf74/rollback` using the existing ouuut account token. Do not deploy an unverified directory as a rollback.
-- Daily source data commit is `ae514e7` (`weather: refresh 2026-10-26`). To revert data, `git revert ae514e7` or restore `src/weather/data.js` from `6033e13`, rebuild, verify, and deploy. Reverting source alone does not change production.
+- Current production deployment: `e16a2b8e-fcc9-4f5b-81d0-c9c744814c16`. Previous production deployment: `ca2cf008-5a36-4f16-a213-e921e3564d5b` (the first weather refresh), saved in `state.json` as `previous_deployment_id`; older release metadata is in `F:/archive/20261026-125659-panout-weather/`.
+- Restore through the Cloudflare dashboard “Rollback to this deployment”, or POST `https://api.cloudflare.com/client/v4/accounts/{account_id}/pages/projects/panout-site/deployments/ca2cf008-5a36-4f16-a213-e921e3564d5b/rollback` using the existing ouuut account token. Do not deploy an unverified directory as a rollback.
+- Daily source data commit is `6d37d1b` (`weather: refresh 2026-10-26`). To revert data, `git revert 6d37d1b` or restore `src/weather/data.js` from `b8e45d6`, rebuild, verify, and deploy. Reverting source alone does not change production.
 - Older pre-weather source and deployment metadata remain in `F:/archive/20261026-125659-panout-weather/` (`build.py`, `shell.js`, docs, old `site/index.html`, headers/redirects/sitemap/llms).
 
 ## Confidence

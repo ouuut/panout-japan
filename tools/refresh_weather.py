@@ -64,6 +64,14 @@ def save_state(state: dict) -> None:
     tmp.replace(STATE)
 
 
+def record_failure(exc: Exception) -> None:
+    """Keep the last success but mark the latest attempt as failed for the watchdog."""
+    state = load_state()
+    state["last_failure_at"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    state["last_error"] = str(exc)[:300]
+    save_state(state)
+
+
 def run(cmd: list[str], timeout: int = 600, env: dict | None = None) -> subprocess.CompletedProcess:
     log("$ " + " ".join(cmd))
     proc = subprocess.run(cmd, cwd=ROOT, env=env, text=True, stdout=subprocess.PIPE,
@@ -330,6 +338,10 @@ def main() -> int:
         if not deployed:
             DATA.write_text(old_data, encoding="utf-8")
             log("Restored previous data.js")
+        try:
+            record_failure(exc)
+        except Exception as state_exc:
+            log(f"Failed to record failure state: {state_exc}")
         kuma("down", str(exc)[:180])
         log(f"FAILED: {exc}")
         return 1

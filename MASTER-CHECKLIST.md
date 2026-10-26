@@ -64,7 +64,7 @@
 - [~] **G4** 静态站 CDN 日志与探针日志；未新增 Sentry/RUM。
 - [~] **G5** 本地完整构建、预览、生产冒烟完成；未做真实生产回滚计时。
 - [ ] **G6** 未查域名商续费页；TLS 到期已测并由监控继续跟踪。
-- [x] **G7** 天气日更已接：vps-jp systemd timer 每日 06:10 JST，抓 95 个 JMA 资源、校验 47 县、全量构建、Pages 部署、线上复核、双远端提交；Kuma id 54 26h push monitor；首次手动 run、两次 `--force` 生产 run、幂等跳过和 systemd service 均 exit 0。2026-10-26 强制 run 发现并修复周日期 off-by-one（`week[0]` 是明日，UI 误当今日），浏览器复核 dateline 10/26、7 卡 10/26–11/01。首次自动 06:10 run 尚待 2026-10-27 观察。
+- [x] **G7** 天气日更已接：vps-jp systemd timer 每日 06:10 JST，抓 95 个 JMA 资源、校验 47 县、全量构建、Pages 部署、线上复核、双远端提交；Kuma id 54 26h push monitor（1 retry/120s）；外部探针 `panout_weather_watch.py` cron `45 * * * *`，registry `panout-japan.weather`，心跳 `panout-weather-refresh.ok`，06:40 JST 截止，对账 state/线上 data.js/47 县/week[0]；首次手动 run、两次 `--force` 生产 run、幂等跳过和 systemd service 均 exit 0。2026-10-26 强制 run 发现并修复周日期 off-by-one（`week[0]` 是明日，UI 误当今日），浏览器复核 dateline 10/26、7 卡 10/26–11/01。首次自动 06:10 run 尚待 2026-10-27 观察。
 
 ## H. 合规 / 无障碍
 
