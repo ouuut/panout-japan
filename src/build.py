@@ -30,6 +30,7 @@ import home_plates as HP
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 SRC = ROOT / "src"
+WEATHER_SRC = SRC / "weather"
 SITE_URL = "https://japan.ouuut.com"
 BRAND = "japan.ouuut.com"
 WM = '<span class="wm-main">japan</span><span class="wm-tld">.ouuut.com</span>'
@@ -49,7 +50,7 @@ def animated_wordmark():
             '<span class="wm-stage" aria-hidden="true">' + "".join(layers) + '</span>')
 
 
-BUILD_DATE = "2026-10-25"
+BUILD_DATE = "2026-10-26"
 BUILD_STAMP = datetime.now().strftime("%Y-%m-%d %H:%M")
 
 # ---------------------------------------------------------------- data
@@ -71,11 +72,11 @@ PCT_2011_E = round(100 * sum(10 ** (1.5 * e["mag"]) for e in Q if e["time"][:4] 
 PAGE_META = {
     "home": {
         "ja": (f"{BRAND} — 日本を、六つの尺度で見る",
-               f"{f"{Q_N:,}"}の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格。六つの尺度、四つの入口から直接起動する。"),
+               f"{f"{Q_N:,}"}の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格、47都道府県の天気。六つの尺度、五つの入口から直接起動する。"),
         "zh": (f"{BRAND} — 用六个尺度看日本",
-               f"{f"{Q_N:,}"} 个震源、5,234 个町丁、331 个月的內閣支持率、23 区住宅价格。六个尺度，四个入口直接启动。"),
+               f"{f"{Q_N:,}"} 个震源、5,234 个町丁、331 个月的內閣支持率、23 区住宅价格、47 个都道府县的天气。六个尺度，五个入口直接启动。"),
         "en": (f"{BRAND} — Japan in six scales",
-               f"{f"{Q_N:,}"} hypocentres, 5,234 neighbourhoods, 331 months of cabinet approval, 23-ward housing prices. Six scales; four entry points."),
+               f"{f"{Q_N:,}"} hypocentres, 5,234 neighbourhoods, 331 months of cabinet approval, 23-ward housing prices and 47-prefecture weather. Six scales; five entry points."),
     },
     "quake": {
         "ja": (f"地震 — {f"{Q_N:,}"}の震源 | {BRAND}",
@@ -109,9 +110,17 @@ PAGE_META = {
         "en": (f"Housing — town-level prices | {BRAND}",
                "Closed condo prices in Tokyo for the latest four quarters (2025Q2–2026Q1), mapped as mean price per m² by town. Derived from MLIT data."),
     },
+    "weather": {
+        "ja": (f"天気 — 日本の47都道府県 | {BRAND}",
+               "気象庁の予報から、47都道府県の今日・明日と7日間の天気、気温、降水確率を見る。"),
+        "zh": (f"天气 — 日本47都道府县 | {BRAND}",
+               "来自日本气象厅的预报：47 个都道府县的今天、明天与未来七天天气、气温和降水概率。"),
+        "en": (f"Weather — Japan’s 47 prefectures | {BRAND}",
+               "JMA forecasts for all 47 prefectures: today, tomorrow and the next seven days, with temperatures and precipitation probability."),
+    },
     "404": {
-        "ja": (f"404 — この頁は、ない | {BRAND}", "このURLには頁がありません。表紙または四つの章から辿り直せます。"),
-        "zh": (f"404 — 这一页不存在 | {BRAND}", "这个网址没有对应页面。可以回到首页或四个章节。"),
+        "ja": (f"404 — この頁は、ない | {BRAND}", "このURLには頁がありません。表紙または五つの章から辿り直せます。"),
+        "zh": (f"404 — 这一页不存在 | {BRAND}", "这个网址没有对应页面。可以回到首页或五个章节。"),
         "en": (f"404 — Page not found | {BRAND}", "No page exists at this URL. Return to the cover or choose a chapter."),
     },
 }
@@ -125,6 +134,9 @@ HOUSE_WARDS = HOUSE["wards"]
 HOUSE_TOWNS_DOC = json.loads((ROOT / "app" / "housing" / "data" / "towns.json").read_text(encoding="utf-8"))
 HOUSE_N = HOUSE_TOWNS_DOC["n"]
 HOUSE_TOWNS = sum(1 for x in HOUSE_TOWNS_DOC["towns"] if x["n"])
+_weather_raw = (WEATHER_SRC / "data.js").read_text(encoding="utf-8")
+WEATHER_DOC = json.loads(_weather_raw.split("=", 1)[1].rstrip().rstrip(";"))
+WEATHER_REGIONS = WEATHER_DOC["regions"]
 
 MUNI_BY = {m["ward"]: m for m in MUNI}
 CAB_BY = {c["pm"]: c for c in CAB["cabinets"]}
@@ -463,6 +475,7 @@ def cabinet_thumb(w=300, h=140):
 
 # ---------------------------------------------------------------- copy
 COPY = {
+    "nav.weather": ("天気", "天气", "Weather"),
     "nav.quake": ("地震", "地震", "Quakes"),
     "nav.crime": ("犯罪", "犯罪", "Crime"),
     "nav.cabinet": ("内閣", "内阁", "Cabinet"),
@@ -498,10 +511,13 @@ COPY = {
     "home.details": ("出典と計算方法", "出处与计算方法", "Sources and counting rules"),
     "home.definitions": ("計算方法", "计算方法", "Counting rules"),
     "home.definitions.copy": (
-        f"地震はM4以上・{len(YEARS)}年分、犯罪率は人口1,000人当たり、支持率は月内全調査の算術平均。住宅は町名ごとの平均㎡単価。補間や面積での絞り込みはしない。",
-        f"地震取 M4 以上、{len(YEARS)} 年；犯罪率按每千人；支持率取月内全部调查的算术平均；住宅按町名计算平均㎡单价。不插值，也不按面积筛选。",
-        f"Earthquakes are M4+ over {len(YEARS)} years. Crime is per 1,000 residents; cabinet approval is the arithmetic mean of all polls in a month. Housing is mean price per square metre by town. No interpolation or area filter.",
+        f"地震はM4以上・{len(YEARS)}年分、犯罪率は人口1,000人当たり、支持率は月内全調査の算術平均。住宅は町名ごとの平均㎡単価。天気は気象庁の予報値で、観測値ではない。補間や面積での絞り込みはしない。",
+        f"地震取 M4 以上、{len(YEARS)} 年；犯罪率按每千人；支持率取月内全部调查的算术平均；住宅按町名计算平均㎡单价；天气为气象厅预报值，不是观测值。不插值，也不按面积筛选。",
+        f"Earthquakes are M4+ over {len(YEARS)} years. Crime is per 1,000 residents; cabinet approval is the arithmetic mean of all polls in a month. Housing is mean price per square metre by town. Weather figures are JMA forecasts, not observations. No interpolation or area filter.",
     ),
+    "home.weather.title": ("天気", "天气", "Weather"),
+    "home.weather.source": ("気象庁", "气象厅", "JMA"),
+    "home.weather.copy": ("47都道府県の今日・明日と7日間の予報。", "47 个都道府县的今天、明天与未来七天预报。", "Today, tomorrow and seven days ahead for all 47 prefectures."),
     "home.quake.title": ("地震", "地震", "Earthquakes"),
     "home.quake.source": ("USGS ComCat", "USGS ComCat", "USGS ComCat"),
     "home.quake.copy": (f"2000年からM4以上、{n(Q_N)}の震源。", f"2000 年至今 M4 以上，共 {n(Q_N)} 个震源。", f"{n(Q_N)} M4+ hypocentres since 2000."),
@@ -540,14 +556,14 @@ COPY = {
     "card.housing.claim": (f"直近4四半期の成約で町名ごとの平均m2単価を塗る。{HOUSE_TOWNS:,}町・{HOUSE_N:,}件。",
                            f"用最近四个季度成交,按町名平均m2单价上色。{HOUSE_TOWNS:,} 个町、{HOUSE_N:,} 笔。",
                            f"Latest four quarters of closed prices, mean per m2 by town: {HOUSE_TOWNS:,} towns, {HOUSE_N:,} deals."),
-    # The two preview plates carry no live feed yet: they promise a scale, and
-    # their foot shows「予告」instead of「開く」, so no card reads as an entry.
+    # News remains a preview plate: it promises a scale and its foot shows
+    #「予告」instead of「開く」, so it never reads as an entry.
     "card.weather.title": ("仰いで見る", "抬头看", "Look up"),
     "card.weather.topic": ("天気", "天气", "Weather"),
     "card.weather.unit": ("都道府県 / 予報", "都道府县 / 预报", "Prefectures / forecast"),
-    "card.weather.claim": ("各都道府県庁所在地の今日の空を、一枚に。",
-                           "各都道府县厅所在地,今日的天空收进一张图。",
-                           "Today's sky for every prefectural capital, on one plate."),
+    "card.weather.claim": ("47都道府県の今日の空と7日間を、一枚に。",
+                           "47 个都道府县今天与未来七天的天气，收进一张图。",
+                           "Today and the next seven days for all 47 prefectures, on one map."),
     "card.news.title": ("追って見る", "追着看", "Follow along"),
     "card.news.topic": ("話題", "话题", "Topics"),
     "card.news.unit": ("時間 / 話題", "小时 / 话题", "Hours / topics"),
@@ -733,9 +749,9 @@ COPY = {
 
     "nf.code": ("404", "404", "404"),
     "nf.h1": ("この頁は、ない。", "这一页不存在。", "This page is not here."),
-    "nf.p": ("URLが変わったか、まだ作っていない頁。四つの章から辿り直せる。",
-             "网址变了，或这一页还没做。可以从四个章节重新找。",
-             "The URL changed, or the page was never built. Start again from the four chapters."),
+    "nf.p": ("URLが変わったか、まだ作っていない頁。五つの章から辿り直せる。",
+             "网址变了，或这一页还没做。可以从五个章节重新找。",
+             "The URL changed, or the page was never built. Start again from the five chapters."),
     "nf.home": ("表紙へ戻る", "回到封面", "Back to the cover"),
 
     "foot.built": ("静的生成", "静态生成", "Statically generated"),
@@ -754,6 +770,7 @@ PAGES = []
 CSS_VER = "__CSS_VER__"
 JS_VER = "__JS_VER__"
 FONT_VER = "__FONT_VER__"
+WEATHER_VER = "__WEATHER_VER__"
 
 
 def head(title, desc, path, jsonld=None, extra_head="", body_class=""):
@@ -824,6 +841,7 @@ def mast(active=""):
     return f"""<header class="masthead"><div class="wrap masthead-in">
 <a class="wordmark wordmark-cycle" href="/" aria-label="{BRAND}">{animated_wordmark()}</a>
 <nav class="chapters" aria-label="Chapters">
+{link('/weather/', 'nav.weather', 'weather')}
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
@@ -837,6 +855,7 @@ def mast(active=""):
 </div></header>
 <div class="mobile-menu" id="mobile-menu">
 <nav class="mobile-nav-links" aria-label="Chapters">
+{link('/weather/', 'nav.weather', 'weather')}
 {link('/quake/', 'nav.quake', 'quake')}
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
@@ -893,18 +912,18 @@ def pager(prev_href, prev_label, next_href, next_label):
 
 # ---------------------------------------------------------------- pages
 def build_home_preview():
-    """Six plates, followed by the selected C provenance panel and A statement.
+    """Six plates. Five are live chapter links; news remains a preview.
 
-    Four plates are live chapter links. Weather and news are previews with no
-    connected feed; they carry「予告」and are not anchors. Provenance remains
-    readable without JavaScript, and the closing statement stays on one line.
+    The weather plate now opens the real /weather/ page. News has no connected
+    feed yet: it carries「予告」and is not an anchor. Provenance remains readable
+    without JavaScript, and the closing statement stays on one line.
     """
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
 
     # key, num, href (None = preview plate), verb, topic, count, unit, claim, source, plate
     rows = [
-        ("weather", "01", None, "card.weather.title", "card.weather.topic", "47",
-         "card.weather.unit", "card.weather.claim", "気象庁 予報",
+        ("weather", "01", "/weather/", "card.weather.title", "card.weather.topic", "47",
+         "card.weather.unit", "card.weather.claim", "気象庁 · 予報",
          HP.weather_svg(OUTLINE)),
         ("quake", "02", "/quake/", "card.quake.title", "nav.quake", n(Q_N),
          "card.quake.unit", "card.quake.claim", f"USGS ComCat · 2000—{Q_END_DOT}",
@@ -941,7 +960,7 @@ def build_home_preview():
             entries.append(f'<div class="hp-entry hp-entry-soon">\n{card}\n</div>')
 
     source_items = []
-    for key in ("quake", "crime", "cabinet", "housing"):
+    for key in ("weather", "quake", "crime", "cabinet", "housing"):
         source_items.append(
             f'<article class="hp-source-item"><h3><span data-t="home.{key}.title">{ja(f"home.{key}.title")}</span>'
             f'<span aria-hidden="true">—</span><a href="/{key}/"><span data-t="home.{key}.source">{ja(f"home.{key}.source")}</span> ↗</a></h3>'
@@ -1009,7 +1028,7 @@ def build_home_preview():
 
 def build_404():
     links = "".join(f'<li><a href="/{key}/" data-t="nav.{key}">{ja(f"nav.{key}")}</a></li>'
-                    for key in ("quake", "crime", "cabinet", "housing"))
+                    for key in ("weather", "quake", "crime", "cabinet", "housing"))
     body = f'''<main id="main" class="cover"><div class="wrap">
 <p class="eyebrow" data-t="nf.code">404</p>
 <h1 data-t="nf.h1">{ja("nf.h1")}</h1>
@@ -1037,6 +1056,59 @@ def build_preview_redirect():
 </head>
 <body><p><a href="/">{BRAND}</a></p></body>
 </html>"""
+
+
+def weather_assets():
+    """Weather runtime is shipped as versioned static assets, not inlined."""
+    return {
+        "app.js": (WEATHER_SRC / "app.js").read_text(encoding="utf-8"),
+        "data.js": (WEATHER_SRC / "data.js").read_text(encoding="utf-8"),
+        "geo.js": (WEATHER_SRC / "geo.js").read_text(encoding="utf-8"),
+        "weather.css": (WEATHER_SRC / "lab.css").read_text(encoding="utf-8"),
+    }
+
+
+def build_weather(ver):
+    def temp(v):
+        return "—" if v is None or v == "" else f"{esc(v)}°"
+
+    def pop_text(r):
+        v = r.get("pop")
+        return "—" if v is None else f"{esc(v)}%"
+
+    rows = "".join(
+        f'<tr><th scope="row">{esc(r["nameJa"])}</th>'
+        f'<td>{esc(r.get("summaryJa") or "")}</td>'
+        f'<td>{temp(r.get("today", {}).get("high"))} / {temp(r.get("today", {}).get("low"))}</td>'
+        f'<td>{pop_text(r)}</td></tr>'
+        for r in WEATHER_REGIONS
+    )
+    week = WEATHER_REGIONS[0]["week"]
+    jsonld = {
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Japan weather forecast by prefecture",
+        "description": "JMA short-range and seven-day forecasts for all 47 prefectures; a static snapshot, not live observations.",
+        "temporalCoverage": f"{week[0]['date']}/{week[-1]['date']}",
+        "spatialCoverage": "Japan (47 prefectures)",
+        "creator": {"@type": "Organization", "name": "気象庁"},
+        "isBasedOn": "https://www.jma.go.jp/bosai/forecast/",
+        "url": SITE_URL + "/weather/",
+    }
+    body = f"""<main id="main" class="weather-lab">
+<div class="wrap" id="weather-app"></div>
+<noscript><section class="wrap weather-static-fallback">
+<p class="micro">気象庁 / JMA</p>
+<h1>日本の天気</h1>
+<p class="muted">気象庁の予報を47都道府県ごとに整列しました。インタラクティブな地図はJavaScriptで動作します。</p>
+<div class="table-scroll"><table><thead><tr><th>都道府県</th><th>天気</th><th>最高 / 最低</th><th>降水確率</th></tr></thead><tbody>{rows}</tbody></table></div>
+</section></noscript>
+</main>
+<script src="/assets/weather/data.js?v={ver}" defer></script>
+<script src="/assets/weather/geo.js?v={ver}" defer></script>
+<script src="/assets/weather/app.js?v={ver}" defer></script>"""
+    return page("/weather/", PAGE_META["weather"]["ja"][0], PAGE_META["weather"]["ja"][1],
+                body, "weather", jsonld,
+                head_extra=f'<link rel="stylesheet" href="/assets/weather/weather.css?v={ver}">')
 
 
 def build_quake():
@@ -1162,18 +1234,26 @@ def fill_copy(s):
 
 # ---------------------------------------------------------------- main
 def main():
-    global CSS_VER, JS_VER, FONT_VER
+    global CSS_VER, JS_VER, FONT_VER, WEATHER_VER
     files = {}
 
-    # Exactly four chapters: /quake/, /crime/, /cabinet/, /housing/ (plus the cover).
+    weather_files = weather_assets()
+    WEATHER_VER = hashlib.sha1(
+        "".join(weather_files[k] for k in sorted(weather_files)).encode("utf-8")
+    ).hexdigest()[:8]
+
+    # Five chapters: /weather/, /quake/, /crime/, /cabinet/, /housing/ (plus the cover).
     # /preview/ remains a tiny redirect for the old preview URL.
     files["/"] = build_home_preview()
     files["/404.html"] = build_404()
     files["/preview/"] = build_preview_redirect()
+    files["/weather/"] = build_weather(WEATHER_VER)
     files["/quake/"] = build_quake()
     files["/crime/"] = build_crime()
     files["/cabinet/"] = build_cabinet()
     files["/housing/"] = build_housing()
+    for name, content in weather_files.items():
+        files[f"/assets/weather/{name}"] = content
 
     # i18n dictionary (only the three languages; ja already in HTML)
     dic = {k: {"ja": fill_copy(v[0]), "zh": fill_copy(v[1]), "en": fill_copy(v[2])}
@@ -1409,19 +1489,20 @@ def write_meta(font_meta):
         "  Cache-Control: public, max-age=86400\n", encoding="utf-8")
 
     (SITE / "_redirects").write_text(
-        "/quake /quake/ 301\n/crime /crime/ 301\n/cabinet /cabinet/ 301\n/housing /housing/ 301\n"
+        "/weather /weather/ 301\n/quake /quake/ 301\n/crime /crime/ 301\n/cabinet /cabinet/ 301\n/housing /housing/ 301\n"
         "/preview / 301\n/preview/ / 301\n", encoding="utf-8")
 
     (SITE / "llms.txt").write_text(f"""# {BRAND}
 
-> 日本を六つの尺度で見る静的データサイト。地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）、住宅（並べて見る）の四章、天気（仰いで見る）と話題（追って見る）は予告。
+> 日本を六つの尺度で見る静的データサイト。天気（仰いで見る）、地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）、住宅（並べて見る）の五章。話題（追って見る）は予告。
 
+- [天気](/weather/): 気象庁の予報、47都道府県。今日・明日と7日間、気温と降水確率。
 - [地震](/quake/): 2000–{Q_END_DOT}、M4以上の震源{n(Q_N)}点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。
 - [内閣](/cabinet/): 1998–2026、644調査、331か月、14内閣。
 - [住宅](/housing/): 直近4四半期 2025Q2–2026Q1（2025年4月–2026年3月）、東京、中古マンション成約26,416件を町名（1,237町）ごとに平均した㎡単価の地図。
 
-Build: {BUILD_STAMP}. Sources: USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
+Build: {BUILD_STAMP}. Sources: 気象庁, USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
 """, encoding="utf-8")
 
 

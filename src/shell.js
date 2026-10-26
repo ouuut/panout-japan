@@ -65,6 +65,7 @@
     }
     applyMeta(l);
     syncUrlLang(l);
+    try { window.dispatchEvent(new CustomEvent('pj:lang', { detail: l })); } catch (e) {}
     var live = document.querySelector('.stage[data-live="1"] .stage-live');
     if (live && live._setVendorLang) live._setVendorLang(l);
   }
@@ -73,7 +74,7 @@
   // canonical 必须自指到 ?lang=，否则 zh/en 会被合并回 ja、hreflang 白写。
   function pageKey() {
     var p = location.pathname.replace(/index\.html$/, '');
-    var m = p.match(/^\/(housing|crime|cabinet|quake)\//);
+    var m = p.match(/^\/(housing|crime|cabinet|quake|weather)\//);
     if (m) return m[1];
     return document.querySelector('meta[name="robots"][content="noindex"]') ? '404' : 'home';
   }
