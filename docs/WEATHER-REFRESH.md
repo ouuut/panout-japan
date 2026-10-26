@@ -20,6 +20,15 @@ not publish today's minimum temperature, so `todayLow` is normally `null`; this 
 an official data gap, not a fetch failure. The daily job does not fetch Natural Earth and does
 not rebuild `geo.js`.
 
+## Host prerequisites
+
+- Python 3.12 with `fonttools`, `brotli` and `python3-shapely` (the full build uses
+  shapely for the homepage SVG clipping; the data-only refresh does not).
+- Node 24 with `npx`; the script pins `wrangler@4.152.0`.
+- Font cache: `/home/ubuntu/panout-fonts/{latin,sc}` plus
+  `/home/ubuntu/panout-japan/.cache/fonts/{NotoSansJP-VF,NotoSerifJP-VF}.ttf`.
+- Cloudflare API token with Pages edit access, stored only in the 600-mode env file.
+
 ## Manual commands
 
 ```bash
