@@ -584,3 +584,15 @@
 - 最终生产 `b9b0c617-0a3f-49a8-8d05-ac6e8cd72c96`，未知 URL 真 404/no-store，三语版本化字典与结构化数据在线验证通过；robots/sitemap/llms/资源 200，TLS 余 76 天。最终报告 `.review/release/`。GitHub/Gitea 已 push 并 fetch 对账均 0 领先/0 落后。
 - 长项目监控三条件成立：线上常驻、周期可看、可机器判活。复用 vps-jp Kuma+TG：`panout_watch.py` 每小时第23分钟检查首页标记/robots/sitemap/llms/TLS；Kuma `panout-japan-check` id53 interval5400，通知1，登记 registry、KUMA_HB、PROBE_HEARTBEAT 已补，cron 已挂。首跑缺 JSON-LD 曾立案，补齐后实测 heartbeat UP + 恢复通知。Kuma 备份 `vps-ops/backups/kuma.db.pre-20261025-155727`，共享配置备份 `~/archive/20261026-panout-monitoring/`。
 - 未做：Search Console/Bing 提交、各社交平台预览、统计事件审计、全浏览器矩阵、真生产回滚计时；这些不等于已验收。下一步 24h 观察，天气/新闻仍是预告，不冒充已接数据。
+
+## 2026-10-26 · 天气章接入生产并收口
+
+- 用户要求把选定的天气页推送上线并收口。此前天气只存在于 `.review/weather-lab/` 本地预览，生产没有 `/weather/`；首页天气卡是「予告」占位。
+- 接入方式：把最终运行时复制到 `src/weather/`（`app.js`、`lab.css`、`data.js`、`geo.js`），`src/build.py` 新增 `build_weather()` 与 `/assets/weather/*` 版本化资产，`WEATHER_VER=40145957`；`src/shell.js` 的 `pageKey()` 加 `weather`，`setLang()` 派发 `pj:lang` 让天气页随全站语言切换重渲染。首页天气卡改为 `/weather/` 实链，导航/404/llms/sitemap/`_redirects` 同步加天气；首页来源面板从四章变五章。
+- 本地构建：6 个内容页，191 个 i18n 键，6 个 sitemap URL；CSS `39c895b0`、JS `a78b2c26`、fonts `5d02f1ac`、charset 2244。有头 Chromium 实测 1440/390/320/768：天气页 47 州、46 个主图地点 + 冲绳 inset、47 行无 JS 回退；默认东京，点冲绳圆标选中 `471000` 并显示「那覇/那霸」；语言切换、选择器、今日/明日、表格行均可用；横向溢出 0。首页 5 个实链 + 1 个新闻预告，来源 5 条。
+- 发布：Cloudflare Pages `panout-site` 部署 `1ca63cf9-e8f4-4f71-a9c8-41900ca9cf74`（源码 `692d5e9`），上传 23 新文件 / 54 已存在；`/weather/` 线上 200，`/weather` 301 到 `/weather/`，未知 URL 真 404 + no-store；天气 HTML `max-age=0`，`/assets/weather/*` 200 且 immutable；sitemap 6 条、llms 五章、robots 200。
+- 线上浏览器：天气页 47 州、默认东京；真实点冲绳选中、日语「那覇」/中文「那霸」；中文 canonical 带 `?lang=zh`；390px 卡片 200×200、无溢出、移动菜单含天气；首页天气卡是 `<a href="/weather/">` + 「開く」；四个既有章节仍正常挂载（quake WebGL、crime/housing Leaflet、cabinet chart）。
+- 线上性能探针（390px，禁缓存）：LCP 240ms、CLS 0、1 个 133ms long task、无溢出。未重跑 Lighthouse（本机无 Chrome 安装），不把该探针冒充 Lighthouse。
+- 监控：既有 vps-jp `panout_watch.py` 仍检查首页标记、robots/sitemap/llms/TLS；其 `panout-japan-watch/1.0` UA 对生产返回 200。Kuma id53 / 每小时第 23 分钟不变。
+- 备份：`F:/archive/20261026-125659-panout-weather/`（旧 `build.py`、`shell.js`、README/HANDOFF/CHECKLIST/progress/TRACK_TREE、旧 `site/index.html`、headers/redirects/sitemap/llms、Cloudflare 旧部署元数据）。旧生产 `b9b0c617` 为回滚点。
+- 未做：天气快照刷新/定时任务未接；天气页 Lighthouse 未重跑；新闻仍为预告。源码提交 `692d5e9`，文档收口提交随后，双远端推送对账后更新。

@@ -1,24 +1,24 @@
 # MASTER-CHECKLIST · panout-japan
 
 > 正本：`sai-long-project/references/website-launch-checklist.md`（10 组 59 项）。纯静态 MPA，无后端/账号/支付；A1–A7 任一不过即阻断。
-> 本次发布：2026-10-26，部署 `b9b0c617`，源码 `63262ef`。证据集中在 `.review/release/` 与 `HANDOFF.md`。
+> 本次发布：2026-10-26，部署 `1ca63cf9-e8f4-4f71-a9c8-41900ca9cf74`，源码 `692d5e9`。证据集中在 `.review/weather-lab/`、`.review/release/` 与 `HANDOFF.md`。
 > 记号：`[x]` 本次已实测；`[~]` 已明确范围或未完整覆盖；`[ ]` 未执行；`[N/A]` 当前产品不适用。
 
 ## A. 抓取与索引（阻断级）
 
 - [x] **A1** robots 生产 200 + Allow / + Sitemap；未对 AI bot 另设封禁。
-- [x] **A2** sitemap 恰为五个 canonical 内容页；lastmod 为构建日期；无 404 或 preview。
-- [x] **A3** 五页自指 canonical；运行时语言 canonical 与 URL 参数一致。
+- [x] **A2** sitemap 恰为六个 canonical 内容页；lastmod 为构建日期；无 404 或 preview。
+- [x] **A3** 六页自指 canonical；运行时语言 canonical 与 URL 参数一致。
 - [x] **A4** ja / zh / en / x-default 四向 alternate，语言运行时 canonical 同步。
-- [x] **A5** 五页静态 JA title/description 唯一；三语字典驱动对应语言 head。
-- [x] **A6** 五页及 404 各一个 H1；首页方法 H2 / 来源 H3 递进。
-- [x] **A7** 五个内容页无 noindex / X-Robots-Tag noindex；刻意保留 404/preview noindex。
+- [x] **A5** 六页静态 JA title/description 唯一；三语字典驱动对应语言 head。
+- [x] **A6** 六页及 404 各一个 H1；首页方法 H2 / 来源 H3 递进。
+- [x] **A7** 六个内容页无 noindex / X-Robots-Tag noindex；刻意保留 404/preview noindex。
 
 ## B. GEO / AI 搜索
 
-- [x] **B1** `/llms.txt` 生产 200，含项目与四章口径。
-- [x] **B2** 首页 WebSite + Organization JSON-LD 已上线；四章 Dataset JSON-LD 保留。
-- [x] **B3** 四章 Dataset 类型，无伪造 FAQ 结构化数据。
+- [x] **B1** `/llms.txt` 生产 200，含项目与五章口径。
+- [x] **B2** 首页 WebSite + Organization JSON-LD 已上线；五章 Dataset JSON-LD 保留。
+- [x] **B3** 五章 Dataset 类型，无伪造 FAQ 结构化数据。
 - [~] **B4** 首页有“方法与出典”及计算口径；未另做独立 FAQ 富媒体模板。
 
 ## C. 社交传播
@@ -39,13 +39,13 @@
 ## E. 性能
 
 - [x] **E1** 图版为构建期内联 SVG，不拉伸；无需要响应式替代的大照片。
-- [x] **E2** 13 个字体文件约 2092KB，CJK 按页面字符集子集化；版本化 woff2。
-- [x] **E3** 生产 Lighthouse TBT 0ms；共享 shell 约 15KB，章节按需加载。
-- [x] **E4** LCP 为静态直出的卡片文字；非 JS 动态海报；生产 LCP 2.1s。
-- [x] **E5** 生产 CLS 0；字标固定舞台，动效只改 opacity。
+- [x] **E2** 13 个字体文件约 2128KB，CJK 按页面字符集子集化；版本化 woff2。
+- [~] **E3** 共享 shell 约 15KB，章节按需加载；天气页额外按需加载 343KB 运行时。首页 Lighthouse TBT 0ms 为上一发布；天气页未重跑 Lighthouse，实测 1 个 133ms long task。
+- [x] **E4** 首页 LCP 2.1s（上一发布）；天气页实测 LCP 240ms，静态直出。
+- [~] **E5** 生产 CLS 0；字标固定舞台，动效只改 opacity。天气页实测 CLS 0。
 - [x] **E6** HTML max-age=0；静态资源长期缓存且带内容版本；字典已独立版本化。
 - [~] **E7** 校验使用 cache-bust；生产已正确返回新版，未额外执行全站 purge。
-- [x] **E8** 移动端 Lighthouse：性能 97、A11y 100、Best Practices 100、SEO 100。
+- [~] **E8** 首页移动端 Lighthouse 97/100/100/100（上一发布）；天气页未重跑 Lighthouse，CLS 0、LCP 240ms、无横向溢出。
 
 ## F. 安全
 
@@ -59,7 +59,7 @@
 ## G. 可靠性
 
 - [~] **G1** GitHub + Gitea + 本地生产根 + Cloudflare 部署留存；RPO=源码提交，RTO=回滚部署。未做全基础设施 3-2-1 灾备审计。
-- [x] **G2** 从源码完整重建五页与资源并在本地预览实测。
+- [x] **G2** 从源码完整重建六页与资源并在本地预览实测。
 - [x] **G3** Kuma id 53 + TG + 每小时首页/robots/sitemap/llms/TLS 探针已接，最新 UP；首发缺少 JSON-LD 的真实故障已被捕获并恢复。
 - [~] **G4** 静态站 CDN 日志与探针日志；未新增 Sentry/RUM。
 - [~] **G5** 本地完整构建、预览、生产冒烟完成；未做真实生产回滚计时。
@@ -67,29 +67,29 @@
 
 ## H. 合规 / 无障碍
 
-- [~] **H1** 键盘移动菜单开/Esc 关、链接及 404 路径已测；未做全四章所有控件键盘矩阵。
+- [~] **H1** 键盘移动菜单开/Esc 关、链接及 404 路径已测；未做全五章所有控件键盘矩阵。
 - [x] **H2** 全局 `:focus-visible` 2px 外框，主题色对比，菜单键盘操作实测。
 - [~] **H3** 目标正文/作者/导航对比度已测：sage 最低 4.9:1，dark 最低 6.48:1；过渡中间值不作终点判据。Lighthouse A11y 100；未逐字全站扫描。
 - [x] **H4** reduced-motion 与 no-JS 固定域名、无动画；字标只改透明度。
 - [~] **H5** 无表单/新增统计 cookie；未新增隐私条款页，Pages 自带分析未单独审计。
-- [x] **H6** 四章一次来源、计算口径、CC BY 4.0 可查。
+- [x] **H6** 五章一次来源、计算口径、CC BY 4.0 可查。
 - [x] **H7** 数据期间和来源在卡面/章节标注；非投资建议、无敏感操作。
-- [x] **H8** 作者邮件/X 可点；404 提供首页、四章、联系入口。
+- [x] **H8** 作者邮件/X 可点；404 提供首页、五章、联系入口。
 
 ## I. 多语言 / 移动端
 
 - [x] **I1** `?lang=` 优先，其次本地记忆，默认 ja；URL 与按钮同步。
 - [x] **I2** alternate 含 x-default；canonical 在切换时同步。
-- [x] **I3** 185 键三语完整，使用键无缺失；字典按内容版本加载。
+- [x] **I3** 191 键三语完整，使用键无缺失；字典按内容版本加载。
 - [x] **I4** 320/390/1440 三语无横向溢出；章节页桌面实际挂载无溢出。
 - [~] **I5** 顶栏触控按钮 44px、移动抽屉开/Esc 关实测；抽屉未实现完整焦点陷阱，见后续无障碍改进。
 
 ## J. 发布流程与发布后
 
-- [x] **J1** 旧部署、HTML、Cloudflare 元数据已存 `F:/archive/20261026-panout-production/`。
-- [~] **J2** 已记录旧部署及官方 rollback endpoint；未真切生产回滚计时。
-- [x] **J3** 未知 URL 返回真 404 + no-store + 三语错误页；四章稳定 URL 200。
-- [x] **J4** 生产三语、移动端、五页、四章挂载、字典、404 实测，证据 `.review/release/`。
+- [x] **J1** 旧部署 `b9b0c617`、旧 HTML 与 Cloudflare 元数据已存 `F:/archive/20261026-panout-production/`；本轮源码与旧部署元数据另存 `F:/archive/20261026-125659-panout-weather/`。
+- [~] **J2** 已记录旧部署 `b9b0c617` 及官方 rollback endpoint；未真切生产回滚计时。
+- [x] **J3** 未知 URL 返回真 404 + no-store + 三语错误页；五章稳定 URL 200。
+- [x] **J4** 生产三语、移动端、六页、五章挂载、字典、404 实测，证据 `.review/weather-lab/` 与 `.review/release/`。
 - [x] **J5** README / HANDOFF / progress / TRACK_TREE 已记录；源码双远端推齐。
 - [~] **J6** Kuma+TG 已启动并见 UP；24h 与首周持续观察不能提前勾选。
 
