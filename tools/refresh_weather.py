@@ -117,21 +117,35 @@ def verify_build(data: dict, report: dict) -> None:
     log(f"Build verified: 6 pages, 47 rows, weather v{version}, {report['regions']} regions")
 
 
-def get_deployment_id() -> str | None:
+def list_production_deployments() -> list[dict]:
     token = os.environ.get("CLOUDFLARE_API_TOKEN")
     account = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
     if not token or not account:
-        return None
-    url = f"https://api.cloudflare.com/client/v4/accounts/{account}/pages/projects/{PROJECT}/deployments?env=production&per_page=5"
+        return []
+    url = f"https://api.cloudflare.com/client/v4/accounts/{account}/pages/projects/{PROJECT}/deployments?env=production&per_page=10"
     req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
     try:
         with urllib.request.urlopen(req, timeout=30) as response:
             payload = json.load(response)
-        for item in payload.get("result", []):
-            if item.get("environment") == "production" and item.get("id"):
-                return item["id"]
+        return [item for item in payload.get("result", []) if item.get("environment") == "production"]
     except Exception as exc:
-        log(f"Could not read current deployment: {exc}")
+        log(f"Could not read deployments: {exc}")
+        return []
+
+
+def get_deployment_id() -> str | None:
+    for item in list_production_deployments():
+        if item.get("id"):
+            return item["id"]
+    return None
+
+
+def find_deployment_id(url: str | None) -> str | None:
+    if not url:
+        return None
+    for item in list_production_deployments():
+        if item.get("url") == url and item.get("id"):
+            return item["id"]
     return None
 
 
@@ -170,8 +184,15 @@ def deploy() -> tuple[str | None, str | None]:
     if match:
         deployment_id = match.group(1)
     url_match = re.search(r"https://[a-z0-9-]+\.panout-site\.pages\.dev", text)
-    log(f"Deployed: id={deployment_id or 'unknown'} url={url_match.group(0) if url_match else 'unknown'}")
-    return deployment_id, url_match.group(0) if url_match else None
+    deployment_url = url_match.group(0) if url_match else None
+    if deployment_url:
+        for _ in range(3):
+            deployment_id = find_deployment_id(deployment_url)
+            if deployment_id:
+                break
+            time.sleep(2)
+    log(f"Deployed: id={deployment_id or 'unknown'} url={deployment_url or 'unknown'}")
+    return deployment_id, deployment_url
 
 
 def verify_production(data: dict) -> None:
