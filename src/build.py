@@ -688,6 +688,28 @@ COPY = {
     "pop.lede": ("2025年国勢調査。1,719市町村を、等面積の格子と人口加重のツリーで見る。91.2%の市町村が減り、73.4%の人がそこに住む。",
                  "2025年国势调查。把 1,719 个市町村放进等面积方格，再按人口加权成树图。91.2% 的市町村在减少，73.4% 的人住在那里。",
                  "The 2025 census across 1,719 municipalities: equal-area cells first, then a population-weighted treemap. 91.2% of places are shrinking; 73.4% of people live in them."),
+    "pop.read.eyebrow": ("読み方", "怎么看", "How to read"),
+    "pop.read.title": ("地図ではなく、1,719 の「数」で見る。",
+                       "不是地图，是 1,719 个「数」。",
+                       "Not a map: 1,719 numbers."),
+    "pop.read.lede": ("位置は地理ではなく、都道府県の順。同じ大きさのマスだから、「いくつの市町村が減ったか」が見える。面積で見たいときは「人口の大きさ」に切り替える。",
+                      "位置不按地理，而按都道府县顺序。每格同样大，所以能看出「有多少市町村在减少」。想按人口看，就切到「人口的大小」。",
+                      "Position follows prefecture order, not geography. Equal-sized cells show how many municipalities shrank; switch to “By population” to see where people live."),
+    "pop.read.s1h": ("1マス = 1市町村", "1 格 = 1 个市町村", "One cell = one municipality"),
+    "pop.read.s1p": ("1,719 の市町村が、同じ大きさで並ぶ。並びは都道府県順、県内は人口の多い順。上端の細い帯が都道府県の区切り。",
+                     "1,719 个市町村按同样大小排列。顺序是都道府县，县内按人口从多到少。顶端的细带是都道府县的分界。",
+                     "All 1,719 municipalities are the same size, grouped by prefecture and ordered by population within each. The thin ribbon above marks the prefectures."),
+    "pop.read.s2h": ("色 = 2020→2025 の増減", "颜色 = 2020→2025 增减", "Colour = 2020→2025 change"),
+    "pop.read.s2p": ("濃いほど大きく減り、明るいほど大きく増える。灰色は横ばい。0% を境に、減っている市町村が 91.2%。",
+                     "越深减得越多，越亮增得越多。灰色是持平。以 0% 为界，减少的市町村占 91.2%。",
+                     "Darker means a larger fall; brighter means a larger rise. Grey is flat. On the 0% line, 91.2% of municipalities are shrinking."),
+    "pop.read.s3h": ("押す = 名前と数字", "点击 = 名称和数字", "Click = name and numbers"),
+    "pop.read.s3p": ("マスを押すと市町村名・人口・2050年推計。上の帯を押すと都道府県。検索でも飛べる。例：左上の1格目は札幌市。",
+                     "点格子看市町村名、人口、2050 年推算。点顶端的带看都道府县。也可以搜索。例：左上第 1 格是札幌市。",
+                     "Click a cell for the name, population and 2050 projection. Click the ribbon for a prefecture, or search. Example: the first cell, top left, is Sapporo."),
+    "pop.read.note": ("地図ではない理由：面積の大きい北海道が目立つと、人の多い東京が見えなくなる。ここでは「1市町村 = 1マス」に固定している。",
+                      "为什么不是地图：地图上面积大的北海道很显眼，人口多的东京反而看不见。这里固定为「1 市町村 = 1 格」。",
+                      "Why not a map: area makes Hokkaido dominate and Tokyo disappear. Here every municipality gets one equal cell."),
     "pop.strip.pop": ("人口", "人口", "Population"),
     "pop.strip.rate": ("2020→2025", "2020→2025", "2020→2025"),
     "pop.strip.munis": ("市町村", "市町村", "Municipalities"),
@@ -1461,6 +1483,19 @@ def build_population():
 <p class="pop-lede" data-t="pop.lede">{ja('pop.lede')}</p>
 <dl class="pop-strip">{strip_html}</dl>
 </div></section>
+<section class="wrap pop-read">
+<div class="pop-read-head">
+<p class="pop-read-eyebrow" data-t="pop.read.eyebrow">{ja('pop.read.eyebrow')}</p>
+<h2 data-t="pop.read.title">{ja('pop.read.title')}</h2>
+<p data-t="pop.read.lede">{ja('pop.read.lede')}</p>
+</div>
+<ol class="pop-read-steps">
+<li><span class="pop-read-num">01</span><b data-t="pop.read.s1h">{ja('pop.read.s1h')}</b><p data-t="pop.read.s1p">{ja('pop.read.s1p')}</p></li>
+<li><span class="pop-read-num">02</span><b data-t="pop.read.s2h">{ja('pop.read.s2h')}</b><p data-t="pop.read.s2p">{ja('pop.read.s2p')}</p></li>
+<li><span class="pop-read-num">03</span><b data-t="pop.read.s3h">{ja('pop.read.s3h')}</b><p data-t="pop.read.s3p">{ja('pop.read.s3p')}</p></li>
+</ol>
+<p class="pop-read-note" data-t="pop.read.note">{ja('pop.read.note')}</p>
+</section>
 <section class="wrap pop-stage-wrap">
 <div class="stage pop-stage" data-live="0" data-stage-auto="population" data-view="population">
 <div class="stage-poster">{HP.population_svg(POP)}</div>

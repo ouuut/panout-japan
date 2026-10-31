@@ -76,6 +76,84 @@
   color: var(--muted);
 }
 
+.pop-read {
+  padding: clamp(28px, 4vw, 48px) 0 clamp(24px, 3vw, 40px);
+}
+
+.pop-read-eyebrow {
+  margin: 0 0 12px;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pop-read-head h2 {
+  margin: 0;
+  font-family: var(--ja-serif);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1.3;
+  letter-spacing: .01em;
+}
+
+.pop-read-head p:not(.pop-read-eyebrow) {
+  max-width: 760px;
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.pop-read-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: clamp(22px, 3vw, 34px) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.pop-read-steps li {
+  padding: 16px 24px 0 0;
+  border-right: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.pop-read-steps li + li { padding-left: 24px; }
+.pop-read-steps li:last-child { border-right: 0; padding-right: 0; }
+
+.pop-read-num {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pop-read-steps b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pop-read-steps p {
+  margin: 7px 0 0;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+.pop-read-note {
+  margin: 18px 0 0;
+  max-width: 760px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
 .pop-stage-wrap {
   padding: 0 0 clamp(36px, 5vw, 64px);
 }
@@ -249,4 +327,12 @@
   .pop-strip { gap: 18px 20px; }
   .pop-strip dd { font-size: 20px; }
   .pop-stage .stage-caption { left: 12px; bottom: 6px; font-size: 9px; }
+  .pop-read-steps { grid-template-columns: 1fr; border-top: 0; }
+  .pop-read-steps li,
+  .pop-read-steps li + li {
+    padding: 14px 0 0;
+    border-right: 0;
+    border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+  .pop-read-steps li:first-child { border-top: 0; padding-top: 0; }
 }

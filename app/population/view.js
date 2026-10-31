@@ -9,13 +9,23 @@ const COLS = 54, ROWS = 32;
 const I18N = {
   ja: {
     metrics: { rate: "増減", pop: "人口", age65: "65+", proj: "2050" },
-    views: { grid: "市町村", tree: "人口" },
+    views: { grid: "同じ大きさ", tree: "人口の大きさ" },
     searchPh: "市町村を検索…",
     headline: {
       rateGrid: "の市町村が減少", rateTree: "は減少市町村に住む",
       popGrid: "市町村", popTree: "は上位10市町村",
       ageGrid: "が65歳以上", ageTree: "が65歳以上",
       projGrid: "2050年 / 2020年=100", projTree: "2050年の人口",
+    },
+    headlineSub: {
+      rateGrid: "1,568 / 1,719 市町村。減った市町村に 73.4% が住む。",
+      rateTree: "減った市町村に住む人の割合。",
+      popGrid: "1,719 市町村の合計。",
+      popTree: "人口上位 10 市町村に住む人の割合。",
+      ageGrid: "全国の 65 歳以上人口の割合。",
+      ageTree: "全国の 65 歳以上人口の割合。",
+      projGrid: "2050 年の推計人口（2020 年=100）。",
+      projTree: "2050 年の推計人口。",
     },
     card: {
       national: "日本", pref: "都道府県", munis: "市町村",
@@ -33,18 +43,30 @@ const I18N = {
       unitRate: "2020→2025 増減率", unitPop: "2025年人口", unitAge: "65歳以上比率", unitProj: "2050年指数",
     },
     hint: "点で選ぶ · 検索で飛ぶ",
+    munisUnit: "市町村",
+    stations: { tokyo: "東京", akita: "秋田" },
     tooltip: { pop: "人", rate: "2020→2025" },
     noData: "—",
   },
   zh: {
     metrics: { rate: "增减", pop: "人口", age65: "65+", proj: "2050" },
-    views: { grid: "市町村", tree: "人口" },
+    views: { grid: "等大", tree: "按人口" },
     searchPh: "搜索市町村…",
     headline: {
       rateGrid: "的市町村在减少", rateTree: "住在减少的市町村",
       popGrid: "市町村", popTree: "集中在前10市町村",
       ageGrid: "为65岁以上", ageTree: "为65岁以上",
       projGrid: "2050年 / 2020年=100", projTree: "2050年人口",
+    },
+    headlineSub: {
+      rateGrid: "1,568 / 1,719 个市町村。减少的市町村住着 73.4% 的人。",
+      rateTree: "减少的市町村所住人口的比例。",
+      popGrid: "1,719 个市町村的合计。",
+      popTree: "人口前 10 市町村所住人口的比例。",
+      ageGrid: "全国 65 岁以上人口的比例。",
+      ageTree: "全国 65 岁以上人口的比例。",
+      projGrid: "2050 年推算人口（2020 年=100）。",
+      projTree: "2050 年推算人口。",
     },
     card: {
       national: "日本", pref: "都道府县", munis: "市町村",
@@ -62,18 +84,30 @@ const I18N = {
       unitRate: "2020→2025 增减率", unitPop: "2025年人口", unitAge: "65岁以上比例", unitProj: "2050年指数",
     },
     hint: "点选 · 搜索跳转",
+    munisUnit: "个市町村",
+    stations: { tokyo: "东京", akita: "秋田" },
     tooltip: { pop: "人", rate: "2020→2025" },
     noData: "—",
   },
   en: {
     metrics: { rate: "Change", pop: "Population", age65: "65+", proj: "2050" },
-    views: { grid: "Municipalities", tree: "People" },
+    views: { grid: "Equal cells", tree: "By people" },
     searchPh: "Search a municipality…",
     headline: {
       rateGrid: "of municipalities are shrinking", rateTree: "of people live in shrinking municipalities",
       popGrid: "municipalities", popTree: "live in the top 10 municipalities",
       ageGrid: "are 65 or older", ageTree: "are 65 or older",
       projGrid: "2050 / 2020 = 100", projTree: "people in 2050",
+    },
+    headlineSub: {
+      rateGrid: "1,568 of 1,719 municipalities. 73.4% of people live in the shrinking ones.",
+      rateTree: "Share of people living in shrinking municipalities.",
+      popGrid: "The 1,719 municipalities combined.",
+      popTree: "Share of people in the top 10 municipalities.",
+      ageGrid: "Share of the national population aged 65+.",
+      ageTree: "Share of the national population aged 65+.",
+      projGrid: "Projected population in 2050 (2020 = 100).",
+      projTree: "Projected population in 2050.",
     },
     card: {
       national: "Japan", pref: "Prefecture", munis: "Municipalities",
@@ -91,6 +125,8 @@ const I18N = {
       unitRate: "2020→2025 change", unitPop: "2025 population", unitAge: "65+ share", unitProj: "2050 index",
     },
     hint: "Click a cell · Search to jump",
+    munisUnit: "municipalities",
+    stations: { tokyo: "Tokyo", akita: "Akita" },
     tooltip: { pop: "people", rate: "2020→2025" },
     noData: "—",
   },
@@ -114,7 +150,10 @@ const SKELETON = `
       <ul id="pop-results" class="pop-results" hidden></ul>
     </div>
   </div>
-  <div class="pop-headline" aria-live="polite"><b id="pop-headline"></b><span id="pop-headline-label"></span></div>
+  <div class="pop-headline" aria-live="polite">
+    <div class="pop-headline-main"><b id="pop-headline"></b><span id="pop-headline-label"></span></div>
+    <p class="pop-headline-sub" id="pop-headline-sub"></p>
+  </div>
   <div class="pop-canvas-wrap">
     <canvas id="pop-canvas"></canvas>
     <div id="pop-tooltip" class="pop-tooltip" hidden></div>
@@ -203,7 +242,7 @@ function layout() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
   const mobile = W < 720;
-  pad = mobile ? { l: 12, r: 12, t: 132, b: 18 } : { l: 24, r: 340, t: 112, b: 48 };
+  pad = mobile ? { l: 12, r: 12, t: 228, b: 18 } : { l: 24, r: 340, t: 158, b: 48 };
   const innerW = Math.max(40, W - pad.l - pad.r);
   const innerH = Math.max(40, H - pad.t - pad.b);
 
@@ -347,6 +386,35 @@ function draw() {
     ctx.strokeRect(q.x + 0.5, q.y + 0.5, Math.max(0, q.w - 1), Math.max(0, q.h - 1));
   }
 
+  // two reading stations in the equal-cell rate view
+  if (metric === "rate" && a < 0.55 && W >= 720) {
+    ctx.save();
+    ctx.font = '600 10px "Geist","Noto Sans JP",system-ui,sans-serif';
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "left";
+    for (const [code, label] of [["13100", t().stations.tokyo], ["05201", t().stations.akita]]) {
+      const r = rects.find((x) => x.m.code === code);
+      if (!r) continue;
+      const q = r.g;
+      const cx = q.x + q.w / 2, cy = q.y + q.h / 2;
+      const rad = Math.max(4, q.w * 0.85);
+      ctx.globalAlpha = (1 - a) * 0.75;
+      ctx.strokeStyle = C.ink;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.stroke();
+      const tx = Math.min(W - pad.r - 30, cx + 16);
+      ctx.globalAlpha = (1 - a) * 0.95;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = C.bg;
+      ctx.strokeText(label, tx, cy);
+      ctx.fillStyle = C.ink;
+      ctx.fillText(label, tx, cy);
+    }
+    ctx.restore();
+  }
+
   // treemap labels for the five largest
   if (a > 0.65) {
     ctx.save();
@@ -411,28 +479,31 @@ function setView(next, immediate) {
 
 function headlineData() {
   const n = DOC.meta.national;
+  const S = t().headlineSub;
   if (metric === "rate") {
     return view === "tree"
-      ? [pct(n.decliningShare), t().headline.rateTree]
-      : [pct(100 * n.declining / DOC.meta.n), t().headline.rateGrid];
+      ? [pct(n.decliningShare), t().headline.rateTree, S.rateTree]
+      : [pct(100 * n.declining / DOC.meta.n), t().headline.rateGrid, S.rateGrid];
   }
   if (metric === "pop") {
     return view === "tree"
-      ? [pct(n.top10Share), t().headline.popTree]
-      : [fmt(DOC.meta.n), t().headline.popGrid];
+      ? [pct(n.top10Share), t().headline.popTree, S.popTree]
+      : [fmt(DOC.meta.n), t().headline.popGrid, S.popGrid];
   }
   if (metric === "age65") {
-    return [pct(n.age65Share), view === "tree" ? t().headline.ageTree : t().headline.ageGrid];
+    return [pct(n.age65Share), view === "tree" ? t().headline.ageTree : t().headline.ageGrid, S.ageGrid];
   }
   return view === "tree"
-    ? [fmt(n.pop2050), t().headline.projTree]
-    : [fmt(n.index2050, 1), t().headline.projGrid];
+    ? [fmt(n.pop2050), t().headline.projTree, S.projTree]
+    : [fmt(n.index2050, 1), t().headline.projGrid, S.projGrid];
 }
 
 function updateHeadline() {
-  const [num, label] = headlineData();
+  const [num, label, sub] = headlineData();
   headlineEl.textContent = num;
   headlineLabelEl.textContent = label;
+  const subEl = $("pop-headline-sub");
+  if (subEl) subEl.textContent = sub;
 }
 
 function updateButtons() {
@@ -446,16 +517,20 @@ function updateButtons() {
   });
   searchEl.placeholder = t().searchPh;
   searchEl.setAttribute("aria-label", t().searchPh);
-  $("pop-hint").textContent = t().hint + " · " + fmt(DOC.meta.n) + " / " + fmt(COLS * ROWS);
+  $("pop-hint").textContent = t().hint + " · " + fmt(DOC.meta.n) + " " + t().munisUnit;
 }
 
 function updateLegend() {
   const L = t().legend;
   const label = metric === "rate" ? L.unitRate : metric === "pop" ? L.unitPop : metric === "age65" ? L.unitAge : L.unitProj;
   const scaleText = metric === "rate" ? L.rate : metric === "pop" ? L.pop : metric === "age65" ? L.age65 : L.proj;
+  const parts = scaleText.split(/[←→]/).map((s) => s.trim());
+  const left = parts[0] || "", mid = parts[1] || "", right = parts[2] || "";
   legendEl.innerHTML = `<span class="pop-legend-label">${label}</span>
-    <span class="pop-legend-scale"><i class="lo"></i><i class="mid"></i><i class="hi"></i></span>
-    <span class="pop-legend-ends"><span>${scaleText.split("←")[0].trim()}</span><span>${scaleText.split("→").pop().trim()}</span></span>`;
+    <span class="pop-legend-key">
+      <span class="pop-legend-scale"><i class="lo"></i><i class="mid"></i><i class="hi"></i></span>
+      <span class="pop-legend-ends"><span>${left}</span><span>${mid}</span><span>${right}</span></span>
+    </span>`;
 }
 
 function rankOf(m) {

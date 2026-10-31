@@ -618,4 +618,7 @@
 - 首页第六块板换成人口:`src/home_plates.py` 删除 `news_svg`、新增 `population_svg`(1,719 格 + 47 县 ribbon);`card.news.*`/`card.soon`/`.hp-entry-soon` 全删;六块板全部是链接。
 - 集成:nav 五→六;sitemap 六→七;`_redirects` 加 `/population`;`llms.txt` 六章;404 六章;shell `pageKey`/`mountStage` 加 population;`collect_chars` 加 1,719 名;字体 13 文件 2.3MB。
 - 数字:122,972,528(−2.5%);1,719;1,568 减(91.2%)、150 增 + 1 横ばい;73.4% 住在减少市町村;65+ 29.5%;2050 104,686,386(指数 83.0)。
-- 构建:7 页,charset 2421,字体 13 文件 2287KB;本地浏览器验收进行中。
+- 构建:7 页,charset 2420-2421,字体 13 文件 ~2287KB;本地浏览器验收进行中。
+- 本地验收(headless Chromium,omp 托管):桌面 1440×900 无溢出;方格 ↔ 树图 91.2% → 73.4%;2050 指标 104,686,386;搜索选中特別区部(排名 1、+2.2%、2050 10,260,520、指数 105.4);EN 切换 H1 “Population — 123.0 million”、app 标签 EN;ZH H1「人口 — 1亿2297万人」、金字塔总数本地化;手机 390×844 无溢出、札幌市卡片从底部滑出;禁用 JS 仍有 poster + 47 县表 + 金字塔 + 8 数字条;首页六卡含 `/population/`、出典六章、无「予告/追って見る」。截图 `C:/Users/sai/ego/population-qa/`。提交 `5c232cb`。
+- 预览部署:`npx wrangler pages deploy site --project-name=panout-site --branch=population`(82 文件)→ `https://f993fdb9.panout-site.pages.dev`,别名 `https://population.panout-site.pages.dev`;别名上 `/population/` 200、47 行、6 nav、canonical 指向生产域;`/population` → `/population/`;首页六卡; sitemap 7; llms 六章。生产 `main` 未动;推生产前需先更新 VPS checkout,避免 06:10 天气刷新用六页覆盖。
+- 用户反馈「根本看不懂怎么看」:在英雄区与舞台之间加「読み方」三步(不是地图 / 1 格 = 1 市町村 / 颜色 = 2020→2025 增减 / 点击与搜索 / 为什么不是地图);大数字下加整句副行(1,568 / 1,719 · 减少市町村住 73.4%);视角按钮改为「同じ大きさ / 人口の大きさ」;图例补全「減少 / 0 / 増加」三端;画布标出東京、秋田两个阅读锚点。JA/ZH/EN 桌面 1440 与手机 390 实测无溢出、无与搜索行重叠;重建 charset 2423,预览重新部署。截图 `read-*.png`。
