@@ -72,11 +72,11 @@ PCT_2011_E = round(100 * sum(10 ** (1.5 * e["mag"]) for e in Q if e["time"][:4] 
 PAGE_META = {
     "home": {
         "ja": (f"{BRAND} — 日本を、六つの尺度で見る",
-               f"{f"{Q_N:,}"}の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格、47都道府県の天気。六つの尺度、五つの入口から直接起動する。"),
+               f"{f"{Q_N:,}"}の震源、5,234の町丁、331か月の内閣支持率、23区の住宅価格、47都道府県の天気、1,719市町村の人口。六つの尺度、六つの入口から直接起動する。"),
         "zh": (f"{BRAND} — 用六个尺度看日本",
-               f"{f"{Q_N:,}"} 个震源、5,234 个町丁、331 个月的內閣支持率、23 区住宅价格、47 个都道府县的天气。六个尺度，五个入口直接启动。"),
+               f"{f"{Q_N:,}"} 个震源、5,234 个町丁、331 个月的內閣支持率、23 区住宅价格、47 个都道府县的天气、1,719 个市町村的人口。六个尺度，六个入口直接启动。"),
         "en": (f"{BRAND} — Japan in six scales",
-               f"{f"{Q_N:,}"} hypocentres, 5,234 neighbourhoods, 331 months of cabinet approval, 23-ward housing prices and 47-prefecture weather. Six scales; five entry points."),
+               f"{f"{Q_N:,}"} hypocentres, 5,234 neighbourhoods, 331 months of cabinet approval, 23-ward housing prices, 47-prefecture weather and 1,719 municipalities of population. Six scales; six entry points."),
     },
     "quake": {
         "ja": (f"地震 — {f"{Q_N:,}"}の震源 | {BRAND}",
@@ -134,6 +134,27 @@ HOUSE_WARDS = HOUSE["wards"]
 HOUSE_TOWNS_DOC = json.loads((ROOT / "app" / "housing" / "data" / "towns.json").read_text(encoding="utf-8"))
 HOUSE_N = HOUSE_TOWNS_DOC["n"]
 HOUSE_TOWNS = sum(1 for x in HOUSE_TOWNS_DOC["towns"] if x["n"])
+POP = json.loads((ROOT / "app/population/data/population.json").read_text(encoding="utf-8"))
+POP_N = POP["meta"]["national"]
+_POP50_M = POP["age"]["y2050"]["male"]
+_POP50_F = POP["age"]["y2050"]["female"]
+_POP50_T = sum(_POP50_M) + sum(_POP50_F)
+POP_2050_65 = round(100 * (sum(_POP50_M[13:]) + sum(_POP50_F[13:])) / _POP50_T, 1)
+POP_2050_0 = round(100 * (sum(_POP50_M[:3]) + sum(_POP50_F[:3])) / _POP50_T, 1)
+PAGE_META["population"] = {
+    "ja": (f"人口 — {POP['meta']['n']:,}市町村のいま | {BRAND}",
+           f"2025年国勢調査。{POP_N['pop']:,}人、{POP['meta']['n']:,}市町村。"
+           f"{100 * POP_N['declining'] / POP['meta']['n']:.1f}%の市町村が減少し、"
+           f"{POP_N['decliningShare']}%が減少市町村に住む。2050年は{POP_N['pop2050']:,}人。"),
+    "zh": (f"人口 — {POP['meta']['n']:,} 个市町村的现在 | {BRAND}",
+           f"2025 年国势调查。{POP_N['pop']:,} 人、{POP['meta']['n']:,} 个市町村。"
+           f"{100 * POP_N['declining'] / POP['meta']['n']:.1f}% 的市町村在减少，"
+           f"{POP_N['decliningShare']}% 的人住在减少的市町村。2050 年为 {POP_N['pop2050']:,} 人。"),
+    "en": (f"Population — {POP['meta']['n']:,} municipalities | {BRAND}",
+           f"2025 census: {POP_N['pop']:,} people across {POP['meta']['n']:,} municipalities. "
+           f"{100 * POP_N['declining'] / POP['meta']['n']:.1f}% of municipalities are shrinking; "
+           f"{POP_N['decliningShare']}% of people live in them. {POP_N['pop2050']:,} by 2050."),
+}
 _weather_raw = (WEATHER_SRC / "data.js").read_text(encoding="utf-8")
 WEATHER_DOC = json.loads(_weather_raw.split("=", 1)[1].rstrip().rstrip(";"))
 WEATHER_REGIONS = WEATHER_DOC["regions"]
@@ -217,6 +238,29 @@ def f1(x):
 
 def pct(x, d=1):
     return f"{x * 100:.{d}f}"
+
+
+def jp_compact(x):
+    """122972528 -> 1億2297万; 104686386 -> 1億468万."""
+    x = int(round(x))
+    if x >= 100000000:
+        oku, rem = divmod(x, 100000000)
+        man = rem // 10000
+        return f"{oku}億{man}万" if man else f"{oku}億"
+    if x >= 10000:
+        return f"{x // 10000}万"
+    return f"{x:,}"
+
+
+def sgn_pct(x, d=1):
+    if x is None:
+        return "—"
+    return f"{x:+.{d}f}%"
+
+
+def zh_compact(x):
+    """Same as jp_compact with the simplified 亿."""
+    return jp_compact(x).replace("億", "亿")
 
 
 def jfmt(j):
@@ -480,6 +524,7 @@ COPY = {
     "nav.crime": ("犯罪", "犯罪", "Crime"),
     "nav.cabinet": ("内閣", "内阁", "Cabinet"),
     "nav.housing": ("住宅", "住宅", "Housing"),
+    "nav.population": ("人口", "人口", "Population"),
     "nav.method": ("方法", "方法", "Method"),
     "ui.theme": ("配色を変える", "切换配色", "Change palette"),
     "ui.lang": ("言語", "语言", "Language"),
@@ -511,9 +556,9 @@ COPY = {
     "home.details": ("出典と計算方法", "出处与计算方法", "Sources and counting rules"),
     "home.definitions": ("計算方法", "计算方法", "Counting rules"),
     "home.definitions.copy": (
-        f"地震はM4以上・{len(YEARS)}年分、犯罪率は人口1,000人当たり、支持率は月内全調査の算術平均。住宅は町名ごとの平均㎡単価。天気は気象庁の予報値で、観測値ではない。補間や面積での絞り込みはしない。",
-        f"地震取 M4 以上、{len(YEARS)} 年；犯罪率按每千人；支持率取月内全部调查的算术平均；住宅按町名计算平均㎡单价；天气为气象厅预报值，不是观测值。不插值，也不按面积筛选。",
-        f"Earthquakes are M4+ over {len(YEARS)} years. Crime is per 1,000 residents; cabinet approval is the arithmetic mean of all polls in a month. Housing is mean price per square metre by town. Weather figures are JMA forecasts, not observations. No interpolation or area filter.",
+        f"地震はM4以上・{len(YEARS)}年分、犯罪率は人口1,000人当たり、支持率は月内全調査の算術平均。住宅は町名ごとの平均㎡単価。人口は2025年国勢調査（原数値）、年齢は不詳を除く。2050年は社人研の中位推計。天気は気象庁の予報値で、観測値ではない。補間や面積での絞り込みはしない。",
+        f"地震取 M4 以上、{len(YEARS)} 年；犯罪率按每千人；支持率取月内全部调查的算术平均；住宅按町名计算平均㎡单价；人口为 2025 年国势调查原数值，年龄不含不详；2050 年为社人研中位推算；天气为气象厅预报值，不是观测值。不插值，也不按面积筛选。",
+        f"Earthquakes are M4+ over {len(YEARS)} years. Crime is per 1,000 residents; cabinet approval is the arithmetic mean of all polls in a month. Housing is mean price per square metre by town. Population is the 2025 census raw count, age excludes unknown; 2050 is the IPSS medium variant. Weather figures are JMA forecasts, not observations. No interpolation or area filter.",
     ),
     "home.weather.title": ("天気", "天气", "Weather"),
     "home.weather.source": ("気象庁", "气象厅", "JMA"),
@@ -530,6 +575,9 @@ COPY = {
     "home.housing.title": ("住宅", "住宅", "Housing"),
     "home.housing.source": ("国土交通省 PDL 1.0", "国土交通省 PDL 1.0", "MLIT / PDL 1.0"),
     "home.housing.copy": (f"{HOUSE['basis']}、東京全域の中古マンション等の成約{n(HOUSE_N)}件。23区の{n(HOUSE['totals']['trades'])}件は区・町名の価格を表示。", f"{HOUSE['basis']}，东京全域二手公寓等共 {n(HOUSE_N)} 笔成交；其中 23 区 {n(HOUSE['totals']['trades'])} 笔展示区与町名价格。", f"{n(HOUSE_N)} used-flat transactions across Tokyo, {HOUSE['basis']}; {n(HOUSE['totals']['trades'])} in the 23 wards carry ward and town prices."),
+    "home.population.title": ("人口", "人口", "Population"),
+    "home.population.source": ("総務省統計局・社人研", "总务省统计局・社人研", "Statistics Bureau / IPSS"),
+    "home.population.copy": (f"2025年国勢調査、{POP['meta']['n']:,}市町村。2050年は社人研の推計。", f"2025 年国势调查、{POP['meta']['n']:,} 个市町村；2050 年为社人研推算。", f"2025 census across {POP['meta']['n']:,} municipalities; 2050 is the IPSS projection."),
     "home.compiled": ("出典は各章に記載。本站が一次資料から加工・静的生成。", "各章列出出处。本站根据一次资料加工并静态生成。", "Sources are named in each chapter. Compiled from primary sources and statically generated."),
     "prod.open": ("開く", "打开", "Open"),
     "cover.scale.quake": ("列島 · 27年", "列岛 · 27年", "Archipelago · 27 yrs"),
@@ -556,21 +604,20 @@ COPY = {
     "card.housing.claim": (f"直近4四半期の成約で町名ごとの平均m2単価を塗る。{HOUSE_TOWNS:,}町・{HOUSE_N:,}件。",
                            f"用最近四个季度成交,按町名平均m2单价上色。{HOUSE_TOWNS:,} 个町、{HOUSE_N:,} 笔。",
                            f"Latest four quarters of closed prices, mean per m2 by town: {HOUSE_TOWNS:,} towns, {HOUSE_N:,} deals."),
-    # News remains a preview plate: it promises a scale and its foot shows
-    #「予告」instead of「開く」, so it never reads as an entry.
     "card.weather.title": ("仰いで見る", "抬头看", "Look up"),
     "card.weather.topic": ("天気", "天气", "Weather"),
     "card.weather.unit": ("都道府県 / 予報", "都道府县 / 预报", "Prefectures / forecast"),
     "card.weather.claim": ("47都道府県の今日の空と7日間を、一枚に。",
                            "47 个都道府县今天与未来七天的天气，收进一张图。",
                            "Today and the next seven days for all 47 prefectures, on one map."),
-    "card.news.title": ("追って見る", "追着看", "Follow along"),
-    "card.news.topic": ("話題", "话题", "Topics"),
-    "card.news.unit": ("時間 / 話題", "小时 / 话题", "Hours / topics"),
-    "card.news.claim": ("各社の見出しを束ね、いま上がっている話題を並べる。",
-                        "把各社标题束在一起,排出此刻正在上升的话题。",
-                        "Headlines from across the press, ranked by what is rising now."),
-    "card.soon": ("予告", "预告", "Soon"),
+    "card.population.title": ("数えて見る", "数着看", "Count"),
+    "card.population.topic": ("人口", "人口", "Population"),
+    "card.population.unit": ("人 / 1,719市町村", "人 / 1,719市町村", "People / 1,719 municipalities"),
+    "card.population.claim": (
+        f"2025年国勢調査。増えた市町村は8.8%だけ。65歳以上{POP_N['age65Share']}%、2050年は{jp_compact(POP_N['pop2050'])}人。",
+        f"2025年国势调查。只有8.8%的市町村人口增加。65岁以上{POP_N['age65Share']}%，2050年降至{zh_compact(POP_N['pop2050'])}人。",
+        f"2025 census. Only 8.8% of municipalities grew. {POP_N['age65Share']}% are 65+; {POP_N['pop2050'] / 1e6:.1f} million by 2050.",
+    ),
 
     "q.eyebrow": ("02 / 引いて見る", "02 / 拉远看", "02 / Pull back"),
     "q.h1": (f"地震 — <em>{n(Q_N)}</em>の震源", f"地震 — <em>{n(Q_N)}</em>个震源", f"Earthquakes — <em>{n(Q_N)}</em> hypocentres"),
@@ -633,6 +680,82 @@ COPY = {
     "h.lede": ("中古マンションの成約価格、直近4四半期（2025年4月–2026年3月）。町名（地区名）ごとの平均㎡単価で塗る。",
                "二手公寓成交价，最近四个季度（2025年4月–2026年3月）。按町名（地区名）的平均㎡单价上色。",
                "Used-flat closed prices for the latest four quarters (Apr 2025 – Mar 2026), shaded by each town's mean price per m²."),
+
+    "pop.eyebrow": ("06 / 数えて見る", "06 / 数着看", "06 / Count"),
+    "pop.h1": (f"人口 — <em>{jp_compact(POP_N['pop'])}</em>人",
+               f"人口 — <em>{zh_compact(POP_N['pop'])}</em>人",
+               f"Population — <em>{POP_N['pop'] / 1e6:.1f} million</em>"),
+    "pop.lede": ("2025年国勢調査。1,719市町村を、等面積の格子と人口加重のツリーで見る。91.2%の市町村が減り、73.4%の人がそこに住む。",
+                 "2025年国势调查。把 1,719 个市町村放进等面积方格，再按人口加权成树图。91.2% 的市町村在减少，73.4% 的人住在那里。",
+                 "The 2025 census across 1,719 municipalities: equal-area cells first, then a population-weighted treemap. 91.2% of places are shrinking; 73.4% of people live in them."),
+    "pop.strip.pop": ("人口", "人口", "Population"),
+    "pop.strip.rate": ("2020→2025", "2020→2025", "2020→2025"),
+    "pop.strip.munis": ("市町村", "市町村", "Municipalities"),
+    "pop.strip.age65": ("65歳以上", "65岁以上", "Age 65+"),
+    "pop.strip.hh": ("一般世帯", "一般世带", "Households"),
+    "pop.strip.foreign": ("外国人", "外国人", "Foreign residents"),
+    "pop.strip.proj": ("2050年", "2050年", "2050"),
+    "pop.strip.density": ("人口密度", "人口密度", "Density"),
+    "pop.unit.people": ("人", "人", "people"),
+    "pop.unit.hh": ("世帯", "世带", "households"),
+    "pop.unit.km2": ("人/km²", "人/km²", "people/km²"),
+
+    "pop.pyramid.title": ("年齢構成 — 2025 / 2050", "年龄构成 — 2025 / 2050", "Age structure — 2025 / 2050"),
+    "pop.pyramid.lede": ("2025年の実績と、2050年の推計。65歳以上の割合は29.5%から37.1%へ上がり、0–14歳は11.1%から9.9%へ下がる。",
+                         "2025 年实测与 2050 年推算。65 岁以上占比从 29.5% 升至 37.1%，0–14 岁从 11.1% 降至 9.9%。",
+                         "2025 actual and 2050 projected. The 65+ share rises from 29.5% to 37.1%; the 0–14 share falls from 11.1% to 9.9%."),
+    "pop.pyramid.stat65": ("65歳以上", "65岁以上", "Age 65+"),
+    "pop.pyramid.stat0": ("0–14歳", "0–14岁", "Age 0–14"),
+    "pop.pyramid.statpop": ("総人口", "总人口", "Total population"),
+    "pop.pyramid.pop2025": (jp_compact(POP_N['pop']), zh_compact(POP_N['pop']), f"{POP_N['pop'] / 1e6:.1f} million"),
+    "pop.pyramid.pop2050": (jp_compact(POP_N['pop2050']), zh_compact(POP_N['pop2050']), f"{POP_N['pop2050'] / 1e6:.1f} million"),
+    "pop.pyramid.note": ("2050年は社人研「令和5年推計」の出生中位・死亡中位。年齢不詳を除く構成比。",
+                         "2050 年为社人研「令和 5 年推算」出生中位、死亡中位。构成比不含年龄不详。",
+                         "2050 uses the IPSS 2023 medium variant. Shares exclude age unknown."),
+    "pop.pyramid.legend2025": ("2025", "2025", "2025"),
+    "pop.pyramid.legend2050": ("2050", "2050", "2050"),
+    "pop.pyramid.male": ("男", "男", "Men"),
+    "pop.pyramid.female": ("女", "女", "Women"),
+
+    "pop.table.title": ("47都道府県", "47 个都道府县", "Forty-seven prefectures"),
+    "pop.table.lede": ("2025年人口、2020→2025の増減、65歳以上、2050年の推計。人口の多い順。",
+                       "2025 年人口、2020→2025 增减、65 岁以上、2050 年推算。按人口降序。",
+                       "2025 population, 2020→2025 change, 65+ share and the 2050 projection, ordered by population."),
+    "pop.table.th.pref": ("都道府県", "都道府县", "Prefecture"),
+    "pop.table.th.pop": ("2025年人口", "2025年人口", "2025 population"),
+    "pop.table.th.change": ("2020→2025", "2020→2025", "2020→2025"),
+    "pop.table.th.age65": ("65歳以上", "65岁以上", "Age 65+"),
+    "pop.table.th.pop2050": ("2050年", "2050年", "2050"),
+    "pop.table.th.index": ("2050年指数", "2050年指数", "2050 index"),
+    "pop.table.note": ("2050年は社人研の出生中位・死亡中位推計。浜通り地域の13市町村（いわき市・相馬市・南相馬市・広野町・楢葉町・富岡町・川内村・大熊町・双葉町・浪江町・葛尾村・新地町・飯舘村）は個別推計がないため「—」。県の2050年は県全体の推計。",
+                       "2050 年为社人研出生中位、死亡中位推算。滨通地区 13 个市町村（いわき市、相馬市、南相馬市、広野町、楢葉町、富岡町、川内村、大熊町、双葉町、浪江町、葛尾村、新地町、飯舘村）没有个别推算，显示「—」。县的 2050 年为全县推算。",
+                       "2050 is the IPSS medium variant. The 13 Hamadori municipalities in Fukushima have no individual projection and show “—”; prefecture totals use the prefecture projection."),
+
+    "pop.method.title": ("方法と出典", "方法与出处", "Method and sources"),
+    "pop.method.lede": ("数字の意味は、数え方で変わる。人口・年齢・推計の口径をここにまとめる。",
+                        "数字的意义取决于怎么数。这里汇总人口、年龄与推算的口径。",
+                        "Numbers change meaning with the counting rule. Population, age and projection definitions are collected here."),
+    "pop.method.census.h": ("国勢調査", "国势调查", "Census"),
+    "pop.method.census.p": ("2025年10月1日現在、総務省統計局「令和7年国勢調査 人口等基本集計」（2026年9月29日公表）の原数値。2020年人口は2025年の市町村境域に組み替えた値。年齢不詳は3,289,734人で、年齢構成比は不詳を除いて算出。",
+                            "2025 年 10 月 1 日，总务省统计局《令和 7 年国势调查 人口等基本集计》（2026 年 9 月 29 日公布）原数值。2020 年人口按 2025 年市町村境域重组。年龄不详 3,289,734 人，年龄构成比不含不详。",
+                            "1 October 2025, raw counts from the Statistics Bureau’s 2025 Census basic tabulation (published 29 September 2026). The 2020 population is boundary-adjusted to 2025 municipalities. Age unknown is 3,289,734; age shares exclude it."),
+    "pop.method.proj.h": ("2050年推計", "2050 年推算", "2050 projection"),
+    "pop.method.proj.p": ("国立社会保障・人口問題研究所「日本の地域別将来推計人口（令和5年推計）」（2023年12月22日公表）の出生中位・死亡中位推計。基準は2020年10月1日、2050年まで5年ごと。福島県浜通り地域の13市町村は個別推計がなく「浜通り地域」として一括。特別区部は23区の合計。2023年12月基準と2025年10月の市町村境の差異は、コードが一致する範囲で結合。",
+                            "国立社会保障・人口问题研究所《日本地域别将来推算人口（令和 5 年推算）》（2023 年 12 月 22 日公布）出生中位、死亡中位推算。基准为 2020 年 10 月 1 日，每 5 年至 2050 年。福岛县滨通地区 13 个市町村没有个别推算，合并为「滨通地区」。特别区部为 23 区合计。2023 年 12 月基准与 2025 年 10 月市町村境的差异，按代码一致范围合并。",
+                            "IPSS Regional Population Projections 2023 (published 22 December 2023), medium fertility and mortality, base 1 October 2020, five-year steps to 2050. The 13 Hamadori municipalities are grouped; the special wards are summed from the 23 wards. Boundaries are joined where codes match."),
+    "pop.method.def.h": ("口径", "口径", "Definitions"),
+    "pop.method.def.p": ("1,719市町村は、20政令市＋特別区部＋772市＋926町村（国勢調査の集計単位）。「増加」は2020→2025の増減率が0%以上、「減少」は負。人口加重ビューは2025年人口を面積に比例させたツリーマップ。2050年指数は2020年=100。",
+                         "1,719 个市町村 = 20 个政令市 + 特别区部 + 772 市 + 926 町村（国势调查汇总单位）。「增加」为 2020→2025 增减率 0% 以上，「减少」为负。人口加权视图是把 2025 年人口作为面积的树图。2050 年指数以 2020 年=100。",
+                         "The 1,719 units are 20 designated cities, the special-ward area, 772 cities and 926 towns/villages (census tabulation units). “Growing” means a 2020→2025 rate of 0% or more; “shrinking” means negative. The weighted view is a treemap with area proportional to 2025 population. The 2050 index uses 2020 = 100."),
+    "pop.method.src.h": ("出典", "来源", "Sources"),
+    "pop.method.src.p": ("総務省統計局「令和7年国勢調査」（e-Stat 第1-1表・第2-7表・第49-1表）、国立社会保障・人口問題研究所「日本の地域別将来推計人口（令和5年推計）」。",
+                         "总务省统计局《令和 7 年国势调查》（e-Stat 第 1-1 表、第 2-7 表、第 49-1 表）、国立社会保障・人口问题研究所《日本地域别将来推算人口（令和 5 年推算）》。",
+                         "Statistics Bureau, 2025 Census (e-Stat tables 1-1, 2-7 and 49-1); IPSS Regional Population Projections 2023."),
+    "pop.method.lic.h": ("ライセンス", "许可", "Licence"),
+    "pop.method.lic.p": ("e-Stat は政府標準利用規約（商用可・出典明記）。社人研は出典明記。本站の文と図は CC BY 4.0。",
+                         "e-Stat 按政府标准利用规约（可商用、需署名）。社人研需署名。本站文字与图表为 CC BY 4.0。",
+                         "e-Stat under the Government Standard Terms (commercial use with attribution). IPSS requires attribution. Text and figures here are CC BY 4.0."),
+
     "b.stat.polls": ("調査", "调查", "Polls"),
     "b.stat.months": ("月", "月", "Months"),
     "b.stat.cabinets": ("内閣", "内阁", "Cabinets"),
@@ -749,9 +872,9 @@ COPY = {
 
     "nf.code": ("404", "404", "404"),
     "nf.h1": ("この頁は、ない。", "这一页不存在。", "This page is not here."),
-    "nf.p": ("URLが変わったか、まだ作っていない頁。五つの章から辿り直せる。",
-             "网址变了，或这一页还没做。可以从五个章节重新找。",
-             "The URL changed, or the page was never built. Start again from the five chapters."),
+    "nf.p": ("URLが変わったか、まだ作っていない頁。六つの章から辿り直せる。",
+             "网址变了，或这一页还没做。可以从六个章节重新找。",
+             "The URL changed, or the page was never built. Start again from the six chapters."),
     "nf.home": ("表紙へ戻る", "回到封面", "Back to the cover"),
 
     "foot.built": ("静的生成", "静态生成", "Statically generated"),
@@ -846,6 +969,7 @@ def mast(active=""):
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
 {link('/housing/', 'nav.housing', 'housing')}
+{link('/population/', 'nav.population', 'population')}
 </nav>
 <div class="tools">
 {THEME_DOTS}
@@ -860,6 +984,7 @@ def mast(active=""):
 {link('/crime/', 'nav.crime', 'crime')}
 {link('/cabinet/', 'nav.cabinet', 'cabinet')}
 {link('/housing/', 'nav.housing', 'housing')}
+{link('/population/', 'nav.population', 'population')}
 </nav>
 <div class="mobile-foot">
 {LANG_NAV}
@@ -912,15 +1037,15 @@ def pager(prev_href, prev_label, next_href, next_label):
 
 # ---------------------------------------------------------------- pages
 def build_home_preview():
-    """Six plates. Five are live chapter links; news remains a preview.
+    """Six plates, all live chapter links.
 
-    The weather plate now opens the real /weather/ page. News has no connected
-    feed yet: it carries「予告」and is not an anchor. Provenance remains readable
-    without JavaScript, and the closing statement stays on one line.
+    The sixth plate is population: 1,719 equal cells, one per municipality.
+    Provenance remains readable without JavaScript, and the closing statement
+    stays on one line.
     """
     css = (SRC / "home-preview.css").read_text(encoding="utf-8")
 
-    # key, num, href (None = preview plate), verb, topic, count, unit, claim, source, plate
+    # key, num, href, verb, topic, count, unit, claim, source, plate
     rows = [
         ("weather", "01", "/weather/", "card.weather.title", "card.weather.topic", "47",
          "card.weather.unit", "card.weather.claim", "気象庁 · 予報",
@@ -937,16 +1062,14 @@ def build_home_preview():
         ("housing", "05", "/housing/", "card.housing.title", "nav.housing", f"{HOUSE['totals']['trades']:,}",
          "card.housing.unit", "card.housing.claim", "国土交通省 · 2025Q2—2026Q1",
          HP.housing_svg(HOUSE_WARDS, MUNI_POLY, deals=HOUSE_N, towns=HOUSE_TOWNS)),
-        ("news", "06", None, "card.news.title", "card.news.topic", "24",
-         "card.news.unit", "card.news.claim", "各社 RSS",
-         HP.news_svg()),
+        ("population", "06", "/population/", "card.population.title", "card.population.topic",
+         jp_compact(POP_N["pop"]), "card.population.unit", "card.population.claim",
+         "総務省統計局 · 2025 / 社人研 · 2050", HP.population_svg(POP)),
     ]
 
     entries = []
     for key, num, href, verb, topic, count, unit, claim, source, svg in rows:
-        foot = (f'<span class="hp-enter"><span data-t="prod.open">{ja("prod.open")}</span> ↗</span>'
-                if href else
-                f'<span class="hp-enter hp-enter-soon" data-t="card.soon">{ja("card.soon")}</span>')
+        foot = f'<span class="hp-enter"><span data-t="prod.open">{ja("prod.open")}</span> ↗</span>'
         card = f"""<div class="hp-entry-head"><span class="hp-num">{num}</span><span class="hp-verb" data-t="{verb}">{ja(verb)}</span><span class="hp-topic" data-t="{topic}">{ja(topic)}</span></div>
 <div class="hp-entry-visual" aria-hidden="true">{svg}</div>
 <div class="hp-entry-body">
@@ -954,13 +1077,10 @@ def build_home_preview():
 <p class="hp-claim" data-t="{claim}">{ja(claim)}</p>
 <div class="hp-entry-foot"><span class="hp-source">{source}</span>{foot}</div>
 </div>"""
-        if href:
-            entries.append(f'<a class="hp-entry" href="{href}">\n{card}\n</a>')
-        else:
-            entries.append(f'<div class="hp-entry hp-entry-soon">\n{card}\n</div>')
+        entries.append(f'<a class="hp-entry" href="{href}">\n{card}\n</a>')
 
     source_items = []
-    for key in ("weather", "quake", "crime", "cabinet", "housing"):
+    for key in ("weather", "quake", "crime", "cabinet", "housing", "population"):
         source_items.append(
             f'<article class="hp-source-item"><h3><span data-t="home.{key}.title">{ja(f"home.{key}.title")}</span>'
             f'<span aria-hidden="true">—</span><a href="/{key}/"><span data-t="home.{key}.source">{ja(f"home.{key}.source")}</span> ↗</a></h3>'
@@ -1028,7 +1148,7 @@ def build_home_preview():
 
 def build_404():
     links = "".join(f'<li><a href="/{key}/" data-t="nav.{key}">{ja(f"nav.{key}")}</a></li>'
-                    for key in ("weather", "quake", "crime", "cabinet", "housing"))
+                    for key in ("weather", "quake", "crime", "cabinet", "housing", "population"))
     body = f'''<main id="main" class="cover"><div class="wrap">
 <p class="eyebrow" data-t="nf.code">404</p>
 <h1 data-t="nf.h1">{ja("nf.h1")}</h1>
@@ -1228,6 +1348,179 @@ def build_housing():
                 body, "housing", jsonld, fullscreen=True)
 
 
+def pop_pyramid_svg(doc, w=1000, h=540):
+    """National age pyramid: 2025 actual filled, 2050 IPSS medium outlined."""
+    bins = doc["age"]["bins"]
+    y25 = doc["age"]["y2025"]
+    y50 = doc["age"]["y2050"]
+    m25, f25 = y25["male"], y25["female"]
+    m50, f50 = y50["male"], y50["female"]
+    maxv = max(max(m25), max(f25), max(m50), max(f50)) or 1
+    cx = w / 2
+    halfw = w * 0.36
+    top, bottom = 58, h - 54
+    n = len(bins)
+    rh = (bottom - top) / n
+    out = [
+        f'<text x="{cx}" y="24" text-anchor="middle" font-size="12" '
+        f'fill="var(--muted)" letter-spacing="1">2025 / 2050</text>',
+        f'<text x="{cx - halfw - 10}" y="44" text-anchor="end" font-size="11" '
+        f'fill="var(--muted)">M</text>',
+        f'<text x="{cx + halfw + 10}" y="44" text-anchor="start" font-size="11" '
+        f'fill="var(--muted)">F</text>',
+    ]
+    for i in range(n - 1, -1, -1):
+        y = top + (n - 1 - i) * rh
+        hh = max(1.0, rh - 2.2)
+        bm25 = max(0.0, m25[i] / maxv * halfw)
+        bf25 = max(0.0, f25[i] / maxv * halfw)
+        bm50 = max(0.0, m50[i] / maxv * halfw)
+        bf50 = max(0.0, f50[i] / maxv * halfw)
+        out.append(f'<rect x="{cx - 12 - bm25:.1f}" y="{y:.1f}" width="{bm25:.1f}" '
+                   f'height="{hh:.1f}" fill="var(--accent)" opacity=".30"/>')
+        out.append(f'<rect x="{cx + 12:.1f}" y="{y:.1f}" width="{bf25:.1f}" '
+                   f'height="{hh:.1f}" fill="var(--accent)" opacity=".30"/>')
+        out.append(f'<rect x="{cx - 12 - bm50:.1f}" y="{y:.1f}" width="{bm50:.1f}" '
+                   f'height="{hh:.1f}" fill="none" stroke="var(--ink)" stroke-width="1" opacity=".55"/>')
+        out.append(f'<rect x="{cx + 12:.1f}" y="{y:.1f}" width="{bf50:.1f}" '
+                   f'height="{hh:.1f}" fill="none" stroke="var(--ink)" stroke-width="1" opacity=".55"/>')
+    for i in range(0, n, 4):
+        y = top + (n - 1 - i) * rh + rh / 2 + 3
+        out.append(f'<text x="{cx}" y="{y:.1f}" text-anchor="middle" font-size="9" '
+                   f'fill="var(--muted)">{bins[i]}</text>')
+    ky = h - 18
+    out.append(f'<rect x="{cx - 74}" y="{ky - 9}" width="12" height="12" '
+               f'fill="var(--accent)" opacity=".30"/>')
+    out.append(f'<text x="{cx - 56}" y="{ky + 1}" font-size="10" fill="var(--muted)">2025</text>')
+    out.append(f'<rect x="{cx + 4}" y="{ky - 9}" width="12" height="12" '
+               f'fill="none" stroke="var(--ink)" stroke-width="1" opacity=".55"/>')
+    out.append(f'<text x="{cx + 22}" y="{ky + 1}" font-size="10" fill="var(--muted)">2050</text>')
+    return (f'<svg class="pop-pyr" viewBox="0 0 {w} {h}" role="img" '
+            f'aria-label="年齢構成 2025年と2050年">'
+            f'<title>年齢構成 2025年と2050年</title>{"".join(out)}</svg>')
+
+
+def build_population():
+    nat = POP_N
+    n_munis = POP["meta"]["n"]
+
+    def strip(key, value, unit=None):
+        u = f'<small data-t="{unit}">{ja(unit)}</small>' if unit else ""
+        return (f'<div><dt data-t="{key}">{ja(key)}</dt>'
+                f'<dd>{value}{u}</dd></div>')
+
+    strip_html = "".join([
+        strip("pop.strip.pop", n(nat["pop"]), "pop.unit.people"),
+        strip("pop.strip.rate", sgn_pct(nat["rate"])),
+        strip("pop.strip.munis", n(n_munis)),
+        strip("pop.strip.age65", f'{nat["age65Share"]}%'),
+        strip("pop.strip.hh", n(nat["households"]), "pop.unit.hh"),
+        strip("pop.strip.foreign", n(nat["foreign"]), "pop.unit.people"),
+        strip("pop.strip.proj", n(nat["pop2050"]), "pop.unit.people"),
+        strip("pop.strip.density", f'{nat["density"]}', "pop.unit.km2"),
+    ])
+
+    prefs_sorted = sorted(POP["prefs"], key=lambda p: -p["pop"])
+    rows = []
+    for i, p in enumerate(prefs_sorted, 1):
+        cls = "up" if (p["rate"] or 0) > 0 else "down"
+        rows.append(
+            f'<tr><td class="idx">{i:02d}</td><td class="name">{esc(p["name"])}</td>'
+            f'<td class="num">{n(p["pop"])}</td>'
+            f'<td class="num {cls}">{sgn_pct(p["rate"])}</td>'
+            f'<td class="num">{p["age65Share"]}%</td>'
+            f'<td class="num">{n(p["pop2050"])}</td>'
+            f'<td class="num">{p["index2050"]}</td></tr>'
+        )
+    table = f"""<div class="pop-table-wrap"><table class="data-table">
+<thead><tr><th class="idx">#</th><th data-t="pop.table.th.pref">{ja('pop.table.th.pref')}</th>
+<th class="num" data-t="pop.table.th.pop">{ja('pop.table.th.pop')}</th>
+<th class="num" data-t="pop.table.th.change">{ja('pop.table.th.change')}</th>
+<th class="num" data-t="pop.table.th.age65">{ja('pop.table.th.age65')}</th>
+<th class="num" data-t="pop.table.th.pop2050">{ja('pop.table.th.pop2050')}</th>
+<th class="num" data-t="pop.table.th.index">{ja('pop.table.th.index')}</th></tr></thead>
+<tbody>{''.join(rows)}</tbody></table></div>"""
+
+    pyramid = pop_pyramid_svg(POP)
+    jsonld = {
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Japan population by municipality, 2025",
+        "description": "2025 Census population, households, age structure and IPSS 2050 projection for 1,719 municipalities.",
+        "temporalCoverage": "2025-10-01/2050-10-01",
+        "spatialCoverage": "Japan",
+        "license": "https://www.e-stat.go.jp/terms-of-use",
+        "creator": [{"@type": "Organization", "name": "総務省統計局"},
+                    {"@type": "Organization", "name": "国立社会保障・人口問題研究所"}],
+        "url": SITE_URL + "/population/",
+    }
+
+    body = f"""<main id="main" class="pop-page">
+<section class="pop-hero"><div class="wrap pop-hero-in">
+<p class="pop-eyebrow" data-t="pop.eyebrow">{ja('pop.eyebrow')}</p>
+<h1 class="pop-h1" data-t="pop.h1">{ja('pop.h1')}</h1>
+<p class="pop-lede" data-t="pop.lede">{ja('pop.lede')}</p>
+<dl class="pop-strip">{strip_html}</dl>
+</div></section>
+<section class="wrap pop-stage-wrap">
+<div class="stage pop-stage" data-live="0" data-stage-auto="population" data-view="population">
+<div class="stage-poster">{HP.population_svg(POP)}</div>
+<p class="stage-caption">1,719市町村 · 2025年国勢調査 · 総務省統計局</p>
+<div class="stage-live"></div>
+</div>
+</section>
+<section class="wrap pop-section pop-pyramid">
+<div class="pop-section-head"><h2 data-t="pop.pyramid.title">{ja('pop.pyramid.title')}</h2>
+<p data-t="pop.pyramid.lede">{ja('pop.pyramid.lede')}</p></div>
+<div class="pop-pyramid-grid">
+<figure>{pyramid}
+<figcaption class="pop-pyramid-note" data-t="pop.pyramid.note">{ja('pop.pyramid.note')}</figcaption>
+</figure>
+<dl class="pop-pyramid-stats">
+<div class="pop-pyramid-stat"><dt data-t="pop.pyramid.stat65">{ja('pop.pyramid.stat65')}</dt>
+<dd>{nat['age65Share']}% <span>→</span> <em>{POP_2050_65}%</em></dd></div>
+<div class="pop-pyramid-stat"><dt data-t="pop.pyramid.stat0">{ja('pop.pyramid.stat0')}</dt>
+<dd>{nat['age0Share']}% <span>→</span> <em>{POP_2050_0}%</em></dd></div>
+<div class="pop-pyramid-stat"><dt data-t="pop.pyramid.statpop">{ja('pop.pyramid.statpop')}</dt>
+<dd><b data-t="pop.pyramid.pop2025">{ja('pop.pyramid.pop2025')}</b> <span>→</span> <em data-t="pop.pyramid.pop2050">{ja('pop.pyramid.pop2050')}</em></dd></div>
+</dl>
+</div>
+</section>
+<section class="wrap pop-section pop-table">
+<div class="pop-section-head"><h2 data-t="pop.table.title">{ja('pop.table.title')}</h2>
+<p data-t="pop.table.lede">{ja('pop.table.lede')}</p></div>
+{table}
+<p class="pop-table-note" data-t="pop.table.note">{ja('pop.table.note')}</p>
+</section>
+<section class="wrap pop-section pop-method">
+<div class="pop-section-head"><h2 data-t="pop.method.title">{ja('pop.method.title')}</h2>
+<p data-t="pop.method.lede">{ja('pop.method.lede')}</p></div>
+<div class="pop-method-grid">
+<section><h3 data-t="pop.method.census.h">{ja('pop.method.census.h')}</h3>
+<p data-t="pop.method.census.p">{ja('pop.method.census.p')}</p></section>
+<section><h3 data-t="pop.method.proj.h">{ja('pop.method.proj.h')}</h3>
+<p data-t="pop.method.proj.p">{ja('pop.method.proj.p')}</p></section>
+<section><h3 data-t="pop.method.def.h">{ja('pop.method.def.h')}</h3>
+<p data-t="pop.method.def.p">{ja('pop.method.def.p')}</p></section>
+<section><h3 data-t="pop.method.src.h">{ja('pop.method.src.h')}</h3>
+<p data-t="pop.method.src.p">{ja('pop.method.src.p')}</p></section>
+<section><h3 data-t="pop.method.lic.h">{ja('pop.method.lic.h')}</h3>
+<p data-t="pop.method.lic.p">{ja('pop.method.lic.p')}</p></section>
+</div>
+<p class="pop-method-src">
+<a href="https://www.stat.go.jp/data/kokusei/2025/index.html" rel="noopener">令和7年国勢調査</a> ·
+<a href="https://www.e-stat.go.jp/stat-search/files?page=1&amp;layout=datalist&amp;lid=000001491012" rel="noopener">e-Stat</a> ·
+<a href="https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp" rel="noopener">社人研</a> ·
+<a href="https://www.gsi.go.jp/KOKUJYOHO/MENCHO-title.htm" rel="noopener">国土地理院</a>
+</p>
+</section>
+</main>"""
+
+    css = (SRC / "population.css").read_text(encoding="utf-8")
+    return page("/population/", PAGE_META["population"]["ja"][0],
+                PAGE_META["population"]["ja"][1], body, "population", jsonld,
+                head_extra='<style>\n' + css + '\n</style>')
+
+
 def fill_copy(s):
     return s.replace("{{B}}", str(N_BUCKETS)).replace("{{S}}", str(N_SINGLE))
 
@@ -1242,7 +1535,7 @@ def main():
         "".join(weather_files[k] for k in sorted(weather_files)).encode("utf-8")
     ).hexdigest()[:8]
 
-    # Five chapters: /weather/, /quake/, /crime/, /cabinet/, /housing/ (plus the cover).
+    # Six chapters: /weather/, /quake/, /crime/, /cabinet/, /housing/, /population/ (plus the cover).
     # /preview/ remains a tiny redirect for the old preview URL.
     files["/"] = build_home_preview()
     files["/404.html"] = build_404()
@@ -1252,6 +1545,7 @@ def main():
     files["/crime/"] = build_crime()
     files["/cabinet/"] = build_cabinet()
     files["/housing/"] = build_housing()
+    files["/population/"] = build_population()
     for name, content in weather_files.items():
         files[f"/assets/weather/{name}"] = content
 
@@ -1323,6 +1617,10 @@ def collect_chars(files, i18n_json):
         chars.update(m["ward"])
     for c in CAB["cabinets"]:
         chars.update(c["pm"])
+    for m in POP["munis"]:
+        chars.update(m["name"])
+    for p in POP["prefs"]:
+        chars.update(p["name"])
     for p in POINTS:
         chars.update(p.get("n") or p.get("name") or "")
         chars.update(p.get("w") or "")
@@ -1394,7 +1692,7 @@ def write_site(files):
             pass
 
     # app runtime (views + vendor + data) — copied verbatim
-    for ch in ("quake", "crime", "cabinet", "housing"):
+    for ch in ("quake", "crime", "cabinet", "housing", "population"):
         src = ROOT / "app" / ch
         dst = SITE / "app" / ch
         if src.exists():
@@ -1450,6 +1748,16 @@ def write_data():
         for ym in sorted(MONTH_MEAN):
             vs = [p["value"] for p in POLLS if p["date"][:7] == ym]
             w.writerow([ym, f"{sum(vs) / len(vs):.2f}", len(vs)])
+    with (d / "population.csv").open("w", encoding="utf-8", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["code", "prefecture", "municipality", "pop2025", "pop2020",
+                    "change", "rate", "age65_share", "pop2050", "index2050",
+                    "households", "foreign", "density"])
+        for m in POP["munis"]:
+            w.writerow([m["code"], m["pref"], m["name"], m["pop"], m["pop2020"],
+                        m["change"], m["rate"], m["age65Share"],
+                        m["pop2050"], m["index2050"], m["households"],
+                        m["foreign"], m["density"]])
 
 
 def write_meta(font_meta):
@@ -1489,20 +1797,21 @@ def write_meta(font_meta):
         "  Cache-Control: public, max-age=86400\n", encoding="utf-8")
 
     (SITE / "_redirects").write_text(
-        "/weather /weather/ 301\n/quake /quake/ 301\n/crime /crime/ 301\n/cabinet /cabinet/ 301\n/housing /housing/ 301\n"
+        "/weather /weather/ 301\n/quake /quake/ 301\n/crime /crime/ 301\n/cabinet /cabinet/ 301\n/housing /housing/ 301\n/population /population/ 301\n"
         "/preview / 301\n/preview/ / 301\n", encoding="utf-8")
 
     (SITE / "llms.txt").write_text(f"""# {BRAND}
 
-> 日本を六つの尺度で見る静的データサイト。天気（仰いで見る）、地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）、住宅（並べて見る）の五章。話題（追って見る）は予告。
+> 日本を六つの尺度で見る静的データサイト。天気（仰いで見る）、地震（引いて見る）、犯罪（寄って見る）、内閣（通して見る）、住宅（並べて見る）、人口（数えて見る）の六章。
 
 - [天気](/weather/): 気象庁の予報、47都道府県。今日・明日と7日間、気温と降水確率。
 - [地震](/quake/): 2000–{Q_END_DOT}、M4以上の震源{n(Q_N)}点。年別・月別・エネルギー。
 - [犯罪](/crime/): 2025年、東京都内5,234町丁、62区市町村。人口あたりの率。
 - [内閣](/cabinet/): 1998–2026、644調査、331か月、14内閣。
 - [住宅](/housing/): 直近4四半期 2025Q2–2026Q1（2025年4月–2026年3月）、東京、中古マンション成約26,416件を町名（1,237町）ごとに平均した㎡単価の地図。
+- [人口](/population/): 2025年国勢調査、{POP['meta']['n']:,}市町村。91.2%が減少、73.4%が減少市町村に住む。2050年は社人研推計で{POP_N['pop2050']:,}人。CSV: /data/population.csv
 
-Build: {BUILD_STAMP}. Sources: 気象庁, USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同.
+Build: {BUILD_STAMP}. Sources: 気象庁, USGS ComCat, 警視庁, NHK, 日経, 朝日, 時事, 読売, JNN, 共同, 総務省統計局, 国立社会保障・人口問題研究所.
 """, encoding="utf-8")
 
 

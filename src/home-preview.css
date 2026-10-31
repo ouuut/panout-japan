@@ -37,10 +37,6 @@
   transform: translateY(-1px);
   transition-duration: .15s;
 }
-/* Preview plates are not entries yet: nothing to open, so nothing moves. */
-.hp-entry-soon { cursor: default; }
-.hp-entry-soon:hover { background: var(--surface); transform: none; }
-.hp-entry-soon:active { transform: none; }
 .hp-entry:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
 
 .hp-entry-head {
@@ -177,12 +173,6 @@ html[lang="zh"] .hp-source { font-family: var(--zh-sans); }
 .hp-entry:hover .hp-enter {
   transform: translate(4px, -2px);
   color: var(--accent);
-}
-/*「予告」is a label, not an affordance: it never gains an arrow or a shift. */
-.hp-enter-soon,
-.hp-entry:hover .hp-enter-soon {
-  transform: none;
-  color: var(--muted);
 }
 html[lang="ja"] .hp-enter, html[lang="zh"] .hp-enter {
   font-family: var(--ja-sans);

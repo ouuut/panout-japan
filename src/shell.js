@@ -74,7 +74,7 @@
   // canonical 必须自指到 ?lang=，否则 zh/en 会被合并回 ja、hreflang 白写。
   function pageKey() {
     var p = location.pathname.replace(/index\.html$/, '');
-    var m = p.match(/^\/(housing|crime|cabinet|quake|weather)\//);
+    var m = p.match(/^\/(housing|crime|cabinet|quake|weather|population)\//);
     if (m) return m[1];
     return document.querySelector('meta[name="robots"][content="noindex"]') ? '404' : 'home';
   }
@@ -217,6 +217,7 @@
       else if (ch === 'crime') mountP = mod.mountCrime(live, opts);
       else if (ch === 'cabinet') mountP = mod.mountCabinet(live, opts);
       else if (ch === 'housing') mountP = mod.mountHousing(live, opts);
+      else if (ch === 'population') mountP = mod.mountPopulation(live, opts);
       return Promise.resolve(mountP).then(function (ok) {
         if (ok === false) throw new Error('mount ' + ch + ' returned false');
         // 模块自己已经降级（数据层失败）时，别再把 data-live 抬回 1 把 poster 藏掉
@@ -228,6 +229,7 @@
           else if (ch === 'crime' && mod.setCrimeLang) mod.setCrimeLang(l);
           else if (ch === 'cabinet' && mod.setCabinetLang) mod.setCabinetLang(l);
           else if (ch === 'housing' && mod.setHousingLang) mod.setHousingLang(l);
+          else if (ch === 'population' && mod.setPopulationLang) mod.setPopulationLang(l);
         } catch (e) {}
       };
       live._setVendorTheme = function (t) {
@@ -236,6 +238,7 @@
           else if (ch === 'crime' && mod.setCrimeTheme) mod.setCrimeTheme(t);
           else if (ch === 'cabinet' && mod.setCabinetTheme) mod.setCabinetTheme(t);
           else if (ch === 'housing' && mod.setHousingTheme) mod.setHousingTheme(t);
+          else if (ch === 'population' && mod.setPopulationTheme) mod.setPopulationTheme(t);
         } catch (e) {}
       };
       live._setVendorLang(opts.lang);
@@ -286,9 +289,9 @@
 
   function legacyHash() {
     var h = location.hash || '';
-    var m = /^#\/?(quake|crime|cabinet|housing)\/?$/.exec(h);
+    var m = /^#\/?(quake|crime|cabinet|housing|population)\/?$/.exec(h);
     if (m) location.replace('/' + m[1] + '/');
-    else if (/^#\/(quake|crime|cabinet|housing)\/(.+)$/.test(h)) {
+    else if (/^#\/(quake|crime|cabinet|housing|population)\/(.+)$/.test(h)) {
       location.replace('/' + h.slice(1).replace(/\/?$/, '/'));
     }
   }

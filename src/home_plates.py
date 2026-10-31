@@ -357,54 +357,88 @@ def weather_svg(outline, w=1000, h=760, bbox=(121.0, 23.0, 151.0, 48.0)):
     out.append(f'<text x="{w - pad}" y="{base - 34}" text-anchor="end" class="micro">'
                f'気象庁 予報</text>')
 
-    return _svg(w, h, "今日の日本天気予報 · 予告", "".join(out))
+    return _svg(w, h, "今日の日本天気予報", "".join(out))
 
 
-def news_svg(w=1000, h=760, rows=10):
-    """Topic ladder plate — headline volume per topic, stacked by outlet.
+def population_svg(doc, w=1000, h=760):
+    """1,719 equal cells, one per municipality, coloured by 2020→2025 change.
 
-    Same rule as the weather plate: the feed is not connected, so the ladder is
-    a skeleton (rank, stack, hour scale), not a ranking of real topics.
+    The sixth scale is a wall of places, not a map. The thin ribbon above it is
+    the 47 prefectures, width proportional to the number of municipalities; the
+    grid itself is row-major in prefecture order, largest municipality first.
     """
+    munis = doc["munis"]
+    prefs = doc["prefs"]
+    rates = sorted(abs(m["rate"]) for m in munis if m["rate"] is not None)
+    cap = rates[int(len(rates) * 0.98)] if rates else 10.0
+    cap = max(2.0, min(12.0, cap))
+    cols, rows = 54, 32
+    pad = 90
+    cell = min((w - 2 * pad) / cols, (h - 230) / rows)
+    gx = (w - cols * cell) / 2
+    gy = 150
     out = []
-    left, right = 104, w - 54
-    top, bottom = 148, 662
-    bar_h = 30
-    step = (bottom - top) / rows
 
-    for i in range(rows):
-        y = top + i * step
-        width = (right - left) * (0.96 - 0.058 * i - (0.03 if i % 3 == 1 else 0))
-        out.append(f'<text x="{left - 20}" y="{y + bar_h * .72:.1f}" text-anchor="end" '
-                   f'class="micro">{i + 1:02d}</text>')
-        # A topic is several outlets stacked; the stack, not the length, is the point.
-        parts = (0.36, 0.27, 0.22, 0.15) if i < 3 else ((0.42, 0.33, 0.25) if i < 7 else (0.58, 0.42))
-        base_op = 0.60 - 0.038 * i
-        cursor = left
-        for j, frac in enumerate(parts):
-            seg_w = width * frac - 3
-            if seg_w <= 0:
-                continue
-            out.append(f'<rect x="{cursor:.1f}" y="{y:.1f}" width="{seg_w:.1f}" '
-                       f'height="{bar_h}" rx="1" fill="var(--accent)" '
-                       f'opacity="{max(0.08, base_op - 0.07 * (j % 3)):.3f}"/>')
-            cursor += seg_w + 3
+    # Prefecture ribbon: 47 segments, width = number of municipalities.
+    total = sum(p["n"] for p in prefs) or 1
+    rx = gx
+    for p in prefs:
+        seg = (w - 2 * gx) * p["n"] / total
+        r = p["rate"] or 0
+        fill = "var(--accent)" if r > 0 else "var(--ink)"
+        op = 0.22 + 0.68 * min(1.0, abs(r) / cap)
+        out.append(f'<rect x="{rx:.2f}" y="116" width="{max(1.0, seg - 1):.2f}" '
+                   f'height="7" rx="1.5" fill="{fill}" opacity="{op:.2f}"/>')
+        rx += seg
 
-    for i in range(5):
-        x = left + (right - left) * i / 4
-        out.append(f'<rect x="{x:.1f}" y="{top - 26:.1f}" width="1.2" height="9" '
-                   f'fill="var(--accent)" opacity="0.32"/>')
-    out.append(f'<text x="{left}" y="{top - 36}" class="micro">TOPIC / 24H</text>')
-    out.append(f'<text x="{right}" y="{top - 36}" text-anchor="end" class="micro">'
-               f'各社 見出し</text>')
+    out.append(f'<text x="{gx}" y="40" class="micro">1,719 MUNICIPALITIES</text>')
+    out.append(f'<text x="{w - gx}" y="40" text-anchor="end" class="micro">'
+               f'2020→2025</text>')
+    out.append(f'<text x="{gx}" y="78" class="note ink">91.2% の市町村が減少</text>')
+
+    for m in munis:
+        x = gx + m["gx"] * cell
+        y = gy + m["gy"] * cell
+        r = m["rate"]
+        if r is None:
+            fill, op = "var(--muted)", 0.22
+        elif r > 0:
+            fill = "var(--accent)"
+            k = min(3, int(min(1.0, r / cap) * 4))
+            op = [0.55, 0.70, 0.85, 0.98][k]
+        else:
+            fill = "var(--ink)"
+            k = min(3, int(min(1.0, -r / cap) * 4))
+            op = [0.08, 0.14, 0.20, 0.28][k]
+        out.append(f'<rect x="{x:.2f}" y="{y:.2f}" width="{max(1.0, cell - 2):.2f}" '
+                   f'height="{max(1.0, cell - 2):.2f}" rx="1.4" fill="{fill}" '
+                   f'opacity="{op:.2f}"/>')
+
+    # Two reading stations: the one growing prefecture and the steepest decline.
+    for code, label, dx, dy, anchor in (
+            ("13100", "東京", 18, 5, "start"),
+            ("05201", "秋田", 18, 18, "start")):
+        m = next((x for x in munis if x["code"] == code), None)
+        if not m:
+            continue
+        x = gx + m["gx"] * cell + cell / 2
+        y = gy + m["gy"] * cell + cell / 2
+        out.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{cell * .85:.2f}" '
+                   f'fill="none" stroke="var(--ink)" stroke-width="1.4" opacity="0.8"/>')
+        out.append(f'<text x="{x + dx:.2f}" y="{y + dy:.2f}" text-anchor="{anchor}" '
+                   f'class="ward halo ink">{label}</text>')
 
     ky = h - 56
-    out.append(f'<text x="54" y="{ky}" class="legend">TOPIC / OUTLET STACK</text>')
-    for i, op in enumerate((0.16, 0.34, 0.52, 0.66)):
-        out.append(f'<rect x="{54 + i * 24}" y="{ky + 14}" width="16" height="16" '
-                   f'fill="var(--accent)" opacity="{op}"/>')
-    out.append(f'<text x="{54 + 4 * 24 + 8}" y="{ky + 27}" class="legend">QUIET → RISING</text>')
-    out.append(f'<text x="{w - 54}" y="{ky}" text-anchor="end" class="legend">'
-               f'RANKED / 予告</text>')
+    out.append(f'<text x="{gx}" y="{ky}" class="legend">MUNICIPALITY / 2020→2025</text>')
+    for i, (fill, op, label) in enumerate((
+            ("var(--ink)", 0.55, "減少"),
+            ("var(--accent)", 0.90, "増加"),
+            ("var(--muted)", 0.30, "横ばい"))):
+        lx = gx + i * 118
+        out.append(f'<rect x="{lx}" y="{ky + 14}" width="16" height="16" rx="1.5" '
+                   f'fill="{fill}" opacity="{op}"/>')
+        out.append(f'<text x="{lx + 24}" y="{ky + 28}" class="legend">{label}</text>')
+    out.append(f'<text x="{w - gx}" y="{ky}" text-anchor="end" class="legend">'
+               f'54 × 32 / 1,719</text>')
 
-    return _svg(w, h, "日本のニュース話題ランキング · 予告", "".join(out))
+    return _svg(w, h, "1,719市町村の2020→2025年人口増減", "".join(out))

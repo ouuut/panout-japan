@@ -1,0 +1,252 @@
+/* 人口章 · 页面层（英雄区 / 数字条 / 舞台 / 金字塔 / 47县表 / 方法）。
+   舞台内部在 app/population/app.css。 */
+
+.pop-page { overflow: clip; }
+
+.pop-hero {
+  padding: clamp(48px, 8vw, 104px) 0 clamp(20px, 3vw, 32px);
+}
+
+.pop-hero-in { max-width: var(--maxw); }
+
+.pop-eyebrow {
+  margin: 0 0 18px;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pop-h1 {
+  margin: 0;
+  font-family: var(--ja-serif);
+  font-weight: 500;
+  font-size: clamp(2.4rem, 5.4vw, 4.6rem);
+  line-height: 1.08;
+  letter-spacing: .01em;
+  text-wrap: balance;
+}
+
+.pop-h1 em {
+  font-style: normal;
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.pop-lede {
+  max-width: 720px;
+  margin: 20px 0 0;
+  font-size: var(--fs-lead);
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.pop-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px 32px;
+  margin: 38px 0 0;
+  padding: 22px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.pop-strip div { min-width: 0; }
+.pop-strip dt {
+  margin: 0 0 5px;
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.pop-strip dd {
+  margin: 0;
+  font-family: var(--wordmark, var(--sans));
+  font-weight: 800;
+  font-size: clamp(19px, 2.1vw, 27px);
+  line-height: 1;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
+.pop-strip dd small {
+  margin-left: 4px;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
+
+.pop-stage-wrap {
+  padding: 0 0 clamp(36px, 5vw, 64px);
+}
+
+.pop-stage {
+  position: relative;
+  height: clamp(560px, 76vh, 820px);
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid color-mix(in srgb, var(--ink) 9%, transparent);
+  border-radius: 4px;
+}
+
+.pop-stage .stage-poster svg { width: 100%; height: 100%; }
+.pop-stage .stage-caption {
+  position: absolute;
+  left: 20px;
+  bottom: 10px;
+  z-index: 2;
+}
+
+.pop-stage.stage-failed .stage-caption { display: block; }
+
+.pop-section {
+  padding: clamp(48px, 7vw, 96px) 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+.pop-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: clamp(24px, 3vw, 40px);
+}
+
+.pop-section-head h2 {
+  margin: 0;
+  font-family: var(--ja-serif);
+  font-weight: 500;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.2;
+}
+
+.pop-section-head p {
+  margin: 0;
+  max-width: 560px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.pop-pyramid-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: center;
+}
+
+.pop-pyramid figure { margin: 0; }
+.pop-pyramid svg { display: block; width: 100%; height: auto; }
+
+.pop-pyramid-stats {
+  display: grid;
+  gap: 22px;
+}
+
+.pop-pyramid-stat {
+  padding: 16px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+.pop-pyramid-stat dt {
+  margin: 0 0 6px;
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.pop-pyramid-stat dd {
+  margin: 0;
+  font-family: var(--wordmark, var(--sans));
+  font-weight: 800;
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.pop-pyramid-stat dd b { font-weight: inherit; }
+
+.pop-pyramid-stat dd span {
+  color: var(--muted);
+  font-size: .55em;
+  font-weight: 400;
+  margin: 0 .2em;
+}
+
+.pop-pyramid-stat dd em {
+  font-style: normal;
+  color: var(--accent-ink);
+}
+
+.pop-pyramid-note {
+  margin: 18px 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.pop-table-wrap { overflow-x: auto; }
+
+.pop-table .up { color: var(--accent); }
+.pop-table .down { color: var(--ink); }
+.pop-table td.name { white-space: nowrap; }
+.pop-table td.num, .pop-table th.num { text-align: right; }
+.pop-table td.idx { color: var(--muted); }
+
+.pop-table-note {
+  margin: 16px 0 0;
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.pop-method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 52px;
+}
+
+.pop-method-grid section { min-width: 0; }
+
+.pop-method-grid h3 {
+  margin: 0 0 8px;
+  font-family: var(--ja-serif);
+  font-weight: 500;
+  font-size: 20px;
+}
+
+.pop-method-grid p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+.pop-method-grid a { color: var(--ink); border-bottom: 1px solid var(--surface); }
+.pop-method-grid a:hover { color: var(--accent); }
+
+.pop-method-src {
+  margin: 24px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+@media (max-width: 899px) {
+  .pop-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pop-pyramid-grid { grid-template-columns: 1fr; }
+  .pop-method-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 719px) {
+  .pop-stage { height: 640px; }
+  .pop-section-head { display: block; }
+  .pop-section-head p { margin-top: 10px; }
+  .pop-h1 { font-size: clamp(2rem, 8vw, 3rem); }
+  .pop-strip { gap: 18px 20px; }
+  .pop-strip dd { font-size: 20px; }
+  .pop-stage .stage-caption { left: 12px; bottom: 6px; font-size: 9px; }
+}

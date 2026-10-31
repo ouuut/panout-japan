@@ -92,11 +92,21 @@
 - [x] **J3** 未知 URL 返回真 404 + no-store + 三语错误页；五章稳定 URL 200。
 - [x] **J4** 生产三语、移动端、六页、五章挂载、字典、404 实测，证据 `.review/weather-lab/` 与 `.review/release/`。
 - [x] **J5** README / HANDOFF / progress / TRACK_TREE 已记录；源码双远端推齐。
-- [~] **J6** Kuma+TG 已启动并见 UP；24h 与首周持续观察不能提前勾选。
+- [~] **J6** Kuma+TG 已启动并见 UP;24h 与首周持续观察不能提前勾选。
 
-## 后续（不属于已完成验收）
+## K. 人口章（2026-10-31，待发布）
+
+- [x] **J1** `/population/` 本地 200；47 县表、年龄金字塔、数字条、方法与出典为构建期静态内容；无 JS 可读。
+- [x] **J2** 数据管线 `tools/build_population_data.py` 可重建 `app/population/data/population.json`（2025 国势调查 1-1/2-7/49-1 + 社人研 2050）；13 个浜通り市町村 2050 为「—」。
+- [x] **J3** 方格 ↔ 人口加权树图、指标 増減/人口/65+/2050、搜索、卡片、tooltip、prefers-reduced-motion。
+- [x] **J4** 桌面 1440 无横向溢出；首页六卡全链接、第六块为人口；出典六章。
+- [x] **J5** 构建 7 个内容页；sitemap 7；llms 六章；`_redirects` 加 `/population`；字体子集含 1,719 市町村名。
+- [ ] **J6** 移动 390 / 平板 768 截图验收；JA/ZH/EN 静态与 app 标签；无 JS 截图。
+- [ ] **J7** 发布：`npx wrangler pages deploy site`，线上冒烟与回滚点。
+
+## 后续(不属于已完成验收)
 
 1. Search Console / Bing 提交与收录检查。
 2. 1200×630 OG 图、Twitter 大图卡与各社交平台实测。
 3. 全站键盘矩阵、抽屉焦点陷阱与 CSP。
-4. 天气与新闻真实数据接入，当前仅预告。
+4. 人口章发布后观察；天气日更持续跑；新闻聚合不再计划（第六张已改为人口）。

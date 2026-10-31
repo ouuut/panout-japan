@@ -608,4 +608,14 @@
 - 线上浏览器（ego-browser）实测：`/weather/?lang=ja` 47 州、47 行、49 个地图点、默认东京 `130000`、`generatedAt 2026-10-26T04:36:11Z`、横向溢出 0、H1「日本の天気」；截图 `.review/weather-lab/live-refresh-1440-ja.png`。
 - 2026-10-26 强制生产 run 两次：13:57 run `generatedAt 04:57:51Z`、部署 `e2947d58`、提交 `5e2ee2b`；14:07 修复周日期后 run `generatedAt 05:07:02Z`、部署 `e16a2b8e`、提交 `6d37d1b`。浏览器发现 `week[0]` 是明日但 UI 当今日，标题/7 卡整体错一天；`src/weather/app.js` 增加 `weekEntry`/`dayDate`，今日用 `reportDatetime` 日期，明日及以后取 `week[0..5]`；本地与线上实测 dateline `10月26日(月)`、7 卡 `10/26–11/01`、47 行、0 溢出。
 - Kuma 看门狗接入（2026-10-26）：新增外部探针 `deploy/vps/panout_weather_watch.py` → VPS `/home/ubuntu/vps-ops/scripts/panout_weather_watch.py`，cron `45 * * * *`，registry `panout-japan.weather`，心跳 `panout-weather-refresh.ok`，Kuma id 54（26h、1 retry/120s、TG id1）。探针校验 `state.json`（06:40 JST 截止、`last_failure_at`、26h 年龄）、`/weather/` H1、版本化 `data.js` 的 `generatedAt`、47 县、`reportDatetime`、`week[0]` 和 immutable 缓存；`refresh_weather.py` 失败时写 `last_failure_at/last_error` 并推 DOWN。首测误把 JS 渲染的 47 行当成静态 HTML 行，已改为只验 H1 + data.js，重跑恢复；failure/deadline/date-mismatch 分支用临时 state 验证通过。
-- 未做：首次自动 06:10 run 要等 2026-10-27；真实回滚未计时；天气页 Lighthouse 未重跑。运行手册 `docs/WEATHER-REFRESH.md`。源码提交 `ec09254` + `6d37d1b` + `b8e45d6`，文档收口 `1f0d211`；双远端 fetch 对账 0/0。
+- 未做:首次自动 06:10 run 要等 2026-10-27;真实回滚未计时;天气页 Lighthouse 未重跑。运行手册 `docs/WEATHER-REFRESH.md`。源码提交 `ec09254` + `6d37d1b` + `b8e45d6`,文档收口 `1f0d211`;双远端 fetch 对账 0/0。
+
+## 2026-10-31 · 第六张卡:人口章实现
+
+- 用户否掉新闻话题,选定「数えて見る 人口」。调查后落地:2025 年国勢調査(総務省統計局,2026-09-29 公表)1-1/2-7/49-1 表 + 社人研 2023 年 2050 推计。
+- 新增 `tools/build_population_data.py`:下载/缓存五份 xlsx,合并 1,719 市町村(20 政令市+特別区部+772 市+926 町村);人口/世帯/年齢/外国人/面積/密度/2020→2025/2050 系列;13 个浜通り市町村没有个别 2050 值;输出 `app/population/data/population.json`(765KB)。
+- 主视觉不是地图:`app/population/view.js`(Canvas)1,719 等面积方格 ↔ 人口加权树图,指标 増減/人口/65+/2050,搜索、卡片、tooltip;`app/population/app.css`。`src/population.css` 负责 hero/数字条/年龄金字塔/47 县表/方法;金字塔与 47 县表是构建期静态内容,无 JS 可读。
+- 首页第六块板换成人口:`src/home_plates.py` 删除 `news_svg`、新增 `population_svg`(1,719 格 + 47 县 ribbon);`card.news.*`/`card.soon`/`.hp-entry-soon` 全删;六块板全部是链接。
+- 集成:nav 五→六;sitemap 六→七;`_redirects` 加 `/population`;`llms.txt` 六章;404 六章;shell `pageKey`/`mountStage` 加 population;`collect_chars` 加 1,719 名;字体 13 文件 2.3MB。
+- 数字:122,972,528(−2.5%);1,719;1,568 减(91.2%)、150 增 + 1 横ばい;73.4% 住在减少市町村;65+ 29.5%;2050 104,686,386(指数 83.0)。
+- 构建:7 页,charset 2421,字体 13 文件 2287KB;本地浏览器验收进行中。
